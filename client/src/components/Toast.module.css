@@ -1,0 +1,116 @@
+.toast {
+  position: relative;
+  min-width: 320px;
+  max-width: 420px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.message {
+  flex: 1;
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.closeButton:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Типы уведомлений */
+.success {
+  border-left: 4px solid #10b981;
+}
+
+.success .iconWrapper {
+  color: #10b981;
+}
+
+.success .message {
+  color: #065f46;
+}
+
+.error {
+  border-left: 4px solid #ef4444;
+}
+
+.error .iconWrapper {
+  color: #ef4444;
+}
+
+.error .message {
+  color: #991b1b;
+}
+
+.info {
+  border-left: 4px solid #3b82f6;
+}
+
+.info .iconWrapper {
+  color: #3b82f6;
+}
+
+.info .message {
+  color: #1e40af;
+}
+
+.warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.warning .iconWrapper {
+  color: #f59e0b;
+}
+
+.warning .message {
+  color: #92400e;
+}
+
+/* Адаптивность */
+@media (max-width: 640px) {
+  .toast {
+    min-width: calc(100vw - 40px);
+    max-width: calc(100vw - 40px);
+  }
+}

@@ -1,0 +1,20 @@
+.dashboardLayout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.mainContent {
+  margin-left: 300px;
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .mainContent {
+    margin-left: 80px;
+    padding: 1rem;
+  }
+}

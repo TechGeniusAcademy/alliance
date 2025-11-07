@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1001",
+    "name": "Иван Иванов",
+    "email": "ivan@example.com",
+    "role": "customer",
+    "active": true,
+    "createdAt": "2024-10-15T10:00:00.000Z"
+  },
+  {
+    "id": "1002",
+    "name": "Петр Петров",
+    "email": "petr@example.com",
+    "role": "master",
+    "active": true,
+    "createdAt": "2024-10-12T12:00:00.000Z"
+  }
+]

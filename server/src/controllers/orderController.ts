@@ -1,0 +1,332 @@
+import { Request, Response } from 'express';
+import pool from '../config/database';
+
+// Создать новый заказ
+export const createOrder = async (req: Request, res: Response) => {
+  try {
+    const customerId = req.userId;
+    const {
+      title,
+      description,
+      category,
+      furniture_type,
+      style,
+      materials,
+      dimensions,
+      budget_min,
+      budget_max,
+      deadline,
+      delivery_address,
+      delivery_required,
+      assembly_required,
+      photos,
+      furniture_config,
+    } = req.body;
+
+    const result = await pool.query(
+      `INSERT INTO orders (
+        customer_id, title, description, category, furniture_type,
+        style, materials, dimensions, budget_min, budget_max,
+        deadline, delivery_address, delivery_required, assembly_required,
+        photos, furniture_config, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, 'auction')
+      RETURNING *`,
+      [
+        customerId, title, description, category, furniture_type,
+        style, materials, dimensions, budget_min, budget_max,
+        deadline, delivery_address, delivery_required, assembly_required,
+        photos, furniture_config ? JSON.stringify(furniture_config) : null,
+      ]
+    );
+
+    res.status(201).json({
+      message: 'Заказ успешно создан',
+      order: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Create order error:', error);
+    res.status(500).json({ message: 'Ошибка при создании заказа' });
+  }
+};
+
+// Получить все заказы клиента
+export const getCustomerOrders = async (req: Request, res: Response) => {
+  try {
+    const customerId = req.userId;
+
+    const result = await pool.query(
+      `SELECT 
+        o.*,
+        u.name as assigned_master_name,
+        u.profile_photo as assigned_master_photo,
+        (SELECT COUNT(*) FROM order_bids WHERE order_id = o.id) as bids_count
+       FROM orders o
+       LEFT JOIN users u ON o.assigned_master_id = u.id
+       WHERE o.customer_id = $1
+       ORDER BY o.created_at DESC`,
+      [customerId]
+    );
+
+    res.json({ orders: result.rows });
+  } catch (error) {
+    console.error('Get customer orders error:', error);
+    res.status(500).json({ message: 'Ошибка при получении заказов' });
+  }
+};
+
+// Получить все заказы в аукционе (для мастеров)
+export const getAuctionOrders = async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(
+      `SELECT 
+        o.*,
+        u.name as customer_name,
+        u.address as customer_address,
+        (SELECT COUNT(*) FROM order_bids WHERE order_id = o.id) as bids_count
+       FROM orders o
+       JOIN users u ON o.customer_id = u.id
+       WHERE o.status = 'auction'
+       ORDER BY o.created_at DESC`
+    );
+
+    res.json({ orders: result.rows });
+  } catch (error) {
+    console.error('Get auction orders error:', error);
+    res.status(500).json({ message: 'Ошибка при получении заказов аукциона' });
+  }
+};
+
+// Получить детали заказа
+export const getOrderById = async (req: Request, res: Response) => {
+  try {
+    const { orderId } = req.params;
+    const userId = req.userId;
+
+    const result = await pool.query(
+      `SELECT 
+        o.*,
+        c.name as customer_name,
+        c.email as customer_email,
+        c.phone as customer_phone,
+        c.address as customer_address,
+        m.name as assigned_master_name,
+        m.profile_photo as assigned_master_photo,
+        (SELECT COUNT(*) FROM order_bids WHERE order_id = o.id) as bids_count
+       FROM orders o
+       JOIN users c ON o.customer_id = c.id
+       LEFT JOIN users m ON o.assigned_master_id = m.id
+       WHERE o.id = $1`,
+      [orderId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Заказ не найден' });
+    }
+
+    const order = result.rows[0];
+
+    // Проверяем права доступа
+    if (order.customer_id !== userId && order.status !== 'auction') {
+      return res.status(403).json({ message: 'Нет доступа к этому заказу' });
+    }
+
+    res.json({ order });
+  } catch (error) {
+    console.error('Get order by id error:', error);
+    res.status(500).json({ message: 'Ошибка при получении заказа' });
+  }
+};
+
+// Обновить заказ
+export const updateOrder = async (req: Request, res: Response) => {
+  try {
+    const { orderId } = req.params;
+    const customerId = req.userId;
+    const {
+      title,
+      description,
+      category,
+      furniture_type,
+      style,
+      materials,
+      dimensions,
+      budget_min,
+      budget_max,
+      deadline,
+      delivery_address,
+      delivery_required,
+      assembly_required,
+      photos,
+    } = req.body;
+
+    // Проверяем, что заказ принадлежит клиенту
+    const checkResult = await pool.query(
+      'SELECT id FROM orders WHERE id = $1 AND customer_id = $2',
+      [orderId, customerId]
+    );
+
+    if (checkResult.rows.length === 0) {
+      return res.status(403).json({ message: 'Нет доступа к этому заказу' });
+    }
+
+    const result = await pool.query(
+      `UPDATE orders SET
+        title = $1, description = $2, category = $3, furniture_type = $4,
+        style = $5, materials = $6, dimensions = $7, budget_min = $8,
+        budget_max = $9, deadline = $10, delivery_address = $11,
+        delivery_required = $12, assembly_required = $13, photos = $14,
+        updated_at = CURRENT_TIMESTAMP
+       WHERE id = $15 AND customer_id = $16
+       RETURNING *`,
+      [
+        title, description, category, furniture_type,
+        style, materials, dimensions, budget_min,
+        budget_max, deadline, delivery_address,
+        delivery_required, assembly_required, photos,
+        orderId, customerId,
+      ]
+    );
+
+    res.json({
+      message: 'Заказ успешно обновлен',
+      order: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Update order error:', error);
+    res.status(500).json({ message: 'Ошибка при обновлении заказа' });
+  }
+};
+
+// Удалить заказ
+export const deleteOrder = async (req: Request, res: Response) => {
+  try {
+    const { orderId } = req.params;
+    const customerId = req.userId;
+
+    const result = await pool.query(
+      'DELETE FROM orders WHERE id = $1 AND customer_id = $2 RETURNING id',
+      [orderId, customerId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(403).json({ message: 'Нет доступа к этому заказу' });
+    }
+
+    res.json({ message: 'Заказ успешно удален' });
+  } catch (error) {
+    console.error('Delete order error:', error);
+    res.status(500).json({ message: 'Ошибка при удалении заказа' });
+  }
+};
+
+// Получить ставки на заказ
+export const getOrderBids = async (req: Request, res: Response) => {
+  try {
+    const { orderId } = req.params;
+    const userId = req.userId;
+
+    // Проверяем, что заказ принадлежит клиенту
+    const orderCheck = await pool.query(
+      'SELECT customer_id FROM orders WHERE id = $1',
+      [orderId]
+    );
+
+    if (orderCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Заказ не найден' });
+    }
+
+    if (orderCheck.rows[0].customer_id !== userId) {
+      return res.status(403).json({ message: 'Нет доступа к ставкам этого заказа' });
+    }
+
+    const result = await pool.query(
+      `SELECT 
+        ob.*,
+        u.name as master_name,
+        u.profile_photo as master_photo,
+        u.address as master_address,
+        mp.rating,
+        mp.reviews_count,
+        mp.completed_orders
+       FROM order_bids ob
+       JOIN users u ON ob.master_id = u.id
+       LEFT JOIN master_profiles mp ON mp.user_id = u.id
+       WHERE ob.order_id = $1
+       ORDER BY ob.proposed_price ASC`,
+      [orderId]
+    );
+
+    console.log('Bids with master data:', JSON.stringify(result.rows, null, 2));
+    res.json({ bids: result.rows });
+  } catch (error) {
+    console.error('Get order bids error:', error);
+    res.status(500).json({ message: 'Ошибка при получении ставок' });
+  }
+};
+
+// Принять ставку и назначить мастера
+export const acceptBid = async (req: Request, res: Response) => {
+  try {
+    const { bidId } = req.params;
+    const customerId = req.userId;
+
+    // Получаем информацию о ставке
+    const bidResult = await pool.query(
+      `SELECT ob.*, o.customer_id, o.id as order_id
+       FROM order_bids ob
+       JOIN orders o ON ob.order_id = o.id
+       WHERE ob.id = $1`,
+      [bidId]
+    );
+
+    if (bidResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Ставка не найдена' });
+    }
+
+    const bid = bidResult.rows[0];
+
+    if (bid.customer_id !== customerId) {
+      return res.status(403).json({ message: 'Нет доступа к этому заказу' });
+    }
+
+    // Обновляем заказ
+    await pool.query(
+      `UPDATE orders SET
+        status = 'in_progress',
+        assigned_master_id = $1,
+        final_price = $2,
+        updated_at = CURRENT_TIMESTAMP
+       WHERE id = $3`,
+      [bid.master_id, bid.proposed_price, bid.order_id]
+    );
+
+    // Обновляем статус принятой ставки
+    await pool.query(
+      'UPDATE order_bids SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      ['accepted', bidId]
+    );
+
+    // Отклоняем остальные ставки
+    await pool.query(
+      'UPDATE order_bids SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE order_id = $2 AND id != $3',
+      ['rejected', bid.order_id, bidId]
+    );
+
+    // Создаем чат между клиентом и мастером
+    const chatResult = await pool.query(
+      `INSERT INTO chats (order_id, customer_id, master_id)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (order_id) DO NOTHING
+       RETURNING id`,
+      [bid.order_id, bid.customer_id, bid.master_id]
+    );
+
+    res.json({ 
+      message: 'Ставка принята, мастер назначен',
+      chatId: chatResult.rows[0]?.id
+    });
+  } catch (error) {
+    console.error('Accept bid error:', error);
+    res.status(500).json({ message: 'Ошибка при принятии ставки' });
+  }
+};

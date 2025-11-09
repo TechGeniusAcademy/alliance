@@ -12,6 +12,8 @@ import orderRoutes from './routes/orderRoutes';
 import bidRoutes from './routes/bidRoutes';
 import chatRoutes from './routes/chatRoutes';
 import transactionRoutes from './routes/transactionRoutes';
+import paymentRoutes from './routes/paymentRoutes';
+import mastersRoutes from './routes/masters';
 import pool, { initializeDatabase } from './config/database';
 
 dotenv.config();
@@ -42,6 +44,8 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/bids', bidRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/masters', mastersRoutes);
 
 // Проверка подключения к базе данных
 app.get('/api/health', async (req, res) => {

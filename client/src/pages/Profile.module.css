@@ -4,7 +4,7 @@
 }
 
 .title {
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 2rem;
@@ -13,7 +13,7 @@
 .loading {
   text-align: center;
   padding: 3rem;
-  font-size: 1.125rem;
+  font-size: 1.5rem;
   color: #64748b;
 }
 
@@ -83,7 +83,7 @@
 }
 
 .photoHint {
-  font-size: 0.875rem;
+  font-size: 1.2rem;
   color: #64748b;
   margin-bottom: 0.5rem;
   text-align: center;
@@ -91,10 +91,10 @@
 
 .photoInput {
   width: 100%;
-  padding: 0.625rem;
+  padding: 0.75rem;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 1.2rem;
   transition: all 0.3s ease;
 }
 
@@ -128,7 +128,7 @@
 .label {
   font-weight: 600;
   color: #334155;
-  font-size: 0.9375rem;
+  font-size: 1.3rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -136,13 +136,14 @@
 
 .labelIcon {
   color: #3b82f6;
+  font-size: 1.4rem;
 }
 
 .input {
-  padding: 0.75rem 1rem;
+  padding: 1rem 1.2rem;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.3rem;
   transition: all 0.3s ease;
 }
 
@@ -159,10 +160,10 @@
 }
 
 .textarea {
-  padding: 0.75rem 1rem;
+  padding: 1rem 1.2rem;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-family: inherit;
   resize: vertical;
   transition: all 0.3s ease;
@@ -175,7 +176,7 @@
 }
 
 .hint {
-  font-size: 0.8125rem;
+  font-size: 1.1rem;
   color: #94a3b8;
   margin-top: -0.25rem;
 }
@@ -185,12 +186,12 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
+  padding: 1.1rem 2rem;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -218,11 +219,11 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+  padding: 1rem 1.5rem;
   background: white;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 0.9375rem;
+  font-size: 1.3rem;
   font-weight: 600;
   color: #334155;
   cursor: pointer;
@@ -249,12 +250,12 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+  padding: 1.1rem 2rem;
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 0.9375rem;
+  font-size: 1.3rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;

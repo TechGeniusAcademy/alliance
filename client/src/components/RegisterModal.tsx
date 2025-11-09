@@ -13,6 +13,7 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps)
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [agreedToPolicy, setAgreedToPolicy] = useState(false);
 
   if (!isOpen) return null;
 
@@ -101,7 +102,29 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps)
             />
           </div>
 
-          <button type="submit" className={styles.submitButton}>
+          <div className={styles.checkboxGroup}>
+            <input
+              type="checkbox"
+              id="privacy-policy"
+              checked={agreedToPolicy}
+              onChange={(e) => setAgreedToPolicy(e.target.checked)}
+              className={styles.checkbox}
+              required
+            />
+            <label htmlFor="privacy-policy" className={styles.checkboxLabel}>
+              {t('auth.agreeToPolicy')}{' '}
+              <a 
+                href="/privacy-policy" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={styles.link}
+              >
+                {t('auth.privacyPolicy')}
+              </a>
+            </label>
+          </div>
+
+          <button type="submit" className={styles.submitButton} disabled={!agreedToPolicy}>
             {t('auth.registerSubmit')}
           </button>
 

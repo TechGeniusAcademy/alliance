@@ -613,6 +613,84 @@ class OrderService {
       throw new Error('Failed to delete order');
     }
   }
+
+  // POST mark order as shipped (for master)
+  async markAsShipped(orderId: number, data: { tracking_number?: string; delivery_notes?: string }): Promise<void> {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${this.baseURL}/orders/${orderId}/ship`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to mark order as shipped');
+    }
+  }
+
+  // POST confirm delivery (for customer)
+  async confirmDelivery(orderId: number): Promise<void> {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${this.baseURL}/orders/${orderId}/confirm-delivery`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to confirm delivery');
+    }
+  }
+
+  // GET order delivery info
+  async getOrderDelivery(orderId: number): Promise<{
+    delivery_status: string;
+    shipped_at: string | null;
+    delivered_at: string | null;
+    tracking_number: string | null;
+    delivery_notes: string | null;
+    customer_name: string;
+    customer_phone: string | null;
+    master_name: string;
+    master_phone: string | null;
+  }> {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${this.baseURL}/orders/${orderId}/delivery`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch delivery info');
+    }
+
+    return response.json();
+  }
+
+  // GET active orders for master
+  async getMasterActiveOrders(): Promise<Order[]> {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${this.baseURL}/orders/master/active`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch master active orders');
+    }
+
+    const data = await response.json();
+    return data.orders.map(transformApiOrder);
+  }
 }
 
 export const orderService = new OrderService();

@@ -43,6 +43,18 @@ const Header = () => {
           <Link to="/services" className={styles.navLink}>
             {t('nav.services')}
           </Link>
+          <Link to="/portfolio" className={styles.navLink}>
+            {t('nav.portfolio')}
+          </Link>
+          <Link to="/masters" className={styles.navLink}>
+            {t('nav.masters')}
+          </Link>
+          <Link to="/how-it-works" className={styles.navLink}>
+            {t('nav.howItWorks')}
+          </Link>
+          <Link to="/pricing" className={styles.navLink}>
+            {t('nav.pricing')}
+          </Link>
           <Link to="/contact" className={styles.navLink}>
             {t('nav.contact')}
           </Link>

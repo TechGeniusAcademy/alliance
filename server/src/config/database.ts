@@ -351,6 +351,35 @@ export const initializeDatabase = async () => {
     await pool.query(addFurnitureConfigField);
     console.log('✓ Поле furniture_config добавлено в таблицу orders');
 
+    // Добавляем поля для отслеживания доставки
+    const addDeliveryFields = `
+      DO $$ 
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='orders' AND column_name='delivery_status') THEN
+              ALTER TABLE orders ADD COLUMN delivery_status VARCHAR(50) DEFAULT 'pending';
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='orders' AND column_name='shipped_at') THEN
+              ALTER TABLE orders ADD COLUMN shipped_at TIMESTAMP;
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='orders' AND column_name='delivered_at') THEN
+              ALTER TABLE orders ADD COLUMN delivered_at TIMESTAMP;
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='orders' AND column_name='tracking_number') THEN
+              ALTER TABLE orders ADD COLUMN tracking_number VARCHAR(100);
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='orders' AND column_name='delivery_notes') THEN
+              ALTER TABLE orders ADD COLUMN delivery_notes TEXT;
+          END IF;
+      END $$;
+    `;
+    await pool.query(addDeliveryFields);
+    console.log('✓ Поля доставки добавлены в таблицу orders');
+
     // Создаем таблицу order_bids (ставки/предложения на заказы)
     const createOrderBidsTable = `
       CREATE TABLE IF NOT EXISTS order_bids (

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { orderService } from '../services/orderService';
 import type { Order } from '../types/order';
 import OrderCard from '../components/OrderCard';
+import PaymentModal from '../components/PaymentModal';
 import { MdFilterList, MdSearch, MdInbox, MdClose, MdPerson, MdAttachMoney, MdTimer, MdStar, MdCheck } from 'react-icons/md';
 import Toast from '../components/Toast';
 import styles from './Orders.module.css';
@@ -33,6 +34,8 @@ const MyOrders = () => {
   const [bids, setBids] = useState<OrderBid[]>([]);
   const [loadingBids, setLoadingBids] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentOrder, setPaymentOrder] = useState<{ id: number; amount: number; title: string; bidId?: number } | null>(null);
 
   useEffect(() => {
     loadOrders();
@@ -106,32 +109,23 @@ const MyOrders = () => {
 
   const handleAcceptBid = async (bidId: number) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/bids/${bidId}/accept`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const bid = bids.find(b => b.id === bidId);
+      if (!bid) return;
 
-      if (response.ok) {
-        const data = await response.json();
-        setToast({ message: 'Предложение принято! Мастер назначен на заказ. Чат с мастером создан.', type: 'success' });
+      // Сохраняем информацию о заявке для последующего принятия после оплаты
+      if (selectedOrder) {
+        setPaymentOrder({
+          id: selectedOrder.id,
+          amount: bid.proposed_price,
+          title: selectedOrder.title,
+          bidId: bidId // Сохраняем ID заявки
+        });
         handleCloseBidsModal();
-        loadOrders(); // Обновляем список заказов
-        
-        // Перенаправляем в чаты если чат был создан
-        setTimeout(() => {
-          if (data.chatId) {
-            window.location.href = '/dashboard/chats';
-          }
-        }, 1500);
-      } else {
-        setToast({ message: 'Ошибка при принятии предложения', type: 'error' });
+        setShowPaymentModal(true);
       }
     } catch (error) {
-      console.error('Error accepting bid:', error);
-      setToast({ message: 'Ошибка при принятии предложения', type: 'error' });
+      console.error('Error opening payment modal:', error);
+      setToast({ message: 'Ошибка при открытии окна оплаты', type: 'error' });
     }
   };
 
@@ -456,6 +450,23 @@ const MyOrders = () => {
           message={toast.message}
           type={toast.type}
           onClose={() => setToast(null)}
+        />
+      )}
+
+      {showPaymentModal && paymentOrder && (
+        <PaymentModal
+          orderId={paymentOrder.id}
+          amount={paymentOrder.amount}
+          orderTitle={paymentOrder.title}
+          bidId={paymentOrder.bidId}
+          onClose={() => {
+            setShowPaymentModal(false);
+            setPaymentOrder(null);
+          }}
+          onSuccess={() => {
+            loadOrders();
+            setToast({ message: 'Оплата прошла успешно! Заказ переведён в работу.', type: 'success' });
+          }}
         />
       )}
     </div>

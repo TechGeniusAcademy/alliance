@@ -2,6 +2,19 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api';
 
+export interface MasterPublicProfile {
+  id: number;
+  name: string;
+  specialty?: string;
+  experience?: number;
+  rating?: number;
+  completedOrders?: number;
+  profilePicture?: string;
+  verified?: boolean;
+  skills?: string[];
+  bio?: string;
+}
+
 export interface PortfolioItem {
   id?: number;
   master_id?: number;
@@ -79,6 +92,20 @@ class MasterService {
     const response = await axios.get(`${API_URL}/master/public/portfolio`);
     return response.data;
   }
+
+  // Получить всех мастеров (публичная информация, без контактов)
+  async getAllMasters(): Promise<MasterPublicProfile[]> {
+    const response = await axios.get(`${API_URL}/masters/public`);
+    return response.data;
+  }
+
+  // Получить профиль мастера (публичная информация)
+  async getMasterProfile(masterId: number): Promise<MasterPublicProfile> {
+    const response = await axios.get(`${API_URL}/masters/public/${masterId}`);
+    return response.data;
+  }
 }
 
-export default new MasterService();
+const masterService = new MasterService();
+
+export { masterService };

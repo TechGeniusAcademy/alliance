@@ -1,0 +1,302 @@
+.servicesSection {
+    padding: 7rem 0 12rem;
+    background-color: #1a1a2e;
+    color: #fff;
+}
+
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.headerSection {
+    text-align: center;
+    margin-bottom: 6.4rem;
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.title {
+    position: relative;
+    margin-bottom: 4rem;
+    padding-bottom: 2.5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 3.6rem;
+    letter-spacing: 0.5px;
+}
+
+.title::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #e67e22, transparent);
+}
+
+.title::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4.5rem;
+    height: 3px;
+    background-color: #e67e22;
+    box-shadow: 0 0 10px rgba(230, 126, 34, 0.5);
+}
+
+.title span {
+    color: #e67e22;
+}
+
+.description {
+    color: #a0aec0;
+    font-size: 1.8rem;
+    line-height: 1.6;
+    max-width: 70rem;
+    margin: 0 auto;
+}
+
+.carouselWrapper {
+    overflow: hidden;
+    position: relative;
+    padding: 2rem 0;
+}
+
+.carouselTrack {
+    display: flex;
+    gap: 3.2rem;
+    animation: scroll 40s linear infinite;
+    width: fit-content;
+}
+
+.carouselTrack:hover {
+    animation-play-state: paused;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.singleService {
+    background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+    border-radius: 12px;
+    min-width: 38rem;
+    max-width: 38rem;
+    height: 50rem;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    border: 1px solid rgba(230, 126, 34, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.singleService:hover {
+    transform: translateY(-8px);
+    border-color: rgba(230, 126, 34, 0.4);
+    box-shadow: 0 12px 40px rgba(230, 126, 34, 0.2);
+}
+
+.part1 {
+    padding: 4rem;
+    border-bottom: 2px solid rgba(230, 126, 34, 0.2);
+    background: linear-gradient(180deg, rgba(230, 126, 34, 0.05) 0%, transparent 100%);
+}
+
+.iconWrapper {
+    width: 7rem;
+    height: 7rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #e67e22, #cf711f);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+    transition: all 0.3s ease;
+}
+
+.singleService:hover .iconWrapper {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 6px 25px rgba(230, 126, 34, 0.5);
+}
+
+.iconWrapper svg {
+    width: 3.6rem;
+    height: 3.6rem;
+    color: #fff;
+}
+
+.serviceTitle {
+    font-size: 1.9rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+    color: #fff;
+}
+
+.part2 {
+    padding: 3rem 4rem 4rem;
+}
+
+.serviceDescription {
+    margin-bottom: 2.4rem;
+    color: #a0aec0;
+    font-size: 1.5rem;
+    line-height: 1.6;
+    min-height: 7.2rem;
+}
+
+.readMore {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    color: #e67e22;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.readMore::before {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #e67e22, #cf711f);
+    transition: width 0.3s ease;
+}
+
+.readMore:hover::before {
+    width: 100%;
+}
+
+.readMore:hover {
+    color: #cf711f;
+    gap: 1.4rem;
+}
+
+.readMore svg {
+    transition: transform 0.3s ease;
+    stroke: #e67e22;
+}
+
+.readMore:hover svg {
+    transform: translateX(4px);
+    stroke: #cf711f;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .singleService {
+        min-width: 34rem;
+        max-width: 34rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .servicesSection {
+        padding: 8rem 0 9rem;
+    }
+
+    .container {
+        padding: 0 2.4rem;
+    }
+
+    .title {
+        font-size: 3rem;
+    }
+
+    .description {
+        font-size: 1.6rem;
+    }
+
+    .singleService {
+        min-width: 32rem;
+        max-width: 32rem;
+        height: 48rem;
+    }
+
+    .carouselTrack {
+        gap: 2.4rem;
+    }
+
+    .part1 {
+        padding: 3rem;
+    }
+
+    .part2 {
+        padding: 2.4rem 3rem 3rem;
+    }
+
+    .serviceTitle {
+        font-size: 1.7rem;
+    }
+}
+
+@media (max-width: 544px) {
+    .servicesSection {
+        padding: 6rem 0 7rem;
+    }
+
+    .headerSection {
+        margin-bottom: 4rem;
+    }
+
+    .title {
+        font-size: 2.4rem;
+        margin-bottom: 2.4rem;
+        padding-bottom: 2rem;
+    }
+
+    .description {
+        font-size: 1.4rem;
+    }
+
+    .singleService {
+        min-width: 28rem;
+        max-width: 28rem;
+        height: 46rem;
+    }
+
+    .carouselTrack {
+        gap: 2rem;
+        animation: scroll 30s linear infinite;
+    }
+
+    .part1 {
+        padding: 2.4rem;
+    }
+
+    .iconWrapper {
+        width: 6rem;
+        height: 6rem;
+        margin-bottom: 2rem;
+    }
+
+    .iconWrapper svg {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    .part2 {
+        padding: 2rem 2.4rem 2.4rem;
+    }
+
+    .serviceDescription {
+        min-height: auto;
+    }
+}

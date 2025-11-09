@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MdArrowBack, MdStar, MdLocationOn, MdPhone, MdEmail, MdChat, MdVerified, MdWork } from 'react-icons/md';
-import masterService from '../services/masterService';
+import { masterService } from '../services/masterService';
 import type { PortfolioItem } from '../services/masterService';
 import Toast from '../components/Toast';
 import type { ToastType } from '../components/Toast';

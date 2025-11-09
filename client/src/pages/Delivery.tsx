@@ -4,14 +4,27 @@ import {
   MdSearch, 
   MdPhone, 
   MdLocationOn,
-  MdPerson
+  MdPerson,
+  MdCheckCircle
 } from 'react-icons/md';
-import { appService } from '../services/appService';
-import type { Delivery as DeliveryType } from '../types/app';
+import { orderService } from '../services/orderService';
 import styles from './Orders.module.css';
 
+interface DeliveryOrder {
+  id: number;
+  title: string;
+  delivery_address: string;
+  delivery_status: string;
+  shipped_at: string | null;
+  delivered_at: string | null;
+  tracking_number: string | null;
+  delivery_notes: string | null;
+  assigned_master_name: string | null;
+  assigned_master_phone: string | null;
+}
+
 const Delivery = () => {
-  const [deliveries, setDeliveries] = useState<DeliveryType[]>([]);
+  const [deliveries, setDeliveries] = useState<DeliveryOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -23,8 +36,36 @@ const Delivery = () => {
   const loadDeliveries = async () => {
     try {
       setLoading(true);
-      const data = await appService.getDeliveries();
-      setDeliveries(data);
+      const orders = await orderService.getMyOrders();
+      // Фильтруем только заказы с назначенным мастером и требующие доставки
+      const ordersWithDelivery = orders.filter((order) => 
+        order.sellerId && order.deliveryAddress
+      ).map((order) => ({
+        id: order.id,
+        title: order.title,
+        delivery_address: order.deliveryAddress || '',
+        delivery_status: 'pending', // будет загружено отдельно
+        shipped_at: null,
+        delivered_at: null,
+        tracking_number: null,
+        delivery_notes: null,
+        assigned_master_name: order.sellerName || null,
+        assigned_master_phone: null,
+      }));
+
+      // Загружаем детальную информацию о доставке для каждого заказа
+      const deliveriesWithDetails = await Promise.all(
+        ordersWithDelivery.map(async (delivery) => {
+          try {
+            const details = await orderService.getOrderDelivery(delivery.id);
+            return { ...delivery, ...details };
+          } catch {
+            return delivery; // если не удалось загрузить детали, возвращаем как есть
+          }
+        })
+      );
+
+      setDeliveries(deliveriesWithDetails);
     } catch (error) {
       console.error('Failed to load deliveries:', error);
     } finally {
@@ -32,27 +73,38 @@ const Delivery = () => {
     }
   };
 
+  const confirmDelivery = async (orderId: number) => {
+    if (!confirm('Подтвердить получение заказа?')) return;
+    
+    try {
+      await orderService.confirmDelivery(orderId);
+      alert('Доставка подтверждена!');
+      loadDeliveries();
+    } catch (error) {
+      console.error('Failed to confirm delivery:', error);
+      alert('Ошибка при подтверждении доставки');
+    }
+  };
+
   const filteredDeliveries = deliveries.filter(delivery => {
-    const matchesSearch = delivery.orderTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (delivery.trackingNumber && delivery.trackingNumber.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                         delivery.address.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || delivery.status === statusFilter;
+    const matchesSearch = delivery.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (delivery.tracking_number && delivery.tracking_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                         delivery.delivery_address.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || delivery.delivery_status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const stats = {
     total: deliveries.length,
-    inTransit: deliveries.filter(d => d.status === 'in_transit').length,
-    delivered: deliveries.filter(d => d.status === 'delivered').length,
+    inTransit: deliveries.filter(d => d.delivery_status === 'shipped').length,
+    delivered: deliveries.filter(d => d.delivery_status === 'delivered').length,
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'delivered': return '#10b981';
-      case 'in_transit': return '#3b82f6';
-      case 'scheduled': return '#f59e0b';
-      case 'pending': return '#6b7280';
-      case 'cancelled': return '#ef4444';
+      case 'shipped': return '#3b82f6';
+      case 'pending': return '#f59e0b';
       default: return '#6b7280';
     }
   };
@@ -136,61 +188,71 @@ const Delivery = () => {
           {filteredDeliveries.map((delivery) => (
             <div key={delivery.id} className={styles.deliveryCard}>
               <div className={styles.deliveryHeader}>
-                <h3>{delivery.orderTitle}</h3>
+                <h3>{delivery.title}</h3>
                 <span 
                   className={styles.statusBadge}
-                  style={{ backgroundColor: getStatusColor(delivery.status) }}
+                  style={{ backgroundColor: getStatusColor(delivery.delivery_status) }}
                 >
-                  {delivery.status === 'delivered' && 'Доставлено'}
-                  {delivery.status === 'in_transit' && 'В пути'}
-                  {delivery.status === 'scheduled' && 'Запланировано'}
-                  {delivery.status === 'pending' && 'Ожидает'}
-                  {delivery.status === 'cancelled' && 'Отменено'}
+                  {delivery.delivery_status === 'delivered' && 'Доставлено'}
+                  {delivery.delivery_status === 'shipped' && 'Отправлено'}
+                  {delivery.delivery_status === 'pending' && 'Ожидает отправки'}
                 </span>
               </div>
 
               <div className={styles.deliveryInfo}>
-                {delivery.trackingNumber && (
+                {delivery.tracking_number && (
                   <div className={styles.infoItem}>
-                    <strong>Трек-номер:</strong> {delivery.trackingNumber}
+                    <strong>Трек-номер:</strong> {delivery.tracking_number}
                   </div>
                 )}
                 <div className={styles.infoItem}>
                   <MdLocationOn size={18} />
-                  <span>{delivery.address}, {delivery.city}</span>
+                  <span>{delivery.delivery_address}</span>
                 </div>
-                {delivery.scheduledDate && (
+                {delivery.shipped_at && (
                   <div className={styles.infoItem}>
-                    <strong>Дата доставки:</strong> {formatDate(delivery.scheduledDate)}
+                    <strong>Отправлено:</strong> {formatDate(delivery.shipped_at)}
                   </div>
                 )}
-                {delivery.deliveredAt && (
+                {delivery.delivered_at && (
                   <div className={styles.infoItem}>
-                    <strong>Доставлено:</strong> {formatDate(delivery.deliveredAt)}
+                    <strong>Доставлено:</strong> {formatDate(delivery.delivered_at)}
                   </div>
                 )}
               </div>
 
-              {delivery.courier && (
+              {delivery.assigned_master_name && (
                 <div className={styles.courierInfo}>
                   <div className={styles.courierHeader}>
                     <MdPerson size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} />
-                    Курьер
+                    Мастер
                   </div>
                   <div className={styles.courierDetails}>
-                    <div>{delivery.courier}</div>
-                    <div className={styles.courierPhone}>
-                      <MdPhone size={16} />
-                      {delivery.courierPhone}
-                    </div>
+                    <div>{delivery.assigned_master_name}</div>
+                    {delivery.assigned_master_phone && (
+                      <div className={styles.courierPhone}>
+                        <MdPhone size={16} />
+                        {delivery.assigned_master_phone}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
 
-              {delivery.notes && (
+              {delivery.delivery_notes && (
                 <div className={styles.deliveryNotes}>
-                  <strong>Примечания:</strong> {delivery.notes}
+                  <strong>Примечания:</strong> {delivery.delivery_notes}
                 </div>
+              )}
+
+              {delivery.delivery_status === 'shipped' && (
+                <button 
+                  className={styles.confirmButton}
+                  onClick={() => confirmDelivery(delivery.id)}
+                >
+                  <MdCheckCircle size={20} />
+                  Подтвердить получение
+                </button>
               )}
             </div>
           ))}

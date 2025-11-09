@@ -4,14 +4,14 @@
 }
 
 .title {
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
-  font-size: 1.125rem;
+  font-size: 1.5rem;
   color: #64748b;
   margin-bottom: 2rem;
 }
@@ -25,7 +25,7 @@
 
 .card {
   background: white;
-  padding: 1.5rem;
+  padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
@@ -37,7 +37,7 @@
 }
 
 .cardIcon {
-  font-size: 2.5rem;
+  font-size: 3.5rem;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
@@ -45,7 +45,7 @@
 }
 
 .cardTitle {
-  font-size: 0.875rem;
+  font-size: 1.2rem;
   color: #64748b;
   font-weight: 600;
   text-transform: uppercase;
@@ -54,7 +54,7 @@
 }
 
 .cardValue {
-  font-size: 2rem;
+  font-size: 2.8rem;
   font-weight: 700;
   color: #1e293b;
   margin: 0;

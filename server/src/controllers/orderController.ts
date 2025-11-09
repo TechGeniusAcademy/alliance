@@ -330,3 +330,150 @@ export const acceptBid = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Ошибка при принятии ставки' });
   }
 };
+
+// Отметить заказ как отправленный (мастер)
+export const markAsShipped = async (req: Request, res: Response) => {
+  try {
+    const masterId = req.userId;
+    const { orderId } = req.params;
+    const { trackingNumber, deliveryNotes } = req.body;
+
+    // Проверяем что заказ принадлежит этому мастеру
+    const orderCheck = await pool.query(
+      'SELECT * FROM orders WHERE id = $1 AND assigned_master_id = $2',
+      [orderId, masterId]
+    );
+
+    if (orderCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Заказ не найден или вы не являетесь исполнителем' });
+    }
+
+    const order = orderCheck.rows[0];
+
+    if (order.status !== 'in_progress') {
+      return res.status(400).json({ message: 'Заказ должен быть в статусе "В работе"' });
+    }
+
+    // Обновляем статус доставки
+    await pool.query(
+      `UPDATE orders SET
+        delivery_status = 'shipped',
+        shipped_at = CURRENT_TIMESTAMP,
+        tracking_number = $1,
+        delivery_notes = $2,
+        updated_at = CURRENT_TIMESTAMP
+       WHERE id = $3`,
+      [trackingNumber, deliveryNotes, orderId]
+    );
+
+    res.json({ message: 'Заказ отмечен как отправленный' });
+  } catch (error) {
+    console.error('Mark as shipped error:', error);
+    res.status(500).json({ message: 'Ошибка при обновлении статуса доставки' });
+  }
+};
+
+// Подтвердить получение заказа (клиент)
+export const confirmDelivery = async (req: Request, res: Response) => {
+  try {
+    const customerId = req.userId;
+    const { orderId } = req.params;
+
+    // Проверяем что заказ принадлежит этому клиенту
+    const orderCheck = await pool.query(
+      'SELECT * FROM orders WHERE id = $1 AND customer_id = $2',
+      [orderId, customerId]
+    );
+
+    if (orderCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Заказ не найден' });
+    }
+
+    const order = orderCheck.rows[0];
+
+    if (order.delivery_status !== 'shipped') {
+      return res.status(400).json({ message: 'Заказ должен быть в статусе "Отправлен"' });
+    }
+
+    // Обновляем статус
+    await pool.query(
+      `UPDATE orders SET
+        delivery_status = 'delivered',
+        delivered_at = CURRENT_TIMESTAMP,
+        status = 'completed',
+        updated_at = CURRENT_TIMESTAMP
+       WHERE id = $1`,
+      [orderId]
+    );
+
+    // Обновляем счетчик completed_orders у мастера
+    await pool.query(
+      `INSERT INTO master_profiles (user_id, completed_orders)
+       VALUES ($1, 1)
+       ON CONFLICT (user_id) DO UPDATE SET
+       completed_orders = master_profiles.completed_orders + 1,
+       updated_at = CURRENT_TIMESTAMP`,
+      [order.assigned_master_id]
+    );
+
+    res.json({ message: 'Доставка подтверждена, заказ завершен' });
+  } catch (error) {
+    console.error('Confirm delivery error:', error);
+    res.status(500).json({ message: 'Ошибка при подтверждении доставки' });
+  }
+};
+
+// Получить информацию о доставке заказа
+export const getOrderDelivery = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+    const { orderId } = req.params;
+
+    // Проверяем доступ (клиент или мастер этого заказа)
+    const orderCheck = await pool.query(
+      `SELECT o.*, 
+        u_customer.name as customer_name, 
+        u_customer.phone as customer_phone,
+        u_master.name as master_name,
+        u_master.phone as master_phone
+       FROM orders o
+       JOIN users u_customer ON o.customer_id = u_customer.id
+       LEFT JOIN users u_master ON o.assigned_master_id = u_master.id
+       WHERE o.id = $1 AND (o.customer_id = $2 OR o.assigned_master_id = $2)`,
+      [orderId, userId]
+    );
+
+    if (orderCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Заказ не найден' });
+    }
+
+    res.json({ delivery: orderCheck.rows[0] });
+  } catch (error) {
+    console.error('Get order delivery error:', error);
+    res.status(500).json({ message: 'Ошибка при получении информации о доставке' });
+  }
+};
+
+// GET active orders for master
+export const getMasterActiveOrders = async (req: Request, res: Response) => {
+  try {
+    const masterId = req.userId;
+
+    const result = await pool.query(
+      `SELECT o.*, 
+              u.name as customer_name,
+              u.address as customer_address
+       FROM orders o
+       LEFT JOIN users u ON o.customer_id = u.id
+       WHERE o.assigned_master_id = $1 
+         AND o.status IN ('in_progress', 'shipped')
+       ORDER BY o.created_at DESC`,
+      [masterId]
+    );
+
+    res.json({ orders: result.rows });
+  } catch (error) {
+    console.error('Error fetching master active orders:', error);
+    res.status(500).json({ error: 'Failed to fetch active orders' });
+  }
+};

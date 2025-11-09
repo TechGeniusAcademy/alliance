@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MdAdd, MdEdit, MdDelete, MdImage, MdVisibility, MdVisibilityOff } from 'react-icons/md';
-import masterService from '../../services/masterService';
+import { masterService } from '../../services/masterService';
 import type { PortfolioItem } from '../../services/masterService';
 import Toast from '../../components/Toast';
 import type { ToastType } from '../../components/Toast';

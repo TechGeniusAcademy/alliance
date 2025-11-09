@@ -6,6 +6,10 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Services from './pages/Services';
 import Contact from './pages/Contact';
+import Portfolio from './pages/Portfolio';
+import Masters from './pages/Masters';
+import HowItWorks from './pages/HowItWorks';
+import Pricing from './pages/Pricing';
 import DashboardLayout from './layouts/DashboardLayout';
 import MasterDashboardLayout from './layouts/MasterDashboardLayout';
 import Dashboard from './pages/Dashboard';
@@ -15,6 +19,7 @@ import Admin from './pages/Admin';
 import ProtectedRoute from './components/ProtectedRoute';
 import MasterDashboard from './pages/master/MasterDashboard';
 import MasterOrders from './pages/master/MasterOrders';
+import MasterActiveOrders from './pages/master/MasterActiveOrders';
 import AuctionHistory from './pages/master/AuctionHistory';
 import MasterChats from './pages/master/MasterChats';
 import MasterRatings from './pages/master/MasterRatings';
@@ -37,6 +42,7 @@ import Reviews from './pages/Reviews';
 import SpecialOffers from './pages/SpecialOffers';
 import Settings from './pages/Settings';
 import Help from './pages/Help';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import './App.css';
 
 function App() {
@@ -77,6 +83,36 @@ function App() {
             <>
               <Header />
               <Contact />
+            </>
+          } />
+          <Route path="/portfolio" element={
+            <>
+              <Header />
+              <Portfolio />
+            </>
+          } />
+          <Route path="/masters" element={
+            <>
+              <Header />
+              <Masters />
+            </>
+          } />
+          <Route path="/how-it-works" element={
+            <>
+              <Header />
+              <HowItWorks />
+            </>
+          } />
+          <Route path="/pricing" element={
+            <>
+              <Header />
+              <Pricing />
+            </>
+          } />
+          <Route path="/privacy-policy" element={
+            <>
+              <Header />
+              <PrivacyPolicy />
             </>
           } />
 
@@ -138,7 +174,7 @@ function App() {
             
             {/* Работа с заказами */}
             <Route path="auctions" element={<MasterOrders />} />
-            <Route path="active-orders" element={<Placeholder title="Активные заказы" icon="📋" description="Заказы в работе" />} />
+            <Route path="active-orders" element={<MasterActiveOrders />} />
             <Route path="orders" element={<MasterOrders />} />
             <Route path="history" element={<AuctionHistory />} />
             <Route path="schedule" element={<Placeholder title="Расписание" icon="📅" description="График работы и дедлайны" />} />

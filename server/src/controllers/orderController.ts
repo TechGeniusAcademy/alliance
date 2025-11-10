@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import pool from '../config/database';
+import { commissionService } from '../services/commissionService';
 
 // Создать новый заказ
 export const createOrder = async (req: Request, res: Response) => {
@@ -320,6 +321,19 @@ export const acceptBid = async (req: Request, res: Response) => {
        RETURNING id`,
       [bid.order_id, bid.customer_id, bid.master_id]
     );
+
+    // Создаем транзакцию комиссии для мастера
+    try {
+      await commissionService.createCommissionTransaction(
+        bid.master_id,
+        bid.order_id,
+        bid.proposed_price
+      );
+      console.log(`✓ Комиссия создана для мастера ${bid.master_id} по заказу ${bid.order_id}`);
+    } catch (commissionError) {
+      console.error('Ошибка создания комиссии:', commissionError);
+      // Не прерываем процесс, комиссию можно создать позже
+    }
 
     res.json({ 
       message: 'Ставка принята, мастер назначен',

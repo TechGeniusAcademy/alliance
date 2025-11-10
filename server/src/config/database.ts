@@ -521,6 +521,65 @@ export const initializeDatabase = async () => {
     await pool.query(createReviewsIndexes);
     console.log('✓ Индексы для reviews созданы/проверены');
 
+    // Миграция: Добавляем поля для комиссионной системы
+    const addCommissionFields = `
+      DO $$ 
+      BEGIN
+        -- Добавляем дату регистрации мастера (для расчета первого месяца)
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'master_profiles' AND column_name = 'registered_at') THEN
+          ALTER TABLE master_profiles ADD COLUMN registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+          UPDATE master_profiles SET registered_at = CURRENT_TIMESTAMP WHERE registered_at IS NULL;
+        END IF;
+
+        -- Счетчик заказов в первый месяц
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'master_profiles' AND column_name = 'first_month_orders') THEN
+          ALTER TABLE master_profiles ADD COLUMN first_month_orders INTEGER DEFAULT 0;
+        END IF;
+
+        -- Баланс комиссий (сколько должен платформе)
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'master_profiles' AND column_name = 'commission_balance') THEN
+          ALTER TABLE master_profiles ADD COLUMN commission_balance DECIMAL(10, 2) DEFAULT 0.00;
+        END IF;
+
+        -- Всего заплачено комиссий
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'master_profiles' AND column_name = 'total_commission_paid') THEN
+          ALTER TABLE master_profiles ADD COLUMN total_commission_paid DECIMAL(10, 2) DEFAULT 0.00;
+        END IF;
+      END $$;
+    `;
+    await pool.query(addCommissionFields);
+    console.log('✓ Поля комиссионной системы добавлены в master_profiles');
+
+    // Создаем таблицу для транзакций комиссий
+    const createCommissionTransactionsTable = `
+      CREATE TABLE IF NOT EXISTS commission_transactions (
+        id SERIAL PRIMARY KEY,
+        master_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        order_amount DECIMAL(10, 2) NOT NULL,
+        commission_amount DECIMAL(10, 2) NOT NULL,
+        commission_type VARCHAR(50) NOT NULL, -- 'first_month' или 'percentage'
+        commission_rate DECIMAL(5, 2), -- процент комиссии (если применимо)
+        status VARCHAR(50) DEFAULT 'pending', -- pending, paid, cancelled
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        paid_at TIMESTAMP
+      );
+    `;
+    await pool.query(createCommissionTransactionsTable);
+    console.log('✓ Таблица commission_transactions создана/проверена');
+
+    const createCommissionIndexes = `
+      CREATE INDEX IF NOT EXISTS idx_commission_master ON commission_transactions(master_id);
+      CREATE INDEX IF NOT EXISTS idx_commission_order ON commission_transactions(order_id);
+      CREATE INDEX IF NOT EXISTS idx_commission_status ON commission_transactions(status);
+    `;
+    await pool.query(createCommissionIndexes);
+    console.log('✓ Индексы для commission_transactions созданы/проверены');
+
     console.log('✅ Инициализация базы данных завершена успешно!\n');
 
   } catch (error) {

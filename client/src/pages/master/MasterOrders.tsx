@@ -5,6 +5,7 @@ import { MdShoppingCart, MdAttachMoney, MdCalendarToday, MdLocationOn, MdPerson,
 import { orderService, type AuctionOrder } from '../../services/orderService';
 import bidService from '../../services/bidService';
 import type { Bid, BidCompetition } from '../../services/bidService';
+import { commissionService, type CommissionCalculation } from '../../services/commissionService';
 import { Bed, Wardrobe, Table, Chair, Sofa, Dresser, Grill } from '../../components/3d/FurnitureModels';
 import Toast from '../../components/Toast';
 import type { ToastType } from '../../components/Toast';
@@ -29,6 +30,7 @@ const MasterOrders = () => {
   const [existingBid, setExistingBid] = useState<Bid | null>(null);
   const [competition, setCompetition] = useState<BidCompetition | null>(null);
   const [submittingBid, setSubmittingBid] = useState(false);
+  const [commissionInfo, setCommissionInfo] = useState<CommissionCalculation | null>(null);
 
   const showToast = (message: string, type: ToastType) => {
     const id = Date.now();
@@ -107,6 +109,25 @@ const MasterOrders = () => {
     setBidComment('');
     setExistingBid(null);
     setCompetition(null);
+    setCommissionInfo(null);
+  };
+
+  // Рассчитать комиссию при изменении цены
+  const handleBidPriceChange = async (value: string) => {
+    setBidPrice(value);
+    const price = parseFloat(value);
+    
+    if (!isNaN(price) && price > 0) {
+      try {
+        const commission = await commissionService.calculateCommission(price);
+        setCommissionInfo(commission);
+      } catch (error) {
+        console.error('Error calculating commission:', error);
+        setCommissionInfo(null);
+      }
+    } else {
+      setCommissionInfo(null);
+    }
   };
 
   const handleSubmitBid = async () => {
@@ -854,7 +875,7 @@ const MasterOrders = () => {
                   <input
                     type="number"
                     value={bidPrice}
-                    onChange={(e) => setBidPrice(e.target.value)}
+                    onChange={(e) => handleBidPriceChange(e.target.value)}
                     placeholder="Введите цену в тенге"
                     style={{
                       width: '100%',
@@ -865,6 +886,37 @@ const MasterOrders = () => {
                       boxSizing: 'border-box',
                     }}
                   />
+                  {commissionInfo && (
+                    <div style={{
+                      marginTop: '8px',
+                      padding: '12px',
+                      background: commissionInfo.type === 'first_month' ? '#dbeafe' : '#fef3c7',
+                      borderRadius: '8px',
+                      fontSize: '0.9rem',
+                    }}>
+                      <div style={{ fontWeight: '600', marginBottom: '4px', color: '#2d3748' }}>
+                        Комиссия платформы:
+                      </div>
+                      <div style={{ color: '#4a5568' }}>
+                        {commissionInfo.type === 'first_month' ? (
+                          <>
+                            <strong>{new Intl.NumberFormat('ru-RU').format(commissionInfo.amount)} ₸</strong>
+                            {' '}(фиксированная ставка за заказ в первый месяц)
+                          </>
+                        ) : (
+                          <>
+                            <strong>{new Intl.NumberFormat('ru-RU').format(commissionInfo.amount)} ₸</strong>
+                            {' '}({commissionInfo.rate}% от суммы заказа)
+                          </>
+                        )}
+                      </div>
+                      <div style={{ marginTop: '8px', fontSize: '0.85rem', color: '#718096' }}>
+                        Вы получите: <strong style={{ color: '#2d3748' }}>
+                          {new Intl.NumberFormat('ru-RU').format(parseFloat(bidPrice) - commissionInfo.amount)} ₸
+                        </strong>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>

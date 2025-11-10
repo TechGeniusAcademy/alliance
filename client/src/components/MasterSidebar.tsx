@@ -124,6 +124,15 @@ const MasterSidebar = () => {
             <span>{t('masterSidebar.earnings')}</span>
           </NavLink>
           <NavLink
+            to="/master/commissions"
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.active : ''}`
+            }
+          >
+            <MdReceipt size={22} />
+            <span>Комиссии</span>
+          </NavLink>
+          <NavLink
             to="/master/invoices"
             className={({ isActive }) =>
               `${styles.navLink} ${isActive ? styles.active : ''}`

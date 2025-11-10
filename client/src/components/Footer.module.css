@@ -213,7 +213,7 @@
   color: #e67e22;
 }
 
-/* Responsive Design */
+/* Адаптивность */
 @media (max-width: 1200px) {
   .footerContent {
     gap: 3.6rem;

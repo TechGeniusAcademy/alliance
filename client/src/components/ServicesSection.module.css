@@ -199,7 +199,7 @@
     stroke: #cf711f;
 }
 
-/* Responsive Design */
+/* Адаптивность */
 @media (max-width: 1200px) {
     .singleService {
         min-width: 34rem;

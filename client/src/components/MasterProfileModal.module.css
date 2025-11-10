@@ -400,7 +400,7 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Mobile responsiveness */
+/* Адаптивность */
 @media (max-width: 768px) {
   .modalContent {
     padding: 28px 20px;

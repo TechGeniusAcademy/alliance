@@ -21,6 +21,7 @@ import MasterDashboard from './pages/master/MasterDashboard';
 import MasterOrders from './pages/master/MasterOrders';
 import MasterActiveOrders from './pages/master/MasterActiveOrders';
 import MasterCommissions from './pages/master/MasterCommissions';
+import MasterWallet from './pages/master/MasterWallet';
 import AuctionHistory from './pages/master/AuctionHistory';
 import MasterChats from './pages/master/MasterChats';
 import MasterRatings from './pages/master/MasterRatings';
@@ -181,6 +182,7 @@ function App() {
             <Route path="schedule" element={<Placeholder title="Расписание" icon="📅" description="График работы и дедлайны" />} />
             
             {/* Финансы */}
+            <Route path="wallet" element={<MasterWallet />} />
             <Route path="earnings" element={<Placeholder title="Доходы" icon="💰" description="История заработка и выплаты" />} />
             <Route path="commissions" element={<MasterCommissions />} />
             <Route path="invoices" element={<Placeholder title="Счета" icon="📄" description="Выставленные и оплаченные счета" />} />

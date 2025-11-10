@@ -29,6 +29,8 @@
 .logoIcon {
   background: linear-gradient(135deg, #e94560 0%, #f9ca24 100%);
   padding: 10px;
+  width: 32px;
+  height: 32px;
   border-radius: 16px;
   animation: pulse 2s ease-in-out infinite;
   box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
@@ -76,12 +78,12 @@
 
 .sectionTitle {
   padding: 16px 24px 8px 24px;
-  font-size: 0.7rem;
+  font-size: 0.95rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.5px;
   opacity: 0.5;
-  color: #e94560;
+  color: #f1dcc9;
   margin-top: 12px;
 }
 
@@ -96,7 +98,7 @@
   padding: 14px 24px;
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 1.4rem;
   font-weight: 500;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -247,7 +249,7 @@
   font-weight: 500;
 }
 
-/* Scrollbar styling */
+/* Стили для скролла */
 .sidebar::-webkit-scrollbar {
   width: 8px;
 }

@@ -70,7 +70,24 @@ const CheckoutForm = ({ orderId, amount, orderTitle, bidId, onSuccess, onClose }
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || 'Ошибка подтверждения платежа');
+          
+          // Специальная обработка ошибок недостаточности средств у мастера
+          if (errorData.error === 'INSUFFICIENT_FUNDS') {
+            throw new Error(
+              `Мастер не может принять заказ: недостаточно средств на кошельке для оплаты комиссии.\n` +
+              `Требуется: ${errorData.required}₸, доступно: ${errorData.available}₸.\n` +
+              `Мастер должен пополнить кошелек перед принятием заказа.`
+            );
+          }
+          
+          if (errorData.error === 'UNPAID_COMMISSIONS') {
+            throw new Error(
+              'Мастер не может принять заказ: у него есть неоплаченные комиссии за предыдущие заказы.\n' +
+              'Мастер должен оплатить комиссии перед тем, как брать новые заказы.'
+            );
+          }
+          
+          throw new Error(errorData.message || errorData.error || 'Ошибка подтверждения платежа');
         }
 
         setSucceeded(true);

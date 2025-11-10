@@ -36,14 +36,14 @@ const AuthModal = ({ isOpen, onClose, onSwitchToRegister }: AuthModalProps) => {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         
-        // Store role separately for easier access
+        // Храним роли отдельно для облегчения доступа (не забыть!)
         if (data.user.role) {
           localStorage.setItem('userRole', data.user.role);
         }
         
         onClose();
         
-        // Redirect based on user role
+        // Перенаправление на основе роли пользователя
         if (data.user.role === 'admin') {
           navigate('/admin');
         } else if (data.user.role === 'master') {

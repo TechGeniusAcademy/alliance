@@ -194,7 +194,7 @@ input:checked + .slider:before {
   100% { transform: rotate(360deg); }
 }
 
-/* Responsive */
+/* Адаптивность*/
 @media (max-width: 768px) {
   .pageContainer {
     padding: 20px;

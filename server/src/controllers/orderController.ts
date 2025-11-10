@@ -267,13 +267,17 @@ export const getOrderBids = async (req: Request, res: Response) => {
 
 // Принять ставку и назначить мастера
 export const acceptBid = async (req: Request, res: Response) => {
+  const client = await pool.connect();
+  
   try {
     const { bidId } = req.params;
     const customerId = req.userId;
 
+    await client.query('BEGIN');
+
     // Получаем информацию о ставке
-    const bidResult = await pool.query(
-      `SELECT ob.*, o.customer_id, o.id as order_id
+    const bidResult = await client.query(
+      `SELECT ob.*, o.customer_id, o.id as order_id, o.title as order_title
        FROM order_bids ob
        JOIN orders o ON ob.order_id = o.id
        WHERE ob.id = $1`,
@@ -281,17 +285,60 @@ export const acceptBid = async (req: Request, res: Response) => {
     );
 
     if (bidResult.rows.length === 0) {
+      await client.query('ROLLBACK');
       return res.status(404).json({ message: 'Ставка не найдена' });
     }
 
     const bid = bidResult.rows[0];
 
     if (bid.customer_id !== customerId) {
+      await client.query('ROLLBACK');
       return res.status(403).json({ message: 'Нет доступа к этому заказу' });
     }
 
+    // ПРОВЕРКА 1: Проверяем, нет ли у мастера неоплаченных комиссий
+    const unpaidCommissionsCheck = await client.query(
+      `SELECT COUNT(*) as unpaid_count
+       FROM commission_transactions
+       WHERE master_id = $1 AND status = 'pending'`,
+      [bid.master_id]
+    );
+
+    if (parseInt(unpaidCommissionsCheck.rows[0].unpaid_count) > 0) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ 
+        message: 'Мастер не может принять заказ: у него есть неоплаченные комиссии. Мастер должен сначала оплатить предыдущие комиссии.',
+        error: 'UNPAID_COMMISSIONS'
+      });
+    }
+
+    // ПРОВЕРКА 2: Вычисляем комиссию и проверяем баланс кошелька
+    const commissionCalc = await commissionService.calculateCommission(
+      bid.master_id,
+      bid.proposed_price
+    );
+
+    const requiredCommission = commissionCalc.amount;
+
+    const walletResult = await client.query(
+      `SELECT wallet_balance FROM master_profiles WHERE user_id = $1`,
+      [bid.master_id]
+    );
+
+    const walletBalance = parseFloat(walletResult.rows[0]?.wallet_balance || 0);
+
+    if (walletBalance < requiredCommission) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ 
+        message: `Недостаточно средств на кошельке мастера для оплаты комиссии. Требуется: ${requiredCommission}₸, доступно: ${walletBalance}₸`,
+        error: 'INSUFFICIENT_FUNDS',
+        required: requiredCommission,
+        available: walletBalance
+      });
+    }
+
     // Обновляем заказ
-    await pool.query(
+    await client.query(
       `UPDATE orders SET
         status = 'in_progress',
         assigned_master_id = $1,
@@ -302,19 +349,19 @@ export const acceptBid = async (req: Request, res: Response) => {
     );
 
     // Обновляем статус принятой ставки
-    await pool.query(
+    await client.query(
       'UPDATE order_bids SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
       ['accepted', bidId]
     );
 
     // Отклоняем остальные ставки
-    await pool.query(
+    await client.query(
       'UPDATE order_bids SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE order_id = $2 AND id != $3',
       ['rejected', bid.order_id, bidId]
     );
 
     // Создаем чат между клиентом и мастером
-    const chatResult = await pool.query(
+    const chatResult = await client.query(
       `INSERT INTO chats (order_id, customer_id, master_id)
        VALUES ($1, $2, $3)
        ON CONFLICT (order_id) DO NOTHING
@@ -322,26 +369,75 @@ export const acceptBid = async (req: Request, res: Response) => {
       [bid.order_id, bid.customer_id, bid.master_id]
     );
 
-    // Создаем транзакцию комиссии для мастера
-    try {
-      await commissionService.createCommissionTransaction(
+    // Создаем транзакцию комиссии
+    const commissionData = await commissionService.calculateCommission(
+      bid.master_id,
+      bid.proposed_price
+    );
+
+    const commissionResult = await client.query(
+      `INSERT INTO commission_transactions 
+       (master_id, order_id, commission_type, commission_rate, order_amount, commission_amount, status)
+       VALUES ($1, $2, $3, $4, $5, $6, 'pending')
+       RETURNING id`,
+      [
         bid.master_id,
         bid.order_id,
-        bid.proposed_price
-      );
-      console.log(`✓ Комиссия создана для мастера ${bid.master_id} по заказу ${bid.order_id}`);
-    } catch (commissionError) {
-      console.error('Ошибка создания комиссии:', commissionError);
-      // Не прерываем процесс, комиссию можно создать позже
-    }
+        commissionData.type,
+        commissionData.rate || null,
+        bid.proposed_price,
+        commissionData.amount
+      ]
+    );
+
+    const commissionId = commissionResult.rows[0].id;
+    const commissionAmount = commissionData.amount;
+
+    // СРАЗУ ОПЛАЧИВАЕМ комиссию из кошелька
+    // 1. Списываем с баланса кошелька
+    await client.query(
+      `UPDATE master_profiles 
+       SET wallet_balance = wallet_balance - $1
+       WHERE user_id = $2`,
+      [commissionAmount, bid.master_id]
+    );
+
+    // 2. Создаем транзакцию в wallet_transactions
+    await client.query(
+      `INSERT INTO wallet_transactions 
+       (master_id, amount, type, status, commission_transaction_id, description, created_at, completed_at)
+       VALUES ($1, $2, 'commission_payment', 'completed', $3, $4, NOW(), NOW())`,
+      [
+        bid.master_id,
+        commissionAmount,
+        commissionId,
+        `Оплата комиссии за заказ: ${bid.order_title}`
+      ]
+    );
+
+    // 3. Обновляем статус комиссии на 'paid'
+    await client.query(
+      `UPDATE commission_transactions 
+       SET status = 'paid', paid_at = NOW()
+       WHERE id = $1`,
+      [commissionId]
+    );
+
+    await client.query('COMMIT');
+
+    console.log(`✓ Комиссия ${commissionAmount}₸ автоматически списана с кошелька мастера ${bid.master_id} за заказ ${bid.order_id}`);
 
     res.json({ 
-      message: 'Ставка принята, мастер назначен',
-      chatId: chatResult.rows[0]?.id
+      message: `Ставка принята, мастер назначен. Комиссия ${commissionAmount}₸ списана с кошелька.`,
+      chatId: chatResult.rows[0]?.id,
+      commissionPaid: commissionAmount
     });
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Accept bid error:', error);
     res.status(500).json({ message: 'Ошибка при принятии ставки' });
+  } finally {
+    client.release();
   }
 };
 

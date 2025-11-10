@@ -324,7 +324,7 @@
   box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
 }
 
-/* Responsive Design */
+/* Адаптивность */
 @media (max-width: 1200px) {
   .categoriesGrid {
     grid-template-columns: repeat(3, 1fr);

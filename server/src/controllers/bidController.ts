@@ -8,6 +8,26 @@ export const createBid = async (req: Request, res: Response) => {
     const { orderId } = req.params;
     const { proposed_price, estimated_days, comment } = req.body;
 
+    // ПРОВЕРКА: Проверяем, нет ли у мастера неоплаченных комиссий
+    const unpaidCommissionsCheck = await pool.query(
+      `SELECT COUNT(*) as unpaid_count, SUM(commission_amount) as total_unpaid
+       FROM commission_transactions
+       WHERE master_id = $1 AND status = 'pending'`,
+      [masterId]
+    );
+
+    const unpaidCount = parseInt(unpaidCommissionsCheck.rows[0].unpaid_count);
+    const totalUnpaid = parseFloat(unpaidCommissionsCheck.rows[0].total_unpaid || 0);
+
+    if (unpaidCount > 0) {
+      return res.status(403).json({ 
+        message: `У вас есть ${unpaidCount} неоплаченных комиссий на сумму ${totalUnpaid}₸. Пожалуйста, оплатите их перед тем, как делать новые ставки.`,
+        error: 'UNPAID_COMMISSIONS',
+        unpaidCount,
+        totalUnpaid
+      });
+    }
+
     // Проверяем, что заказ существует и находится в аукционе
     const orderCheck = await pool.query(
       'SELECT id, status FROM orders WHERE id = $1',

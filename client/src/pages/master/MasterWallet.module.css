@@ -1,0 +1,347 @@
+.container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 2.5rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  font-size: 1.3rem;
+  color: #7f8c8d;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.8rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.statCard.balance {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.statLabel {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.statCard.balance .statLabel {
+  color: white;
+  opacity: 1;
+}
+
+.statValue {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.statCard.balance .statValue {
+  color: white;
+}
+
+.statDescription {
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
+
+.statCard.balance .statDescription {
+  color: white;
+  opacity: 0.9;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.depositSection {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  height: fit-content;
+}
+
+.sectionTitle {
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.depositForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 1.2rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.input {
+  padding: 1rem 1.2rem;
+  font-size: 1.2rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.select {
+  padding: 1rem 1.2rem;
+  font-size: 1.2rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.depositButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1.2rem 2rem;
+  font-size: 1.3rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.depositButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.depositButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.infoBox {
+  background: #f8f9fa;
+  border-left: 4px solid #667eea;
+  padding: 1.2rem;
+  border-radius: 8px;
+  margin-top: 1.5rem;
+}
+
+.infoTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.infoText {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  line-height: 1.6;
+}
+
+.transactionsSection {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.filterTabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.filterTab {
+  padding: 1rem 1.5rem;
+  font-size: 1.2rem;
+  background: none;
+  border: none;
+  color: #7f8c8d;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.filterTab.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+}
+
+.filterTab:hover {
+  color: #667eea;
+}
+
+.transactionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.transactionCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s;
+}
+
+.transactionCard:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.transactionLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.transactionType {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.transactionDescription {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+}
+
+.transactionDate {
+  font-size: 1rem;
+  color: #95a5a6;
+}
+
+.transactionRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.transactionAmount {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.transactionAmount.deposit {
+  color: #27ae60;
+}
+
+.transactionAmount.payment {
+  color: #e74c3c;
+}
+
+.transactionStatus {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.transactionStatus.completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.transactionStatus.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.transactionStatus.failed {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem;
+  color: #95a5a6;
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.emptyText {
+  font-size: 1.3rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.3rem;
+  color: #7f8c8d;
+}
+
+.error {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1.2rem;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  border: 1px solid #f5c6cb;
+  margin-bottom: 1.5rem;
+}

@@ -64,7 +64,7 @@
   overflow-y: auto;
 }
 
-/* Category Styles */
+/* Стили для категории */
 .menuCategory {
   margin-bottom: 0.5rem;
 }
@@ -173,7 +173,7 @@
   flex: 1;
 }
 
-/* Badges */
+/* Значки */
 .badge {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;

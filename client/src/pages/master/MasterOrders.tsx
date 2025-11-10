@@ -157,9 +157,21 @@ const MasterOrders = () => {
       showToast(existingBid ? 'Ставка обновлена!' : 'Ставка успешно создана!', 'success');
       handleCloseBidModal();
       loadAuctionOrders(); // Перезагружаем заказы
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error submitting bid:', error);
-      showToast('Ошибка при создании ставки', 'error');
+      
+      const err = error as { response?: { data?: { error?: string; message?: string; unpaidCount?: number; totalUnpaid?: number } } };
+      
+      if (err.response?.data?.error === 'UNPAID_COMMISSIONS') {
+        const unpaidCount = err.response.data.unpaidCount || 0;
+        const totalUnpaid = err.response.data.totalUnpaid || 0;
+        showToast(
+          `У вас есть ${unpaidCount} неоплаченных комиссий на сумму ${totalUnpaid.toFixed(2)}₸. Пожалуйста, оплатите их в разделе "Комиссии" или пополните кошелек.`,
+          'error'
+        );
+      } else {
+        showToast(err.response?.data?.message || 'Ошибка при создании ставки', 'error');
+      }
     } finally {
       setSubmittingBid(false);
     }

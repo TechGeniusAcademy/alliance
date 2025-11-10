@@ -755,7 +755,7 @@
   max-width: 400px;
 }
 
-/* Mobile responsiveness */
+/* Адаптивность */
 @media (max-width: 1024px) {
   .modalContent {
     grid-template-columns: 1fr;

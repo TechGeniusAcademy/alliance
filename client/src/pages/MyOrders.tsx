@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { orderService } from '../services/orderService';
 import type { Order } from '../types/order';
 import OrderCard from '../components/OrderCard';
-import PaymentModal from '../components/PaymentModal';
 import { MdFilterList, MdSearch, MdInbox, MdClose, MdPerson, MdAttachMoney, MdTimer, MdStar, MdCheck } from 'react-icons/md';
 import Toast from '../components/Toast';
 import styles from './Orders.module.css';
@@ -34,8 +33,6 @@ const MyOrders = () => {
   const [bids, setBids] = useState<OrderBid[]>([]);
   const [loadingBids, setLoadingBids] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentOrder, setPaymentOrder] = useState<{ id: number; amount: number; title: string; bidId?: number } | null>(null);
 
   useEffect(() => {
     loadOrders();
@@ -112,20 +109,46 @@ const MyOrders = () => {
       const bid = bids.find(b => b.id === bidId);
       if (!bid) return;
 
-      // Сохраняем информацию о заявке для последующего принятия после оплаты
-      if (selectedOrder) {
-        setPaymentOrder({
-          id: selectedOrder.id,
-          amount: bid.proposed_price,
-          title: selectedOrder.title,
-          bidId: bidId // Сохраняем ID заявки
+      // Показываем информационное уведомление
+      setToast({ 
+        message: `Принимаем заявку мастера ${bid.master_name}...`, 
+        type: 'info' 
+      });
+
+      // Принимаем заявку напрямую
+      await orderService.acceptBid(bidId);
+      
+      setToast({ 
+        message: 'Заявка принята! Мастер получил заказ в работу. Комиссия списана с кошелька мастера.', 
+        type: 'success' 
+      });
+      
+      handleCloseBidsModal();
+      loadOrders(); // Обновляем список заказов
+      
+    } catch (error: unknown) {
+      console.error('Error accepting bid:', error);
+      
+      const err = error as { response?: { data?: { error?: string; message?: string; required?: number; available?: number } } };
+      
+      if (err.response?.data?.error === 'INSUFFICIENT_FUNDS') {
+        const required = err.response.data.required || 0;
+        const available = err.response.data.available || 0;
+        setToast({ 
+          message: `Мастер не может принять заказ: недостаточно средств на кошельке для оплаты комиссии. Требуется: ${required}₸, доступно: ${available}₸. Попросите мастера пополнить кошелек.`,
+          type: 'error' 
         });
-        handleCloseBidsModal();
-        setShowPaymentModal(true);
+      } else if (err.response?.data?.error === 'UNPAID_COMMISSIONS') {
+        setToast({ 
+          message: 'Мастер не может принять заказ: у него есть неоплаченные комиссии за предыдущие заказы. Попросите мастера оплатить комиссии.',
+          type: 'error' 
+        });
+      } else {
+        setToast({ 
+          message: err.response?.data?.message || 'Ошибка при принятии заявки', 
+          type: 'error' 
+        });
       }
-    } catch (error) {
-      console.error('Error opening payment modal:', error);
-      setToast({ message: 'Ошибка при открытии окна оплаты', type: 'error' });
     }
   };
 
@@ -450,23 +473,6 @@ const MyOrders = () => {
           message={toast.message}
           type={toast.type}
           onClose={() => setToast(null)}
-        />
-      )}
-
-      {showPaymentModal && paymentOrder && (
-        <PaymentModal
-          orderId={paymentOrder.id}
-          amount={paymentOrder.amount}
-          orderTitle={paymentOrder.title}
-          bidId={paymentOrder.bidId}
-          onClose={() => {
-            setShowPaymentModal(false);
-            setPaymentOrder(null);
-          }}
-          onSuccess={() => {
-            loadOrders();
-            setToast({ message: 'Оплата прошла успешно! Заказ переведён в работу.', type: 'success' });
-          }}
         />
       )}
     </div>

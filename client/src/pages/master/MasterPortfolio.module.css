@@ -296,7 +296,7 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Modal Styles */
+/* Стили модального окна */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -543,7 +543,7 @@
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
-/* Confirm Delete Modal */
+/* Модальное окно для подтверждения удаления */
 .confirmModal {
   background: white;
   border-radius: 16px;
@@ -617,7 +617,7 @@
   max-width: 400px;
 }
 
-/* Mobile responsiveness */
+/* Адаптивность */
 @media (max-width: 768px) {
   .pageContainer {
     padding: 16px;

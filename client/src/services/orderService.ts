@@ -691,6 +691,27 @@ class OrderService {
     const data = await response.json();
     return data.orders.map(transformApiOrder);
   }
+
+  // POST accept bid (for customer)
+  async acceptBid(bidId: number): Promise<void> {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${this.baseURL}/orders/bids/${bidId}/accept`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw {
+        response: {
+          data: errorData
+        }
+      };
+    }
+  }
 }
 
 export const orderService = new OrderService();

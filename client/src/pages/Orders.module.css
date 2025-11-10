@@ -278,7 +278,7 @@
   margin: 0;
 }
 
-/* Responsive */
+/* Адаптивность*/
 @media (max-width: 1024px) {
   .ordersGrid {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

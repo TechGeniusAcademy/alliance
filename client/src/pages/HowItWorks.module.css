@@ -239,7 +239,7 @@
   transform: translateY(-3px);
 }
 
-/* Responsive */
+/* Адаптивность*/
 @media (max-width: 1200px) {
   .stepArrow {
     display: none;

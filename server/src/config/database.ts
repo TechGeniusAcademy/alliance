@@ -580,6 +580,47 @@ export const initializeDatabase = async () => {
     await pool.query(createCommissionIndexes);
     console.log('✓ Индексы для commission_transactions созданы/проверены');
 
+    // Миграция: Добавляем поле wallet_balance в master_profiles
+    const addWalletBalance = `
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'master_profiles' AND column_name = 'wallet_balance') THEN
+          ALTER TABLE master_profiles ADD COLUMN wallet_balance DECIMAL(10, 2) DEFAULT 0.00;
+        END IF;
+      END $$;
+    `;
+    await pool.query(addWalletBalance);
+    console.log('✓ Поле wallet_balance добавлено в master_profiles');
+
+    // Создаем таблицу для транзакций кошелька
+    const createWalletTransactionsTable = `
+      CREATE TABLE IF NOT EXISTS wallet_transactions (
+        id SERIAL PRIMARY KEY,
+        master_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        amount DECIMAL(10, 2) NOT NULL,
+        type VARCHAR(50) NOT NULL, -- 'deposit' (пополнение) или 'commission_payment' (оплата комиссии)
+        status VARCHAR(50) DEFAULT 'pending', -- pending, completed, failed, cancelled
+        commission_transaction_id INTEGER REFERENCES commission_transactions(id),
+        payment_method VARCHAR(50), -- 'card', 'bank_transfer', 'cash', etc.
+        payment_details TEXT,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        completed_at TIMESTAMP
+      );
+    `;
+    await pool.query(createWalletTransactionsTable);
+    console.log('✓ Таблица wallet_transactions создана/проверена');
+
+    const createWalletIndexes = `
+      CREATE INDEX IF NOT EXISTS idx_wallet_master ON wallet_transactions(master_id);
+      CREATE INDEX IF NOT EXISTS idx_wallet_type ON wallet_transactions(type);
+      CREATE INDEX IF NOT EXISTS idx_wallet_status ON wallet_transactions(status);
+      CREATE INDEX IF NOT EXISTS idx_wallet_created ON wallet_transactions(created_at DESC);
+    `;
+    await pool.query(createWalletIndexes);
+    console.log('✓ Индексы для wallet_transactions созданы/проверены');
+
     console.log('✅ Инициализация базы данных завершена успешно!\n');
 
   } catch (error) {

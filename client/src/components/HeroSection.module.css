@@ -128,7 +128,7 @@
     font-weight: 700;
 }
 
-/* Responsive Design */
+/* Адаптивность */
 @media (max-width: 1200px) {
     .heroContainer {
         gap: 0 4.8rem;

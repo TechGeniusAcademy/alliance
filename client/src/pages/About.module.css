@@ -333,7 +333,7 @@
   transform: translateY(-4px);
 }
 
-/* Responsive */
+/* Адаптивность */
 @media (max-width: 1024px) {
   .statsGrid,
   .teamGrid {

@@ -179,7 +179,7 @@
   max-width: 400px;
 }
 
-/* Mobile responsiveness */
+/* Адаптивность */
 @media (max-width: 768px) {
   .pageContainer {
     padding: 16px;

@@ -117,7 +117,7 @@
   transform: translateX(4px);
 }
 
-/* Main Content */
+/* Main Контент */
 .mainContent {
   flex: 1;
   margin-left: 280px;
@@ -174,7 +174,7 @@
   margin: 0 0 32px 0;
 }
 
-/* Statistics Cards */
+/* Statistics Карточки */
 .stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -242,7 +242,7 @@
   font-weight: 500;
 }
 
-/* Table */
+/* Таблица */
 .tableContainer {
   background: white;
   border-radius: 16px;
@@ -308,7 +308,7 @@
   color: #7c2d12;
 }
 
-/* Buttons */
+/* Кнопки */
 .btnSmall {
   padding: 6px 14px;
   background: #667eea;
@@ -335,7 +335,7 @@
   background: #e53e3e;
 }
 
-/* Auction Cards */
+/* Auction Карточки */
 .auctionGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -391,7 +391,7 @@
   gap: 8px;
 }
 
-/* Rankings */
+/* Ранги */
 .rankGold {
   font-size: 18px;
   font-weight: 700;
@@ -478,7 +478,7 @@
   color: #a0aec0;
 }
 
-/* Responsive */
+/* Адаптивность */
 @media (max-width: 1024px) {
   .sidebar {
     transform: translateX(-100%);

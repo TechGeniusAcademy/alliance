@@ -14,6 +14,7 @@ import {
   MdSchedule,
   MdAttachMoney,
   MdReceipt,
+  MdAccountBalanceWallet,
   MdNotifications,
   MdSettings,
   MdHelp,
@@ -114,6 +115,15 @@ const MasterSidebar = () => {
         {/* Финансы */}
         <div className={styles.navSection}>
           <div className={styles.sectionTitle}>{t('masterSidebar.financeSection')}</div>
+          <NavLink
+            to="/master/wallet"
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.active : ''}`
+            }
+          >
+            <MdAccountBalanceWallet size={22} />
+            <span>Кошелек</span>
+          </NavLink>
           <NavLink
             to="/master/earnings"
             className={({ isActive }) =>

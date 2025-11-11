@@ -25,7 +25,7 @@ const SpecialOffers = () => {
     }
   };
 
-  const filteredOffers = offers.filter(offer => 
+  const filteredOffers = offers.filter(offer =>
     offer.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     offer.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -67,17 +67,18 @@ const SpecialOffers = () => {
             <div className={styles.statLabel}>Активных акций</div>
           </div>
         </div>
+      </div>
 
-        <div className={styles.filterGroup}>
-          <div className={styles.searchBox}>
-            <MdSearch className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Поиск предложений..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+      <div className={styles.filters}>
+        <div className={styles.searchBox}>
+          <MdSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Поиск предложений..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles.searchInput}
+          />
         </div>
       </div>
 
@@ -111,7 +112,7 @@ const SpecialOffers = () => {
                   <div className={styles.promoCodeBox}>
                     <span className={styles.promoLabel}>Промокод:</span>
                     <code className={styles.promoCode}>{offer.promoCode}</code>
-                    <button 
+                    <button
                       className={styles.copyButton}
                       onClick={() => copyPromoCode(offer.promoCode!)}
                     >

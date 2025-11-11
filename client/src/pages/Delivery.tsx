@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { 
-  MdLocalShipping, 
-  MdSearch, 
-  MdPhone, 
+import {
+  MdLocalShipping,
+  MdSearch,
+  MdPhone,
   MdLocationOn,
   MdPerson,
   MdCheckCircle
@@ -38,7 +38,7 @@ const Delivery = () => {
       setLoading(true);
       const orders = await orderService.getMyOrders();
       // Фильтруем только заказы с назначенным мастером и требующие доставки
-      const ordersWithDelivery = orders.filter((order) => 
+      const ordersWithDelivery = orders.filter((order) =>
         order.sellerId && order.deliveryAddress
       ).map((order) => ({
         id: order.id,
@@ -75,7 +75,7 @@ const Delivery = () => {
 
   const confirmDelivery = async (orderId: number) => {
     if (!confirm('Подтвердить получение заказа?')) return;
-    
+
     try {
       await orderService.confirmDelivery(orderId);
       alert('Доставка подтверждена!');
@@ -88,8 +88,8 @@ const Delivery = () => {
 
   const filteredDeliveries = deliveries.filter(delivery => {
     const matchesSearch = delivery.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (delivery.tracking_number && delivery.tracking_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                         delivery.delivery_address.toLowerCase().includes(searchQuery.toLowerCase());
+      (delivery.tracking_number && delivery.tracking_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      delivery.delivery_address.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || delivery.delivery_status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -150,18 +150,21 @@ const Delivery = () => {
             <div className={styles.statLabel}>Доставлено</div>
           </div>
         </div>
+      </div>
+
+      <div className={styles.filters}>
+        <div className={styles.searchBox}>
+          <MdSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Поиск по трек-номеру или адресу..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
 
         <div className={styles.filterGroup}>
-          <div className={styles.searchBox}>
-            <MdSearch className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Поиск по трек-номеру или адресу..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -189,7 +192,7 @@ const Delivery = () => {
             <div key={delivery.id} className={styles.deliveryCard}>
               <div className={styles.deliveryHeader}>
                 <h3>{delivery.title}</h3>
-                <span 
+                <span
                   className={styles.statusBadge}
                   style={{ backgroundColor: getStatusColor(delivery.delivery_status) }}
                 >
@@ -246,7 +249,7 @@ const Delivery = () => {
               )}
 
               {delivery.delivery_status === 'shipped' && (
-                <button 
+                <button
                   className={styles.confirmButton}
                   onClick={() => confirmDelivery(delivery.id)}
                 >

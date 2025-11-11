@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { 
-  MdCardGiftcard, 
-  MdSearch, 
+import {
+  MdCardGiftcard,
+  MdSearch,
   MdContentCopy,
   MdDiscount
 } from 'react-icons/md';
@@ -30,7 +30,7 @@ const PromoCodes = () => {
     }
   };
 
-  const filteredPromoCodes = promoCodes.filter(promo => 
+  const filteredPromoCodes = promoCodes.filter(promo =>
     promo.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
     promo.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -79,17 +79,18 @@ const PromoCodes = () => {
             <div className={styles.statLabel}>Использованные</div>
           </div>
         </div>
+      </div>
 
-        <div className={styles.filterGroup}>
-          <div className={styles.searchBox}>
-            <MdSearch className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Поиск промокода..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+      <div className={styles.filters}>
+        <div className={styles.searchBox}>
+          <MdSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Поиск промокода..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles.searchInput}
+          />
         </div>
       </div>
 
@@ -102,14 +103,14 @@ const PromoCodes = () => {
       ) : (
         <div className={styles.promoGrid}>
           {filteredPromoCodes.map((promo) => (
-            <div 
-              key={promo.id} 
+            <div
+              key={promo.id}
               className={`${styles.promoCard} ${!promo.isActive ? styles.promoInactive : ''}`}
             >
               <div className={styles.promoHeader}>
                 <div className={styles.promoCode}>
                   {promo.code}
-                  <button 
+                  <button
                     className={styles.copyButton}
                     onClick={() => copyToClipboard(promo.code)}
                     disabled={!promo.isActive}
@@ -117,10 +118,13 @@ const PromoCodes = () => {
                     <MdContentCopy size={18} />
                   </button>
                 </div>
-                <span 
+                <span
                   className={styles.statusBadge}
-                  style={{ 
-                    backgroundColor: promo.isActive ? '#10b981' : '#6b7280' 
+                  style={{
+                    backgroundColor: promo.isActive ? '#10b981' : '#6b7280',
+                    color: '#fff',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
                   }}
                 >
                   {promo.status === 'active' && 'Активен'}

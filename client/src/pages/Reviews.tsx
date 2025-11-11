@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { 
-  MdStars, 
-  MdSearch, 
+import {
+  MdStars,
+  MdSearch,
   MdAdd,
   MdThumbUp,
   MdThumbDown
@@ -31,7 +31,7 @@ const Reviews = () => {
     }
   };
 
-  const filteredReviews = reviews.filter(review => 
+  const filteredReviews = reviews.filter(review =>
     review.orderTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
     review.sellerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     review.comment.toLowerCase().includes(searchQuery.toLowerCase())
@@ -87,17 +87,18 @@ const Reviews = () => {
             <div className={styles.statLabel}>Средняя оценка</div>
           </div>
         </div>
+      </div>
 
-        <div className={styles.filterGroup}>
-          <div className={styles.searchBox}>
-            <MdSearch className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Поиск по отзывам..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+      <div className={styles.filters}>
+        <div className={styles.searchBox}>
+          <MdSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Поиск по отзывам..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles.searchInput}
+          />
         </div>
       </div>
 

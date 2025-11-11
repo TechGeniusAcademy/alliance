@@ -45,6 +45,8 @@
   display: flex;
   flex-direction: column;
   gap: 1.6rem;
+  border-top: 1px solid #e67e22;
+  padding-top: 2rem;
 }
 
 .feature {
@@ -53,11 +55,12 @@
   gap: 1.2rem;
   font-size: 1.8rem;
   color: #2c3e50;
+  
 }
 
 .featureIcon {
   font-size: 2.4rem;
-  color: #667eea;
+  color: #e67e22;
   flex-shrink: 0;
 }
 
@@ -77,7 +80,7 @@
 /* Stats Section */
 .statsSection {
   padding: 8rem 0;
-  background: #f8f9fa;
+  background: #fdf2e9;
 }
 
 .statsGrid {
@@ -87,23 +90,48 @@
 }
 
 .statCard {
+  position: relative;
   text-align: center;
   padding: 3.2rem;
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.statCard::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #e67e22;
+  border-radius: 16px;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease;
 }
 
 .statCard:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+
+  .statIcon {
+    color: #e67e22;
+  }
+}
+
+.statCard:hover::after {
+  transform: scaleX(1);
 }
 
 .statIcon {
   font-size: 4.8rem;
   color: #667eea;
   margin-bottom: 1.6rem;
+  transition: 0.3s;
 }
 
 .statNumber {
@@ -122,6 +150,7 @@
 /* Mission Section */
 .missionSection {
   padding: 10rem 0;
+  background: linear-gradient(180deg, #fdf2e9 0%, #fff 100%);
 }
 
 .sectionTitle {
@@ -130,6 +159,8 @@
   color: #2c3e50;
   margin-bottom: 3.2rem;
   text-align: center;
+  padding-bottom: 3.2rem;
+  border-bottom: 1px solid #2c3e50;
 }
 
 .missionContent {
@@ -170,7 +201,12 @@
 /* Values Section */
 .valuesSection {
   padding: 10rem 0;
-  background: linear-gradient(180deg, #f8f9fa 0%, #fff 100%);
+  background: #1a1a2e;
+
+  >.container .sectionTitle {
+    color: #e67e22;
+    border: none;
+  }
 }
 
 .valuesGrid {
@@ -182,23 +218,23 @@
 
 .valueCard {
   padding: 4rem;
-  background: white;
+  background: linear-gradient(180deg, rgba(230, 126, 34, 0.05) 0%, transparent 100%);
   border-radius: 20px;
+  border: 1px solid transparent;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
-  border: 2px solid transparent;
 }
 
 .valueCard:hover {
   transform: translateY(-8px);
-  border-color: #667eea;
+  border-color: #e67e22;
   box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
 }
 
 .valueIcon {
   font-size: 5.6rem;
   margin-bottom: 2rem;
-  color: #667eea;
+  color: #e67e22;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -207,19 +243,24 @@
 .valueTitle {
   font-size: 2.6rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: #fff;
   margin-bottom: 1.6rem;
 }
 
 .valueDesc {
   font-size: 1.7rem;
   line-height: 1.7;
-  color: #666;
+  color: #a0aec0;
 }
 
 /* Team Section */
 .teamSection {
   padding: 10rem 0;
+
+  >.container .sectionTitle {
+    border: none;
+    padding-bottom: 0;
+  }
 }
 
 .teamSubtitle {
@@ -276,10 +317,14 @@
 
 /* CTA Section */
 .ctaSection {
-  padding: 10rem 0;
+  padding: 6rem 4rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   text-align: center;
+  width: 80%;
+  margin: 0 auto;
+  border-radius: 24px;
+  margin-bottom: 8rem;
 }
 
 .ctaTitle {
@@ -381,5 +426,14 @@
   .ctaButtons {
     flex-direction: column;
     gap: 1.6rem;
+  }
+
+  .valueCard {
+    width: 80%;
+    margin: 0;
+
+    >.valueTitle {
+      font-size: 2rem;
+    }
   }
 }

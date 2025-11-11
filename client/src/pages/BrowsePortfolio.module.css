@@ -46,6 +46,7 @@
   flex: 1;
   position: relative;
   min-width: 300px;
+  display: flex;
 }
 
 .searchIcon {
@@ -61,7 +62,7 @@
   padding: 14px 50px 14px 50px;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
-  font-size: 1rem;
+  font-size: 1.4375rem;
   background: white;
   transition: all 0.2s ease;
 }

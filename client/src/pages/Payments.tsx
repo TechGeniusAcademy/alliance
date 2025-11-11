@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { 
-  MdPayment, 
-  MdSearch, 
-  MdCheckCircle, 
-  MdPending, 
+import {
+  MdPayment,
+  MdSearch,
+  MdCheckCircle,
+  MdPending,
   MdError,
   MdCreditCard,
   MdAccountBalance
@@ -36,7 +36,7 @@ const Payments = () => {
 
   const filteredPayments = payments.filter(payment => {
     const matchesSearch = payment.orderTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         payment.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      payment.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || payment.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -108,18 +108,21 @@ const Payments = () => {
             <div className={styles.statLabel}>В ожидании</div>
           </div>
         </div>
+      </div>
+
+      <div className={styles.filters}>
+        <div className={styles.searchBox}>
+          <MdSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Поиск по названию заказа..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
 
         <div className={styles.filterGroup}>
-          <div className={styles.searchBox}>
-            <MdSearch className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Поиск по названию заказа..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -198,7 +201,7 @@ const Payments = () => {
                     </span>
                   </td>
                   <td>
-                    <span 
+                    <span
                       className={styles.statusBadge}
                       style={{ backgroundColor: getStatusColor(payment.status) }}
                     >

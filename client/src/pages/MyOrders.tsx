@@ -170,16 +170,16 @@ const MyOrders = () => {
         </div>
         <div className={styles.headerStats}>
           <div className={styles.statCard}>
-            <div className={styles.statValue}>{orders.length}</div>
-            <div className={styles.statLabel}>Всего</div>
+            <div className={styles.statValue}>{getStatusCount('completed')}</div>
+            <div className={styles.statLabel}>Завершено</div>
           </div>
           <div className={styles.statCard}>
             <div className={styles.statValue}>{getStatusCount('active')}</div>
             <div className={styles.statLabel}>Активные</div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statValue}>{getStatusCount('completed')}</div>
-            <div className={styles.statLabel}>Завершено</div>
+            <div className={styles.statValue}>{orders.length}</div>
+            <div className={styles.statLabel}>Всего</div>
           </div>
         </div>
       </div>

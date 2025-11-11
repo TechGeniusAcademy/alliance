@@ -28,7 +28,7 @@ const Invoices = () => {
 
   const filteredInvoices = invoices.filter(invoice => {
     const matchesSearch = invoice.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         invoice.orderTitle.toLowerCase().includes(searchQuery.toLowerCase());
+      invoice.orderTitle.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -61,7 +61,7 @@ const Invoices = () => {
   const handleDownloadPDF = (invoice: Invoice) => {
     // Генерируем простой текстовый файл вместо PDF (для демонстрации)
     // В production можно использовать библиотеку jsPDF или backend endpoint
-    
+
     const invoiceText = `
 ════════════════════════════════════════════════════════════════
                               СЧЁТ
@@ -88,10 +88,10 @@ ${index + 1}. ${item.description}
 
 ИТОГО К ОПЛАТЕ: ${invoice.amount.toLocaleString()} ${invoice.currency}
 
-Статус: ${invoice.status === 'paid' ? 'Оплачено' : 
-          invoice.status === 'sent' ? 'Отправлено' : 
-          invoice.status === 'draft' ? 'Черновик' : 
-          invoice.status === 'overdue' ? 'Просрочено' : 'Отменено'}
+Статус: ${invoice.status === 'paid' ? 'Оплачено' :
+        invoice.status === 'sent' ? 'Отправлено' :
+          invoice.status === 'draft' ? 'Черновик' :
+            invoice.status === 'overdue' ? 'Просрочено' : 'Отменено'}
 
 ${invoice.notes ? `\nПримечания:\n${invoice.notes}` : ''}
 
@@ -142,18 +142,21 @@ ${invoice.notes ? `\nПримечания:\n${invoice.notes}` : ''}
             <div className={styles.statLabel}>Просрочено</div>
           </div>
         </div>
+      </div>
+
+      <div className={styles.filters}>
+        <div className={styles.searchBox}>
+          <MdSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Поиск по номеру счета..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
 
         <div className={styles.filterGroup}>
-          <div className={styles.searchBox}>
-            <MdSearch className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Поиск по номеру счета..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -207,7 +210,7 @@ ${invoice.notes ? `\nПримечания:\n${invoice.notes}` : ''}
                   <td className={styles.date}>{formatDate(invoice.issuedAt)}</td>
                   <td className={styles.date}>{formatDate(invoice.dueDate)}</td>
                   <td>
-                    <span 
+                    <span
                       className={styles.statusBadge}
                       style={{ backgroundColor: getStatusColor(invoice.status) }}
                     >
@@ -219,8 +222,8 @@ ${invoice.notes ? `\nПримечания:\n${invoice.notes}` : ''}
                     </span>
                   </td>
                   <td>
-                    <button 
-                      className={styles.iconButton} 
+                    <button
+                      className={styles.iconButton}
                       title="Скачать PDF"
                       onClick={() => handleDownloadPDF(invoice)}
                     >

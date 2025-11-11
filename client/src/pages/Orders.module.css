@@ -98,36 +98,35 @@
 
 .searchBox {
   flex: 1;
-  min-width: 250px;
   position: relative;
+  min-width: 300px;
+  display: flex;
 }
 
 .searchIcon {
   position: absolute;
-  left: 1rem;
+  left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #94a3b8;
-  font-size: 1.25rem;
-  pointer-events: none;
+  color: #718096;
+  font-size: 2rem;
 }
 
 .searchInput {
-  width: 90%;
-  padding: 0.875rem 1rem 0.875rem 3rem;
+  width: 100%;
+  padding: 14px 50px 14px 50px;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
-  font-size: 0.9375rem;
-  transition: all 0.3s ease;
+  font-size: 1.4375rem;
   background: white;
+  transition: all 0.2s ease;
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
-
 .filterGroup {
   display: flex;
   align-items: center;
@@ -591,6 +590,7 @@
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 24px;
   margin-top: 24px;
+  font-size: 14px;
 }
 
 .promoCard {
@@ -657,7 +657,7 @@
 
 .promoDescription {
   color: #666;
-  font-size: 0.875rem;
+  font-size: 1.275rem;
   margin-bottom: 16px;
   line-height: 1.6;
 }
@@ -681,7 +681,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  font-size: 0.875rem;
+  font-size: 1.275rem;
   color: #666;
   margin-top: 16px;
   padding-top: 16px;
@@ -699,6 +699,7 @@
   background: white;
   border-radius: 12px;
   padding: 24px;
+  font-size: 14px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
@@ -707,6 +708,21 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 16px;
+}
+
+.createButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .reviewAuthor {
@@ -735,7 +751,7 @@
 }
 
 .reviewDate {
-  font-size: 0.75rem;
+  font-size: 1.5rem;
   color: #999;
 }
 
@@ -744,11 +760,11 @@
   align-items: center;
   gap: 4px;
   color: #fbbf24;
-  font-size: 1.125rem;
+  font-size: 2.225rem;
 }
 
 .reviewOrder {
-  font-size: 0.875rem;
+  font-size: 1.275rem;
   color: #667eea;
   margin-bottom: 12px;
   font-weight: 500;
@@ -773,7 +789,7 @@
 .reviewList li {
   padding: 8px 0;
   color: #666;
-  font-size: 0.875rem;
+  font-size: 1.275rem;
 }
 
 .prosTitle {
@@ -819,6 +835,7 @@
   border-left: 4px solid #667eea;
   padding: 16px;
   border-radius: 8px;
+  font-size: 1rem;
   margin-top: 16px;
 }
 
@@ -826,13 +843,13 @@
   color: #667eea;
   display: block;
   margin-bottom: 8px;
-  font-size: 0.875rem;
+  font-size: 1.275rem;
 }
 
 .sellerResponse p {
   margin: 0;
   color: #666;
-  font-size: 0.875rem;
+  font-size: 1.575rem;
   line-height: 1.6;
 }
 
@@ -840,6 +857,10 @@
   font-size: 0.75rem;
   color: #999;
   margin-top: 8px;
+}
+
+.reviewFooter {
+  margin-top: 16px;
 }
 
 /* Special Offers Page Styles */
@@ -880,7 +901,7 @@
   position: absolute;
   top: 16px;
   right: 16px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   padding: 8px 16px;
   border-radius: 24px;
@@ -903,6 +924,7 @@
   color: #666;
   line-height: 1.6;
   margin-bottom: 16px;
+  font-size: 1.275rem;
 }
 
 .promoCodeBox {
@@ -917,7 +939,7 @@
 }
 
 .promoLabel {
-  font-size: 0.875rem;
+  font-size: 1.275rem;
   color: #666;
   font-weight: 500;
 }
@@ -933,7 +955,7 @@
 }
 
 .offerValidity {
-  font-size: 0.875rem;
+  font-size: 1.275rem;
   color: #999;
   margin: 12px 0;
 }
@@ -950,7 +972,7 @@
   color: #92400e;
   display: block;
   margin-bottom: 8px;
-  font-size: 0.875rem;
+  font-size: 1.5rem;
 }
 
 .offerTerms ul {
@@ -960,7 +982,7 @@
 
 .offerTerms li {
   color: #666;
-  font-size: 0.875rem;
+  font-size: 1.2rem;
   line-height: 1.6;
   margin-bottom: 4px;
 }
@@ -975,7 +997,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 1rem;
+  font-size: 1.5rem;
   margin-top: 16px;
 }
 
@@ -990,6 +1012,7 @@
   .promoGrid,
   .offersGrid {
     grid-template-columns: 1fr;
+    font-size: 10px;
   }
   
   .table {

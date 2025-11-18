@@ -248,7 +248,7 @@ const MasterRatings = () => {
                   {review.order_price && (
                     <>
                       <span>•</span>
-                      <span><strong>Сумма:</strong> {review.order_price} ₽</span>
+                      <span><strong>Сумма:</strong> {review.order_price} ₸</span>
                     </>
                   )}
                 </div>

@@ -47,6 +47,8 @@ export const calculateCommission = async (req: Request, res: Response) => {
     const masterId = req.userId;
     const { orderAmount } = req.body;
 
+    console.log('📊 Calculate commission request:', { masterId, orderAmount });
+
     if (!masterId) {
       return res.status(401).json({ message: 'Не авторизован' });
     }
@@ -57,10 +59,15 @@ export const calculateCommission = async (req: Request, res: Response) => {
 
     const commission = await commissionService.calculateCommission(masterId, orderAmount);
 
+    console.log('✅ Commission calculated:', commission);
     res.json(commission);
-  } catch (error) {
-    console.error('Error calculating commission:', error);
-    res.status(500).json({ message: 'Ошибка при расчете комиссии' });
+  } catch (error: any) {
+    console.error('❌ Error calculating commission:', error);
+    console.error('Error details:', error.message, error.stack);
+    res.status(500).json({ 
+      message: 'Ошибка при расчете комиссии',
+      error: error.message 
+    });
   }
 };
 

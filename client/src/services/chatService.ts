@@ -79,6 +79,14 @@ class ChatService {
     return response.data.messages;
   }
 
+  async markMessagesAsRead(chatId: number): Promise<void> {
+    await axios.post(
+      `${API_URL}/chats/${chatId}/mark-read`,
+      {},
+      this.getAuthHeader()
+    );
+  }
+
   async sendMessage(chatId: number, message: string): Promise<Message> {
     const response = await axios.post(
       `${API_URL}/chats/${chatId}/messages`,

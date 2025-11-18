@@ -307,7 +307,7 @@ export const acceptBid = async (req: Request, res: Response) => {
     if (parseInt(unpaidCommissionsCheck.rows[0].unpaid_count) > 0) {
       await client.query('ROLLBACK');
       return res.status(400).json({ 
-        message: 'Мастер не может принять заказ: у него есть неоплаченные комиссии. Мастер должен сначала оплатить предыдущие комиссии.',
+        message: 'У вас есть неоплаченные комиссии. Пополните кошелек и оплатите долг перед принятием нового заказа.',
         error: 'UNPAID_COMMISSIONS'
       });
     }
@@ -320,22 +320,16 @@ export const acceptBid = async (req: Request, res: Response) => {
 
     const requiredCommission = commissionCalc.amount;
 
+    // Получаем текущий баланс кошелька мастера
     const walletResult = await client.query(
       `SELECT wallet_balance FROM master_profiles WHERE user_id = $1`,
       [bid.master_id]
     );
 
     const walletBalance = parseFloat(walletResult.rows[0]?.wallet_balance || 0);
+    const hasEnoughBalance = walletBalance >= requiredCommission;
 
-    if (walletBalance < requiredCommission) {
-      await client.query('ROLLBACK');
-      return res.status(400).json({ 
-        message: `Недостаточно средств на кошельке мастера для оплаты комиссии. Требуется: ${requiredCommission}₸, доступно: ${walletBalance}₸`,
-        error: 'INSUFFICIENT_FUNDS',
-        required: requiredCommission,
-        available: walletBalance
-      });
-    }
+    console.log(`ℹ️ Комиссия: ${requiredCommission}₸, Баланс: ${walletBalance}₸, Достаточно: ${hasEnoughBalance}`);
 
     // Обновляем заказ
     await client.query(
@@ -370,67 +364,70 @@ export const acceptBid = async (req: Request, res: Response) => {
     );
 
     // Создаем транзакцию комиссии
-    const commissionData = await commissionService.calculateCommission(
-      bid.master_id,
-      bid.proposed_price
-    );
-
     const commissionResult = await client.query(
       `INSERT INTO commission_transactions 
        (master_id, order_id, commission_type, commission_rate, order_amount, commission_amount, status)
-       VALUES ($1, $2, $3, $4, $5, $6, 'pending')
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
       [
         bid.master_id,
         bid.order_id,
-        commissionData.type,
-        commissionData.rate || null,
+        commissionCalc.type,
+        commissionCalc.rate || null,
         bid.proposed_price,
-        commissionData.amount
+        requiredCommission,
+        hasEnoughBalance ? 'paid' : 'pending'  // Если денег достаточно - сразу 'paid', иначе 'pending'
       ]
     );
 
     const commissionId = commissionResult.rows[0].id;
-    const commissionAmount = commissionData.amount;
 
-    // СРАЗУ ОПЛАЧИВАЕМ комиссию из кошелька
-    // 1. Списываем с баланса кошелька
-    await client.query(
-      `UPDATE master_profiles 
-       SET wallet_balance = wallet_balance - $1
-       WHERE user_id = $2`,
-      [commissionAmount, bid.master_id]
-    );
+    // Если у мастера достаточно денег на кошельке - автоматически списываем комиссию
+    if (hasEnoughBalance) {
+      // 1. Списываем с баланса кошелька
+      await client.query(
+        `UPDATE master_profiles 
+         SET wallet_balance = wallet_balance - $1
+         WHERE user_id = $2`,
+        [requiredCommission, bid.master_id]
+      );
 
-    // 2. Создаем транзакцию в wallet_transactions
-    await client.query(
-      `INSERT INTO wallet_transactions 
-       (master_id, amount, type, status, commission_transaction_id, description, created_at, completed_at)
-       VALUES ($1, $2, 'commission_payment', 'completed', $3, $4, NOW(), NOW())`,
-      [
-        bid.master_id,
-        commissionAmount,
-        commissionId,
-        `Оплата комиссии за заказ: ${bid.order_title}`
-      ]
-    );
+      // 2. Создаем транзакцию в wallet_transactions
+      await client.query(
+        `INSERT INTO wallet_transactions 
+         (master_id, amount, type, status, order_id, description, created_at, updated_at)
+         VALUES ($1, $2, 'commission_payment', 'completed', $3, $4, NOW(), NOW())`,
+        [
+          bid.master_id,
+          requiredCommission,
+          bid.order_id,
+          `Автоматическая оплата комиссии за заказ #${bid.order_id}`
+        ]
+      );
 
-    // 3. Обновляем статус комиссии на 'paid'
-    await client.query(
-      `UPDATE commission_transactions 
-       SET status = 'paid', paid_at = NOW()
-       WHERE id = $1`,
-      [commissionId]
-    );
+      // 3. Обновляем статус комиссии на 'paid' и дату оплаты
+      await client.query(
+        `UPDATE commission_transactions 
+         SET paid_at = NOW()
+         WHERE id = $1`,
+        [commissionId]
+      );
+
+      console.log(`✓ Комиссия ${requiredCommission}₸ автоматически списана с кошелька мастера`);
+    }
 
     await client.query('COMMIT');
 
-    console.log(`✓ Комиссия ${commissionAmount}₸ автоматически списана с кошелька мастера ${bid.master_id} за заказ ${bid.order_id}`);
+    const responseMessage = hasEnoughBalance 
+      ? `Ставка принята! Комиссия ${requiredCommission}₸ списана с вашего кошелька.`
+      : `Ставка принята! Комиссия ${requiredCommission}₸ добавлена в долг. Пополните кошелек для оплаты.`;
 
     res.json({ 
-      message: `Ставка принята, мастер назначен. Комиссия ${commissionAmount}₸ списана с кошелька.`,
+      message: responseMessage,
       chatId: chatResult.rows[0]?.id,
-      commissionPaid: commissionAmount
+      commissionAmount: requiredCommission,
+      commissionId: commissionId,
+      commissionPaid: hasEnoughBalance
     });
   } catch (error) {
     await client.query('ROLLBACK');

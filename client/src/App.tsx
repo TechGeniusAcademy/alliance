@@ -28,8 +28,11 @@ import MasterRatings from './pages/master/MasterRatings';
 import MasterProfile from './pages/master/MasterProfile';
 import MasterSettings from './pages/master/MasterSettings';
 import MasterPortfolio from './pages/master/MasterPortfolio';
+import MasterMore from './pages/MasterMore';
+import ClientMore from './pages/ClientMore';
 import Placeholder from './pages/Placeholder';
 import BrowsePortfolio from './pages/BrowsePortfolio';
+import MasterSchedule from './pages/master/MasterSchedule';
 import MyOrders from './pages/MyOrders';
 import ActiveOrders from './pages/ActiveOrders';
 import OrderHistory from './pages/OrderHistory';
@@ -153,6 +156,9 @@ function App() {
             <Route path="profile" element={<Profile />} />
             <Route path="settings" element={<Settings />} />
             <Route path="help" element={<Help />} />
+            
+            {/* Страница "Ещё" для мобильных */}
+            <Route path="more" element={<ClientMore />} />
           </Route>
 
           {/* Админ панель */}
@@ -179,7 +185,7 @@ function App() {
             <Route path="active-orders" element={<MasterActiveOrders />} />
             <Route path="orders" element={<MasterOrders />} />
             <Route path="history" element={<AuctionHistory />} />
-            <Route path="schedule" element={<Placeholder title="Расписание" icon="📅" description="График работы и дедлайны" />} />
+            <Route path="schedule" element={<MasterSchedule />} />
             
             {/* Финансы */}
             <Route path="wallet" element={<MasterWallet />} />
@@ -201,6 +207,9 @@ function App() {
             <Route path="profile" element={<MasterProfile />} />
             <Route path="settings" element={<MasterSettings />} />
             <Route path="help" element={<Help />} />
+            
+            {/* Страница "Ещё" для мобильных */}
+            <Route path="more" element={<MasterMore />} />
             
             {/* Старые маршруты для обратной совместимости */}
             <Route path="auction-history" element={<AuctionHistory />} />

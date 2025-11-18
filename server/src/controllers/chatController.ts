@@ -109,16 +109,39 @@ export const getChatMessages = async (req: Request, res: Response) => {
       [chatId]
     );
 
-    // Отмечаем сообщения как прочитанные
-    await pool.query(
-      'UPDATE chat_messages SET is_read = true WHERE chat_id = $1 AND sender_id != $2',
-      [chatId, userId]
-    );
-
     res.json({ messages: result.rows });
   } catch (error) {
     console.error('Get messages error:', error);
     res.status(500).json({ message: 'Ошибка при получении сообщений' });
+  }
+};
+
+// Отметить сообщения как прочитанные
+export const markMessagesAsRead = async (req: Request, res: Response) => {
+  try {
+    const { chatId } = req.params;
+    const userId = req.userId;
+
+    // Проверяем доступ к чату
+    const chatCheck = await pool.query(
+      'SELECT * FROM chats WHERE id = $1 AND (customer_id = $2 OR master_id = $2)',
+      [chatId, userId]
+    );
+
+    if (chatCheck.rows.length === 0) {
+      return res.status(403).json({ message: 'Нет доступа к этому чату' });
+    }
+
+    // Отмечаем сообщения как прочитанные
+    await pool.query(
+      'UPDATE chat_messages SET is_read = true WHERE chat_id = $1 AND sender_id != $2 AND is_read = false',
+      [chatId, userId]
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Mark messages as read error:', error);
+    res.status(500).json({ message: 'Ошибка при отметке сообщений' });
   }
 };
 

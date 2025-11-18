@@ -357,7 +357,7 @@ const MasterSettings = () => {
                 className={styles.select}
               >
                 <option value="KZT">₸ Тенге (KZT)</option>
-                <option value="RUB">₽ Рубль (RUB)</option>
+                <option value="RUB">₸ Рубль (RUB)</option>
                 <option value="USD">$ Доллар (USD)</option>
               </select>
             </div>

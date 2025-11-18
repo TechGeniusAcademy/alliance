@@ -234,6 +234,112 @@ class WalletService {
       pendingCommissions: parseFloat(result.rows[0].pending_commissions) || 0,
     };
   }
+
+  /**
+   * Получить список неоплаченных комиссий
+   */
+  async getUnpaidCommissions(masterId: number): Promise<any[]> {
+    const result = await pool.query(
+      `SELECT 
+        ct.*,
+        o.title as order_title,
+        o.status as order_status
+       FROM commission_transactions ct
+       JOIN orders o ON ct.order_id = o.id
+       WHERE ct.master_id = $1 AND ct.status = 'pending'
+       ORDER BY ct.created_at ASC`,
+      [masterId]
+    );
+
+    return result.rows;
+  }
+
+  /**
+   * Оплатить все неоплаченные комиссии разом
+   */
+  async payAllCommissions(masterId: number): Promise<{
+    message: string;
+    paidCount: number;
+    totalAmount: number;
+    newBalance: number;
+  }> {
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      // Получаем все неоплаченные комиссии
+      const commissionsResult = await client.query(
+        `SELECT * FROM commission_transactions 
+         WHERE master_id = $1 AND status = 'pending'
+         ORDER BY created_at ASC`,
+        [masterId]
+      );
+
+      if (commissionsResult.rows.length === 0) {
+        throw new Error('No unpaid commissions');
+      }
+
+      const commissions = commissionsResult.rows;
+      const totalAmount = commissions.reduce((sum, c) => sum + parseFloat(c.commission_amount), 0);
+
+      // Проверяем баланс кошелька
+      const walletResult = await client.query(
+        `SELECT wallet_balance FROM master_profiles WHERE user_id = $1`,
+        [masterId]
+      );
+
+      const walletBalance = parseFloat(walletResult.rows[0]?.wallet_balance || 0);
+
+      if (walletBalance < totalAmount) {
+        throw new Error('Insufficient wallet balance');
+      }
+
+      // Списываем с баланса кошелька
+      await client.query(
+        `UPDATE master_profiles 
+         SET wallet_balance = wallet_balance - $1
+         WHERE user_id = $2`,
+        [totalAmount, masterId]
+      );
+
+      // Обновляем статус всех комиссий
+      await client.query(
+        `UPDATE commission_transactions 
+         SET status = 'paid', paid_at = NOW()
+         WHERE master_id = $1 AND status = 'pending'`,
+        [masterId]
+      );
+
+      // Создаем транзакцию списания
+      await client.query(
+        `INSERT INTO wallet_transactions 
+         (master_id, amount, type, status, description, created_at, updated_at)
+         VALUES ($1, $2, 'commission_payment', 'completed', $3, NOW(), NOW())`,
+        [
+          masterId,
+          totalAmount,
+          `Оплата всех неоплаченных комиссий (${commissions.length} шт.)`
+        ]
+      );
+
+      await client.query('COMMIT');
+
+      const newBalance = walletBalance - totalAmount;
+
+      return {
+        message: `Все комиссии оплачены! Списано: ${totalAmount}₸`,
+        paidCount: commissions.length,
+        totalAmount,
+        newBalance,
+      };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
 }
 
 export const walletService = new WalletService();

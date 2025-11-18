@@ -1,21 +1,23 @@
 .sidebar {
   width: 300px;
   height: 100vh;
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
   color: white;
   display: flex;
   flex-direction: column;
   position: fixed;
   left: 0;
   top: 0;
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 4px 0 40px rgba(0, 0, 0, 0.5);
   z-index: 1000;
+  border-right: 2px solid rgba(59, 130, 246, 0.2);
 }
 
 .sidebarHeader {
   padding: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(59, 130, 246, 0.05);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+  backdrop-filter: blur(10px);
 }
 
 .logo {
@@ -62,6 +64,13 @@
   flex: 1;
   padding: 0.5rem 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.nav::-webkit-scrollbar {
+  display: none;
 }
 
 /* Стили для категории */
@@ -245,8 +254,9 @@
 
 .sidebarFooter {
   padding: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(59, 130, 246, 0.2);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(59, 130, 246, 0.1) 100%);
+  backdrop-filter: blur(10px);
 }
 
 .userCard {
@@ -254,15 +264,24 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.875rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
   border-radius: 12px;
   margin-bottom: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+}
+
+.userCard:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(139, 92, 246, 0.15) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+  border-color: rgba(139, 92, 246, 0.5);
 }
 
 .userAvatar {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   display: flex;
@@ -271,7 +290,8 @@
   font-size: 1.125rem;
   font-weight: 700;
   color: white;
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 6px 15px rgba(59, 130, 246, 0.5);
+  border: 3px solid rgba(255, 255, 255, 0.2);
 }
 
 .userInfo {
@@ -319,94 +339,11 @@
   box-shadow: 0 4px 8px rgba(239, 68, 68, 0.2);
 }
 
-/* Скроллбар для навигации */
-.nav::-webkit-scrollbar {
-  width: 8px;
-}
 
-.nav::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-  margin: 0.5rem 0;
-}
-
-.nav::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #3b82f6 0%, #8b5cf6 100%);
-  border-radius: 4px;
-  transition: all 0.3s ease;
-}
-
-.nav::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #2563eb 0%, #7c3aed 100%);
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
-}
 
 /* Адаптивность */
 @media (max-width: 768px) {
   .sidebar {
-    width: 80px;
-  }
-
-  .sidebarHeader {
-    padding: 1rem;
-  }
-
-  .logo > div {
-    display: none;
-  }
-
-  .logoIcon {
-    margin: 0 auto;
-  }
-
-  .categoryHeader {
-    padding: 0.75rem 1rem;
-    justify-content: center;
-  }
-
-  .categoryTitle {
-    display: none;
-  }
-
-  .categoryArrow {
-    display: none;
-  }
-
-  .navItem {
-    padding: 0.875rem 1rem;
-    justify-content: center;
-    margin: 0.125rem 0.5rem;
-  }
-
-  .label {
-    display: none;
-  }
-
-  .badge,
-  .newBadge,
-  .premiumBadge {
-    display: none;
-  }
-
-  .icon {
-    margin: 0 auto;
-  }
-
-  .userCard {
-    padding: 0.75rem;
-    justify-content: center;
-  }
-
-  .userInfo {
-    display: none;
-  }
-
-  .logoutButton {
-    padding: 0.875rem;
-    justify-content: center;
-  }
-
-  .logoutButton .label {
     display: none;
   }
 }

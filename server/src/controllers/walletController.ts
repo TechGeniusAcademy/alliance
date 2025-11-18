@@ -248,3 +248,86 @@ export const getStripePublishableKey = async (req: Request, res: Response) => {
     publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
   });
 };
+
+// Получить список неоплаченных комиссий
+export const getUnpaidCommissions = async (req: Request, res: Response) => {
+  try {
+    const masterId = req.userId;
+
+    if (!masterId) {
+      return res.status(401).json({ message: 'Не авторизован' });
+    }
+
+    const result = await walletService.getUnpaidCommissions(masterId);
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching unpaid commissions:', error);
+    res.status(500).json({ message: 'Ошибка при получении неоплаченных комиссий' });
+  }
+};
+
+// Оплатить конкретную комиссию из кошелька
+export const paySpecificCommission = async (req: Request, res: Response) => {
+  try {
+    const masterId = req.userId;
+    const { commissionId } = req.params;
+
+    if (!masterId) {
+      return res.status(401).json({ message: 'Не авторизован' });
+    }
+
+    await walletService.payCommissionFromWallet(masterId, parseInt(commissionId));
+
+    const stats = await walletService.getWalletStats(masterId);
+
+    res.json({
+      message: 'Комиссия успешно оплачена',
+      wallet: stats,
+    });
+  } catch (error: any) {
+    console.error('Error paying commission:', error);
+    
+    if (error.message === 'Insufficient wallet balance') {
+      return res.status(400).json({ message: 'Недостаточно средств на кошельке' });
+    }
+    
+    if (error.message === 'Commission already paid or cancelled') {
+      return res.status(400).json({ message: 'Комиссия уже оплачена или отменена' });
+    }
+    
+    res.status(500).json({ message: 'Ошибка при оплате комиссии' });
+  }
+};
+
+// Оплатить все неоплаченные комиссии разом
+export const payAllUnpaidCommissions = async (req: Request, res: Response) => {
+  try {
+    const masterId = req.userId;
+
+    if (!masterId) {
+      return res.status(401).json({ message: 'Не авторизован' });
+    }
+
+    const result = await walletService.payAllCommissions(masterId);
+
+    res.json({
+      message: result.message,
+      paidCount: result.paidCount,
+      totalAmount: result.totalAmount,
+      newBalance: result.newBalance,
+    });
+  } catch (error: any) {
+    console.error('Error paying all commissions:', error);
+    
+    if (error.message === 'Insufficient wallet balance') {
+      return res.status(400).json({ message: 'Недостаточно средств на кошельке' });
+    }
+    
+    if (error.message === 'No unpaid commissions') {
+      return res.status(400).json({ message: 'Нет неоплаченных комиссий' });
+    }
+    
+    res.status(500).json({ message: 'Ошибка при оплате комиссий' });
+  }
+};

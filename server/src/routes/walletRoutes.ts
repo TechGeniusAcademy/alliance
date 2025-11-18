@@ -8,6 +8,9 @@ import {
   createWalletPaymentIntent,
   confirmWalletPayment,
   getStripePublishableKey,
+  getUnpaidCommissions,
+  paySpecificCommission,
+  payAllUnpaidCommissions,
 } from '../controllers/walletController';
 import { authMiddleware } from '../middleware/authMiddleware';
 
@@ -28,11 +31,20 @@ router.get('/stats', getWalletStats);
 // Получить историю транзакций
 router.get('/transactions', getWalletTransactions);
 
+// Получить список неоплаченных комиссий
+router.get('/unpaid-commissions', getUnpaidCommissions);
+
 // Пополнить кошелек (старый метод без Stripe)
 router.post('/deposit', depositToWallet);
 
-// Оплатить комиссию из кошелька
+// Оплатить комиссию из кошелька (старый метод)
 router.post('/pay-commission', payCommissionFromWallet);
+
+// Оплатить конкретную комиссию по ID
+router.post('/pay-commission/:commissionId', paySpecificCommission);
+
+// Оплатить все неоплаченные комиссии разом
+router.post('/pay-all-commissions', payAllUnpaidCommissions);
 
 // Stripe маршруты для пополнения кошелька
 router.post('/create-payment-intent', createWalletPaymentIntent);

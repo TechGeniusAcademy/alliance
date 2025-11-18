@@ -23,6 +23,7 @@ import {
   MdViewModule
 } from 'react-icons/md';
 import { useState } from 'react';
+import { useUnreadChats } from '../hooks/useUnreadChats';
 import styles from './Sidebar.module.css';
 
 interface MenuCategory {
@@ -44,6 +45,7 @@ const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const { unreadCount } = useUnreadChats();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -95,7 +97,7 @@ const Sidebar = () => {
     {
       title: t('sidebar.communication'),
       items: [
-        { path: '/dashboard/chats', icon: MdChat, label: t('sidebar.chats'), badge: '2' },
+        { path: '/dashboard/chats', icon: MdChat, label: t('sidebar.chats'), badge: unreadCount > 0 ? (unreadCount > 9 ? '9+' : String(unreadCount)) : undefined },
         { path: '/dashboard/notifications', icon: MdNotifications, label: t('sidebar.notifications'), badge: '5' },
         { path: '/dashboard/reviews', icon: MdStars, label: t('sidebar.reviews') },
         { path: '/dashboard/offers', icon: MdLocalOffer, label: t('sidebar.specialOffers'), isNew: true },

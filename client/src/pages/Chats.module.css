@@ -560,6 +560,32 @@
   color: #1f2937;
 }
 
+/* Кнопка "Назад" для мобильной версии */
+.backButton {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #1f2937;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.backButton:hover {
+  background: #e5e7eb;
+  transform: scale(1.05);
+}
+
+.backButton:active {
+  transform: scale(0.95);
+}
+
 /* Адаптивность */
 @media (max-width: 1024px) {
   .chatsSidebar {
@@ -573,25 +599,111 @@
 
 @media (max-width: 768px) {
   .chatsContainer {
-    flex-direction: column;
     margin: 0;
     border-radius: 0;
-    height: 100vh;
+    height: calc(100vh - 80px); /* Учитываем мобильную навигацию снизу (70px) + отступ */
+    position: relative;
+    overflow: hidden;
   }
   
+  /* На мобилке показываем либо список чатов, либо окно чата */
   .chatsSidebar {
     width: 100%;
-    max-height: 50vh;
+    height: 100%;
     border-right: none;
-    border-bottom: 1px solid #e5e7eb;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .chatsSidebar.hiddenOnMobile {
+    transform: translateX(-100%);
+    pointer-events: none;
   }
   
   .chatWindow {
-    height: 50vh;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .chatWindow.showOnMobile {
+    transform: translateX(0);
+  }
+  
+  /* Показываем кнопку "Назад" на мобилке */
+  .backButton {
+    display: flex;
   }
   
   .message {
     max-width: 85%;
+  }
+  
+  /* Улучшаем список чатов на мобилке */
+  .chatsList {
+    padding-bottom: 20px;
+  }
+  
+  /* Улучшаем контейнер сообщений на мобилке */
+  .messagesContainer {
+    padding-bottom: 20px;
+  }
+}
+
+/* Стили для кнопок в шапке чата */
+.actionButton {
+  margin-left: auto;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.actionButtonText {
+  display: inline;
+}
+
+.statusBadge {
+  margin-left: auto;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  /* Скрываем текст в кнопках действий, оставляем только иконки */
+  .actionButton {
+    padding: 10px;
+    min-width: auto;
+  }
+  
+  .actionButtonText {
+    display: none;
+  }
+  
+  .statusBadge {
+    padding: 8px 12px;
+    font-size: 12px;
   }
 }
 
@@ -606,6 +718,7 @@
   
   .chatWindowHeader {
     padding: 16px;
+    gap: 8px;
   }
   
   .messagesContainer {
@@ -622,5 +735,10 @@
   
   .modalContent {
     padding: 24px;
+  }
+  
+  .statusBadge {
+    font-size: 11px;
+    padding: 6px 10px;
   }
 }

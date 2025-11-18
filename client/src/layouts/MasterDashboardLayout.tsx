@@ -1,5 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import MasterSidebar from '../components/MasterSidebar.tsx';
+import MasterMobileNav from '../components/MasterMobileNav.tsx';
+import ChatNotification from '../components/ChatNotification';
 import styles from './MasterDashboardLayout.module.css';
 
 const MasterDashboardLayout = () => {
@@ -9,6 +11,8 @@ const MasterDashboardLayout = () => {
       <main className={styles.mainContent}>
         <Outlet />
       </main>
+      <MasterMobileNav />
+      <ChatNotification />
     </div>
   );
 };

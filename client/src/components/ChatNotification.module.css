@@ -1,0 +1,147 @@
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 400px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10000;
+  animation: slideIn 0.3s ease, pulse 2s ease-in-out infinite;
+  border-left: 4px solid #667eea;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+  }
+}
+
+.notification:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  animation: none;
+}
+
+.icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.sender {
+  font-weight: 700;
+  font-size: 14px;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.message {
+  font-size: 13px;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.closeBtn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+@media (max-width: 768px) {
+  .notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+    padding: 12px;
+  }
+
+  .icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .sender {
+    font-size: 13px;
+  }
+
+  .message {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .notification {
+    top: 70px; /* Под хедером */
+    padding: 10px;
+  }
+
+  .icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .sender {
+    font-size: 12px;
+  }
+
+  .message {
+    font-size: 11px;
+  }
+
+  .closeBtn {
+    padding: 2px;
+  }
+}

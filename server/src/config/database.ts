@@ -593,20 +593,19 @@ export const initializeDatabase = async () => {
     await pool.query(addWalletBalance);
     console.log('✓ Поле wallet_balance добавлено в master_profiles');
 
-    // Создаем таблицу для транзакций кошелька
+    // Создаем таблицу для транзакций кошелька (обновленная версия)
     const createWalletTransactionsTable = `
       CREATE TABLE IF NOT EXISTS wallet_transactions (
         id SERIAL PRIMARY KEY,
         master_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         amount DECIMAL(10, 2) NOT NULL,
-        type VARCHAR(50) NOT NULL, -- 'deposit' (пополнение) или 'commission_payment' (оплата комиссии)
+        type VARCHAR(50) NOT NULL, -- 'deposit', 'withdrawal', 'commission_payment', 'order_payment'
         status VARCHAR(50) DEFAULT 'pending', -- pending, completed, failed, cancelled
-        commission_transaction_id INTEGER REFERENCES commission_transactions(id),
-        payment_method VARCHAR(50), -- 'card', 'bank_transfer', 'cash', etc.
-        payment_details TEXT,
+        order_id INTEGER,
+        payment_intent_id VARCHAR(255),
         description TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        completed_at TIMESTAMP
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
     await pool.query(createWalletTransactionsTable);
@@ -620,6 +619,63 @@ export const initializeDatabase = async () => {
     `;
     await pool.query(createWalletIndexes);
     console.log('✓ Индексы для wallet_transactions созданы/проверены');
+
+    // Создаем триггер для автоматического создания профиля мастера
+    const createMasterProfileTrigger = `
+      CREATE OR REPLACE FUNCTION create_master_profile()
+      RETURNS TRIGGER AS $$
+      BEGIN
+        IF NEW.role = 'master' THEN
+          INSERT INTO master_profiles (user_id, registered_at)
+          VALUES (NEW.id, CURRENT_TIMESTAMP)
+          ON CONFLICT (user_id) DO NOTHING;
+        END IF;
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql;
+
+      DROP TRIGGER IF EXISTS trigger_create_master_profile ON users;
+
+      CREATE TRIGGER trigger_create_master_profile
+      AFTER INSERT OR UPDATE OF role ON users
+      FOR EACH ROW
+      EXECUTE FUNCTION create_master_profile();
+    `;
+    await pool.query(createMasterProfileTrigger);
+    console.log('✓ Триггер для автоматического создания профиля мастера создан');
+
+    // Создаем профили для существующих мастеров (если они еще не созданы)
+    const createExistingMasterProfiles = `
+      INSERT INTO master_profiles (user_id, registered_at)
+      SELECT id, created_at FROM users WHERE role = 'master'
+      ON CONFLICT (user_id) DO NOTHING;
+    `;
+    await pool.query(createExistingMasterProfiles);
+    console.log('✓ Профили для существующих мастеров проверены/созданы');
+
+    // Создаем таблицу для расписания
+    const createScheduleTable = `
+      CREATE TABLE IF NOT EXISTS schedule_items (
+        id SERIAL PRIMARY KEY,
+        master_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        date DATE NOT NULL,
+        time TIME NOT NULL,
+        type VARCHAR(50) NOT NULL CHECK (type IN ('deadline', 'reminder', 'meeting', 'other')),
+        priority VARCHAR(20) NOT NULL CHECK (priority IN ('low', 'medium', 'high')),
+        status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'overdue')),
+        order_id INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_schedule_master ON schedule_items(master_id);
+      CREATE INDEX IF NOT EXISTS idx_schedule_date ON schedule_items(date);
+      CREATE INDEX IF NOT EXISTS idx_schedule_order ON schedule_items(order_id);
+    `;
+    await pool.query(createScheduleTable);
+    console.log('✓ Таблица schedule_items создана/проверена');
 
     console.log('✅ Инициализация базы данных завершена успешно!\n');
 

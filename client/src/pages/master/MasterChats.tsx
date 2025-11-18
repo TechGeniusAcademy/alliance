@@ -4,6 +4,7 @@ import { io, Socket } from 'socket.io-client';
 import chatService, { type Chat, type Message } from '../../services/chatService';
 import Toast, { type ToastType } from '../../components/Toast';
 import chatStyles from '../Chats.module.css';
+import { WS_URL } from '../../config/api';
 
 // Стили вынесены наружу для предотвращения пересоздания объектов
 const avatarPlaceholderStyle = {
@@ -63,6 +64,7 @@ const MasterChats = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const [showChatWindow, setShowChatWindow] = useState(false);
   const currentUserId = (() => {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -86,7 +88,7 @@ const MasterChats = () => {
 
   // Подключение WebSocket
   useEffect(() => {
-    socketRef.current = io('http://localhost:5000');
+    socketRef.current = io(WS_URL);
     
     socketRef.current.on('connect', () => {
       console.log('✅ WebSocket подключен (Master)');
@@ -94,26 +96,64 @@ const MasterChats = () => {
 
     socketRef.current.on('newMessage', (message: Message) => {
       console.log('📩 Получено новое сообщение:', message);
-      setMessages(prev => {
-        // Проверяем что сообщение еще не добавлено (избегаем дубликатов)
-        if (prev.some(m => m.id === message.id)) {
-          return prev;
-        }
-        const updated = [...prev, message];
-        lastMessageCountRef.current = updated.length;
-        
-        // ВАЖНО: Прокручиваем вниз при получении нового сообщения
-        // Используем requestAnimationFrame для гарантии что DOM обновился
-        requestAnimationFrame(() => {
+      
+      // Обновляем список сообщений если это текущий чат
+      if (selectedChat && message.chat_id === selectedChat.id) {
+        setMessages(prev => {
+          // Проверяем что сообщение еще не добавлено (избегаем дубликатов)
+          if (prev.some(m => m.id === message.id)) {
+            return prev;
+          }
+          const updated = [...prev, message];
+          lastMessageCountRef.current = updated.length;
+          
+          // ВАЖНО: Прокручиваем вниз при получении нового сообщения
+          // Используем requestAnimationFrame для гарантии что DOM обновился
           requestAnimationFrame(() => {
-            if (messagesContainerRef.current) {
-              messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-            }
+            requestAnimationFrame(() => {
+              if (messagesContainerRef.current) {
+                messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+              }
+            });
           });
+          
+          return updated;
         });
-        
-        return updated;
+      }
+
+      // Обновляем список чатов - последнее сообщение и время
+      setChats(prevChats => {
+        return prevChats.map(chat => {
+          if (chat.id === message.chat_id) {
+            return {
+              ...chat,
+              last_message: message.message,
+              last_message_time: message.created_at,
+              // Увеличиваем счетчик непрочитанных, если сообщение не от нас и не в открытом чате
+              unread_count: message.sender_id !== currentUserId && (!selectedChat || selectedChat.id !== message.chat_id)
+                ? chat.unread_count + 1
+                : chat.unread_count
+            };
+          }
+          return chat;
+        }).sort((a, b) => {
+          // Сортируем по времени последнего сообщения
+          const timeA = a.last_message_time ? new Date(a.last_message_time).getTime() : 0;
+          const timeB = b.last_message_time ? new Date(b.last_message_time).getTime() : 0;
+          return timeB - timeA;
+        });
       });
+    });
+
+    // Обработчик прочтения сообщений
+    socketRef.current.on('messagesRead', (data: { chatId: number }) => {
+      console.log('✓ Сообщения прочитаны в чате:', data.chatId);
+      // Сбрасываем счетчик непрочитанных для этого чата
+      setChats(prevChats =>
+        prevChats.map(chat =>
+          chat.id === data.chatId ? { ...chat, unread_count: 0 } : chat
+        )
+      );
     });
 
     // Обновление статуса заказа
@@ -134,7 +174,7 @@ const MasterChats = () => {
     return () => {
       socketRef.current?.disconnect();
     };
-  }, [selectedChat?.id]);
+  }, [selectedChat?.id, currentUserId]);
 
   // Загружаем список чатов только один раз при монтировании
   useEffect(() => {
@@ -149,6 +189,12 @@ const MasterChats = () => {
       
       // Присоединяемся к комнате чата
       socketRef.current?.emit('joinChat', selectedChat.id);
+      
+      // Отмечаем сообщения как прочитанные
+      chatService.markMessagesAsRead(selectedChat.id).then(() => {
+        // Отправляем событие о прочтении сообщений через WebSocket
+        socketRef.current?.emit('messagesRead', { chatId: selectedChat.id });
+      }).catch(err => console.error('Failed to mark messages as read:', err));
       
       return () => {
         // Покидаем комнату при смене чата
@@ -379,7 +425,7 @@ const MasterChats = () => {
   return (
     <div className={chatStyles.chatsContainer}>
       {/* Sidebar with chat list */}
-      <div className={chatStyles.chatsSidebar}>
+      <div className={`${chatStyles.chatsSidebar} ${showChatWindow ? chatStyles.hideOnMobile : ''}`}>
         <div className={chatStyles.chatsHeader}>
           <h2>Сообщения</h2>
           {unreadCount > 0 && (
@@ -412,7 +458,10 @@ const MasterChats = () => {
                 <div
                   key={chat.id}
                   className={`${chatStyles.chatItem} ${selectedChat?.id === chat.id ? chatStyles.active : ''}`}
-                  onClick={() => setSelectedChat(chat)}
+                  onClick={() => {
+                    setSelectedChat(chat);
+                    setShowChatWindow(true);
+                  }}
                 >
                   <div className={chatStyles.chatAvatar}>
                     {participantPhoto ? (
@@ -462,10 +511,16 @@ const MasterChats = () => {
       </div>
 
       {/* Chat window */}
-      <div className={chatStyles.chatWindow}>
+      <div className={`${chatStyles.chatWindow} ${showChatWindow ? chatStyles.showOnMobile : ''}`}>
         {selectedChat ? (
           <>
             <div className={chatStyles.chatWindowHeader}>
+              <button 
+                className={chatStyles.backButton}
+                onClick={() => setShowChatWindow(false)}
+              >
+                ←
+              </button>
               <div className={chatStyles.chatAvatar}>
                 {getParticipantPhoto(selectedChat) ? (
                   <img src={getParticipantPhoto(selectedChat)!} alt={getParticipantName(selectedChat)} />
@@ -496,44 +551,30 @@ const MasterChats = () => {
                 <button
                   onClick={handleSubmitForReview}
                   disabled={submitting}
+                  className={chatStyles.actionButton}
                   style={{
-                    marginLeft: 'auto',
-                    padding: '10px 20px',
                     background: submitting ? '#9ca3af' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: submitting ? 'not-allowed' : 'pointer',
-                    fontWeight: '600',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
+                    cursor: submitting ? 'not-allowed' : 'pointer'
                   }}
                 >
                   <MdCheckCircle size={20} />
-                  {submitting ? 'Отправка...' : 'Отправить на оценку'}
+                  <span className={chatStyles.actionButtonText}>
+                    {submitting ? 'Отправка...' : 'Отправить на оценку'}
+                  </span>
                 </button>
               )}
               {selectedChat.order_status === 'review' && (
-                <div style={{
-                  marginLeft: 'auto',
-                  padding: '10px 20px',
+                <div className={chatStyles.statusBadge} style={{
                   background: '#fef3c7',
-                  color: '#92400e',
-                  borderRadius: '8px',
-                  fontWeight: '600'
+                  color: '#92400e'
                 }}>
                   Ожидает оценки клиента
                 </div>
               )}
               {selectedChat.order_status === 'completed' && (
-                <div style={{
-                  marginLeft: 'auto',
-                  padding: '10px 20px',
+                <div className={chatStyles.statusBadge} style={{
                   background: '#d1fae5',
-                  color: '#065f46',
-                  borderRadius: '8px',
-                  fontWeight: '600'
+                  color: '#065f46'
                 }}>
                   ✓ Работа принята
                 </div>

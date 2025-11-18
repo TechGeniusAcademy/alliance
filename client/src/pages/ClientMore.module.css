@@ -1,0 +1,214 @@
+.morePage {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.header p {
+  color: #666;
+  font-size: 1rem;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.sectionTitle {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.menuGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+}
+
+.menuItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 16px;
+  text-decoration: none;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  text-align: center;
+}
+
+.menuItem:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+}
+
+.menuItem:active {
+  transform: translateY(-2px);
+}
+
+.iconWrapper {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border-radius: 16px;
+  color: #3b82f6;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.menuItem:hover .iconWrapper {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.newBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 4px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.premiumBadge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 1.2rem;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.8));
+  animation: spinAndPulse 3s ease-in-out infinite;
+}
+
+@keyframes spinAndPulse {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(90deg) scale(1.15);
+  }
+  50% {
+    transform: rotate(180deg) scale(1);
+  }
+  75% {
+    transform: rotate(270deg) scale(1.15);
+  }
+}
+
+.logoutSection {
+  margin-top: 16px;
+  padding: 0 24px;
+}
+
+.logoutButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+  border: 2px solid rgba(239, 68, 68, 0.3);
+  border-radius: 16px;
+  color: #ef4444;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logoutButton:hover {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+  transform: translateY(-2px);
+}
+
+.logoutButton:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .morePage {
+    padding-bottom: 120px;
+  }
+
+  .header h1 {
+    font-size: 1.75rem;
+  }
+
+  .menuGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .menuItem {
+    padding: 16px 12px;
+    font-size: 0.8rem;
+  }
+
+  .iconWrapper {
+    width: 48px;
+    height: 48px;
+  }
+
+  .iconWrapper svg {
+    font-size: 24px;
+  }
+
+  .section {
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .logoutSection {
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .menuGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

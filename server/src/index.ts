@@ -16,6 +16,7 @@ import paymentRoutes from './routes/paymentRoutes';
 import mastersRoutes from './routes/masters';
 import commissionRoutes from './routes/commissionRoutes';
 import walletRoutes from './routes/walletRoutes';
+import scheduleRoutes from './routes/scheduleRoutes';
 import pool, { initializeDatabase } from './config/database';
 
 dotenv.config();
@@ -24,7 +25,7 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: 'http://localhost:5173', // Vite dev server
+    origin: '*', // Разрешаем все источники для локальной сети
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -33,7 +34,10 @@ const io = new Server(httpServer, {
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*', // Разрешаем все источники для локальной сети
+  credentials: true
+}));
 app.use(express.json());
 
 // Routes
@@ -50,6 +54,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/masters', mastersRoutes);
 app.use('/api/commissions', commissionRoutes);
 app.use('/api/wallet', walletRoutes);
+app.use('/api/schedule', scheduleRoutes);
 
 // Проверка подключения к базе данных
 app.get('/api/health', async (req, res) => {
@@ -84,6 +89,13 @@ io.on('connection', (socket) => {
     console.log(`Новое сообщение в чате ${data.chatId}`);
   });
 
+  // Отметить сообщения как прочитанные
+  socket.on('messagesRead', (data: { chatId: number }) => {
+    // Отправляем уведомление всем в комнате чата, что сообщения прочитаны
+    io.to(`chat_${data.chatId}`).emit('messagesRead', { chatId: data.chatId });
+    console.log(`Сообщения прочитаны в чате ${data.chatId}`);
+  });
+
   // Обновление статуса заказа
   socket.on('orderStatusChanged', async (data: { chatId: number; orderStatus: string }) => {
     // Отправляем обновление статуса всем в комнате чата
@@ -106,8 +118,10 @@ const startServer = async () => {
     await initializeDatabase();
     
     // Запускаем сервер (используем httpServer вместо app)
+    // Слушаем на 0.0.0.0 для доступа по локальной сети
     httpServer.listen(PORT, () => {
       console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
+      console.log(`🌐 Доступ по сети: http://<your-ip>:${PORT}`);
       console.log(`🔌 WebSocket готов`);
     });
   } catch (error) {

@@ -22,11 +22,13 @@ import {
   MdBarChart,
   MdGroup
 } from 'react-icons/md';
+import { useUnreadChats } from '../hooks/useUnreadChats';
 import styles from './MasterSidebar.module.css';
 
 const MasterSidebar = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { unreadCount } = useUnreadChats();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -173,6 +175,9 @@ const MasterSidebar = () => {
           >
             <MdChat size={22} />
             <span>{t('masterSidebar.chats')}</span>
+            {unreadCount > 0 && (
+              <span className={styles.badge}>{unreadCount > 9 ? '9+' : unreadCount}</span>
+            )}
           </NavLink>
           <NavLink
             to="/master/notifications"

@@ -8,7 +8,8 @@ import {
   submitForReview,
   acceptWork,
   getWorkAct,
-  getMasterReviews
+  getMasterReviews,
+  markMessagesAsRead
 } from '../controllers/chatController';
 
 const router = express.Router();
@@ -24,6 +25,9 @@ router.get('/order/:orderId', getOrCreateChat);
 
 // Получить сообщения чата
 router.get('/:chatId/messages', getChatMessages);
+
+// Отметить сообщения как прочитанные
+router.post('/:chatId/mark-read', markMessagesAsRead);
 
 // Отправить сообщение
 router.post('/:chatId/messages', sendMessage);

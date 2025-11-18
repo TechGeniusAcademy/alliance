@@ -118,21 +118,228 @@
   box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-    padding: 1rem;
-    gap: 1rem;
-  }
+/* Кнопка бургер-меню */
+.burgerButton {
+  display: none;
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 1002;
+  transition: color 0.3s ease;
+}
 
+.burgerButton:hover {
+  color: #007bff;
+}
+
+/* Overlay для мобильного меню */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Мобильные действия (показываются только в мобильном меню) */
+.mobileActions {
+  display: none;
+}
+
+/* Десктопные действия */
+.desktopActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Иконки в кнопках */
+.languageSwitcher {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.iconOnly {
+  flex-shrink: 0;
+}
+
+.buttonText {
+  display: inline;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
   .nav {
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 1.5rem;
   }
 
   .navLink {
-    font-size: 0.9rem;
+    font-size: 1.3rem;
+  }
+
+  .langSelect {
+    font-size: 1.3rem;
+  }
+
+  .loginButton {
+    font-size: 1.3rem;
+  }
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem 1.5rem;
+    flex-wrap: nowrap;
+  }
+
+  /* Показываем кнопку бургера */
+  .burgerButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Скрываем десктопные кнопки */
+  .desktopActions {
+    display: none;
+  }
+
+  /* Мобильное меню */
+  .nav {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: white;
+    flex-direction: column;
+    justify-content: start;
+    padding: 5rem 2rem 2rem;
+    gap: 20px;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease;
+    z-index: 1001;
+    overflow-y: auto;
+  }
+
+  .nav.navOpen {
+    right: 0;
+  }
+
+  .overlay {
+    display: block;
+  }
+
+  .navLink {
+    width: 100%;
+    padding: 1rem 0;
+    font-size: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: left;
+  }
+
+  .navLink::after {
+    display: none;
+  }
+
+  .navLink:hover {
+    background-color: #f8f9fa;
+    padding-left: 0.5rem;
+  }
+
+  /* Показываем мобильные действия в меню */
+  .mobileActions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #f0f0f0;
+  }
+
+  .mobileActions .languageSwitcher {
+    width: 100%;
+  }
+
+  .mobileActions .langSelect {
+    width: 100%;
+    font-size: 1.1rem;
+  }
+
+  .mobileActions .loginButton {
+    width: 100%;
+    font-size: 1.1rem;
+    margin-left: 0;
+  }
+
+  /* Скрываем текст в десктопных действиях на планшетах */
+  .desktopActions .buttonText {
+    display: none;
+  }
+
+  .desktopActions .langSelect {
+    display: none;
+  }
+
+  .desktopActions .languageSwitcher {
+    width: auto;
+  }
+
+  .desktopActions .loginButton {
+    padding: 0.7rem;
+    min-width: auto;
+  }
+
+  .logo a {
+    font-size: 1.3rem;
+  }
+
+  .logoImage {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+/* Адаптивность для маленьких телефонов */
+@media (max-width: 480px) {
+  .container {
+    padding: 0.8rem 1rem;
+  }
+
+  .logo a {
+    font-size: 1.1rem;
+  }
+
+  .logoImage {
+    width: 30px;
+    height: 30px;
+  }
+
+  .nav {
+    width: 250px;
+    padding: 4rem 1.5rem 1.5rem;
+  }
+
+  .navLink {
+    font-size: 1rem;
+    padding: 0.9rem 0;
+  }
+
+  .mobileActions .langSelect,
+  .mobileActions .loginButton {
+    font-size: 1rem;
   }
 }

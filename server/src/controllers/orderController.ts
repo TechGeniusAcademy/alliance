@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import pool from '../config/database';
 import { commissionService } from '../services/commissionService';
+import whatsappService from '../services/whatsappService';
 
 // Создать новый заказ
 export const createOrder = async (req: Request, res: Response) => {
@@ -40,9 +41,61 @@ export const createOrder = async (req: Request, res: Response) => {
       ]
     );
 
+    const newOrder = result.rows[0];
+
+    // Отправляем уведомления всем мастерам через WhatsApp
+    try {
+      console.log('📱 Отправка WhatsApp уведомлений мастерам о новом заказе...');
+      
+      // Получаем всех активных мастеров с номерами телефонов
+      const mastersResult = await pool.query(
+        `SELECT u.id, u.phone, u.name 
+         FROM users u
+         WHERE u.role = 'master' 
+         AND u.active = true 
+         AND u.phone IS NOT NULL 
+         AND u.phone != ''`
+      );
+
+      const masters = mastersResult.rows;
+      console.log(`Найдено ${masters.length} мастеров для уведомления`);
+
+      // Формируем данные заказа для уведомления
+      const orderData = {
+        id: newOrder.id,
+        title: newOrder.title,
+        category: newOrder.category,
+        description: newOrder.description,
+        budgetMin: parseFloat(newOrder.budget_min),
+        budgetMax: newOrder.budget_max ? parseFloat(newOrder.budget_max) : null,
+        deadline: newOrder.deadline,
+        deliveryAddress: newOrder.delivery_address
+      };
+
+      // Отправляем уведомления асинхронно (не блокируя ответ)
+      if (masters.length > 0) {
+        const notifications = masters.map(master => ({
+          phone: master.phone,
+          orderData
+        }));
+
+        // Запускаем отправку в фоне
+        whatsappService.sendBulkNotifications(notifications, 2000)
+          .then(result => {
+            console.log(`✅ WhatsApp рассылка завершена: успешно ${result.success}, ошибок ${result.failed}`);
+          })
+          .catch(err => {
+            console.error('❌ Ошибка WhatsApp рассылки:', err);
+          });
+      }
+    } catch (whatsappError) {
+      // Логируем ошибку, но не прерываем создание заказа
+      console.error('⚠️ Ошибка отправки WhatsApp уведомлений:', whatsappError);
+    }
+
     res.status(201).json({
       message: 'Заказ успешно создан',
-      order: result.rows[0],
+      order: newOrder,
     });
   } catch (error) {
     console.error('Create order error:', error);

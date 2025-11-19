@@ -28,6 +28,10 @@ import MasterRatings from './pages/master/MasterRatings';
 import MasterProfile from './pages/master/MasterProfile';
 import MasterSettings from './pages/master/MasterSettings';
 import MasterPortfolio from './pages/master/MasterPortfolio';
+import MasterIncome from './pages/master/MasterIncome';
+import MasterNotifications from './pages/master/MasterNotifications';
+import MasterStatistics from './pages/master/MasterStatistics';
+import MasterClients from './pages/master/MasterClients';
 import MasterMore from './pages/MasterMore';
 import ClientMore from './pages/ClientMore';
 import Placeholder from './pages/Placeholder';
@@ -189,19 +193,19 @@ function App() {
             
             {/* Финансы */}
             <Route path="wallet" element={<MasterWallet />} />
-            <Route path="earnings" element={<Placeholder title="Доходы" icon="💰" description="История заработка и выплаты" />} />
+            <Route path="earnings" element={<MasterIncome />} />
             <Route path="commissions" element={<MasterCommissions />} />
             <Route path="invoices" element={<Placeholder title="Счета" icon="📄" description="Выставленные и оплаченные счета" />} />
-            <Route path="statistics" element={<Placeholder title="Статистика" icon="📊" description="Аналитика вашей работы" />} />
+            <Route path="statistics" element={<MasterStatistics />} />
             
             {/* Коммуникация */}
             <Route path="chats" element={<MasterChats />} />
-            <Route path="notifications" element={<Placeholder title="Уведомления" icon="🔔" description="Все уведомления и оповещения" />} />
+            <Route path="notifications" element={<MasterNotifications />} />
             
             {/* Репутация */}
             <Route path="ratings" element={<MasterRatings />} />
             <Route path="portfolio" element={<MasterPortfolio />} />
-            <Route path="clients" element={<Placeholder title="Клиенты" icon="👥" description="База клиентов и история работы" />} />
+            <Route path="clients" element={<MasterClients />} />
             
             {/* Настройки */}
             <Route path="profile" element={<MasterProfile />} />

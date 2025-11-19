@@ -62,8 +62,35 @@ const BrowsePortfolio = () => {
     try {
       setLoading(true);
       const data = await masterService.getAllPublicPortfolio();
-      setPortfolio(data);
-      setFilteredPortfolio(data);
+      
+      // Фильтруем работы мастеров, которые скрыли свое портфолио
+      const filteredData = await Promise.all(
+        data.map(async (item) => {
+          if (!item.master_id) return item;
+          
+          try {
+            // Проверяем публичные настройки мастера
+            const response = await fetch(`http://localhost:5000/api/settings/master/${item.master_id}/public`);
+            if (response.ok) {
+              const settings = await response.json();
+              // Если мастер скрыл портфолио, возвращаем null
+              if (!settings.showPortfolio) {
+                return null;
+              }
+            }
+          } catch (error) {
+            console.error('Error checking master settings:', error);
+          }
+          
+          return item;
+        })
+      );
+      
+      // Убираем null значения (скрытые портфолио)
+      const visiblePortfolio = filteredData.filter(item => item !== null) as PortfolioItem[];
+      
+      setPortfolio(visiblePortfolio);
+      setFilteredPortfolio(visiblePortfolio);
     } catch (error) {
       console.error('Error loading portfolio:', error);
       showToast('Ошибка при загрузке работ', 'error');

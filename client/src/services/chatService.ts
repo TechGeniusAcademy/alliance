@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = `${API_BASE_URL}/api`;
 
 export interface Chat {
   id: number;
@@ -8,6 +9,8 @@ export interface Chat {
   customer_id: number;
   master_id: number;
   status: string;
+  customer_accepted_rules: boolean;
+  master_accepted_rules: boolean;
   created_at: string;
   updated_at: string;
   order_title: string;
@@ -118,6 +121,15 @@ class ChatService {
       this.getAuthHeader()
     );
     return response.data.act;
+  }
+
+  async acceptChatRules(chatId: number): Promise<{ customer_accepted_rules: boolean; master_accepted_rules: boolean }> {
+    const response = await axios.post(
+      `${API_URL}/chats/accept-rules`,
+      { chatId },
+      this.getAuthHeader()
+    );
+    return response.data.chat;
   }
 }
 

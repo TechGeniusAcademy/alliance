@@ -3,6 +3,7 @@ import { MdChat, MdSearch, MdSend, MdAttachFile, MdShoppingCart, MdCheckCircle }
 import { io, Socket } from 'socket.io-client';
 import chatService, { type Chat, type Message } from '../../services/chatService';
 import Toast, { type ToastType } from '../../components/Toast';
+import ChatRulesModal from '../../components/ChatRulesModal';
 import chatStyles from '../Chats.module.css';
 import { WS_URL } from '../../config/api';
 
@@ -65,6 +66,7 @@ const MasterChats = () => {
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   const [showChatWindow, setShowChatWindow] = useState(false);
+  const [showRulesModal, setShowRulesModal] = useState(false);
   const currentUserId = (() => {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -336,8 +338,40 @@ const MasterChats = () => {
     return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
   };
 
+  const handleAcceptRules = async () => {
+    if (!selectedChat) return;
+    
+    try {
+      const updatedChat = await chatService.acceptChatRules(selectedChat.id);
+      
+      // Обновляем чат в списке
+      setChats(prevChats =>
+        prevChats.map(chat =>
+          chat.id === selectedChat.id
+            ? { ...chat, ...updatedChat }
+            : chat
+        )
+      );
+      
+      // Обновляем выбранный чат
+      setSelectedChat(prev => prev ? { ...prev, ...updatedChat } : null);
+      
+      setShowRulesModal(false);
+      setToast({ message: 'Правила приняты. Можете начать общение!', type: 'success' });
+    } catch (error) {
+      console.error('Failed to accept rules:', error);
+      setToast({ message: 'Ошибка при принятии правил', type: 'error' });
+    }
+  };
+
   const handleSendMessage = useCallback(async () => {
     if (!newMessage.trim() || !selectedChat) return;
+    
+    // Проверяем принятие правил перед отправкой
+    if (!selectedChat.master_accepted_rules) {
+      setShowRulesModal(true);
+      return;
+    }
     
     const messageText = newMessage;
     setNewMessage(''); // Сразу очищаем поле
@@ -461,6 +495,11 @@ const MasterChats = () => {
                   onClick={() => {
                     setSelectedChat(chat);
                     setShowChatWindow(true);
+                    
+                    // Проверяем, принял ли мастер правила
+                    if (!chat.master_accepted_rules) {
+                      setShowRulesModal(true);
+                    }
                   }}
                 >
                   <div className={chatStyles.chatAvatar}>
@@ -642,6 +681,13 @@ const MasterChats = () => {
           message={toast.message}
           type={toast.type}
           onClose={() => setToast(null)}
+        />
+      )}
+
+      {showRulesModal && (
+        <ChatRulesModal
+          onAccept={handleAcceptRules}
+          userType="master"
         />
       )}
     </div>

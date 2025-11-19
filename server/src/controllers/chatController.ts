@@ -395,3 +395,53 @@ export const getMasterReviews = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Ошибка при получении отзывов' });
   }
 };
+
+export const acceptChatRules = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+    const { chatId } = req.body;
+
+    if (!chatId) {
+      return res.status(400).json({ message: 'ID чата обязателен' });
+    }
+
+    // Проверяем, что пользователь является участником чата
+    const chatResult = await pool.query(
+      'SELECT customer_id, master_id, customer_accepted_rules, master_accepted_rules FROM chats WHERE id = $1',
+      [chatId]
+    );
+
+    if (chatResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Чат не найден' });
+    }
+
+    const chat = chatResult.rows[0];
+    const isCustomer = chat.customer_id === userId;
+    const isMaster = chat.master_id === userId;
+
+    if (!isCustomer && !isMaster) {
+      return res.status(403).json({ message: 'Вы не являетесь участником этого чата' });
+    }
+
+    // Обновляем статус принятия правил
+    const field = isCustomer ? 'customer_accepted_rules' : 'master_accepted_rules';
+    await pool.query(
+      `UPDATE chats SET ${field} = TRUE WHERE id = $1`,
+      [chatId]
+    );
+
+    // Получаем обновленный статус
+    const updatedChat = await pool.query(
+      'SELECT customer_accepted_rules, master_accepted_rules FROM chats WHERE id = $1',
+      [chatId]
+    );
+
+    res.json({ 
+      message: 'Правила приняты',
+      chat: updatedChat.rows[0]
+    });
+  } catch (error) {
+    console.error('Accept chat rules error:', error);
+    res.status(500).json({ message: 'Ошибка при принятии правил' });
+  }
+};

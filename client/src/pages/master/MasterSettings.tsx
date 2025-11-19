@@ -124,16 +124,49 @@ const MasterSettings = () => {
   const loadSettings = async () => {
     setLoading(true);
     try {
-      // TODO: Загрузка настроек с сервера
-      // const data = await masterService.getSettings();
-      // setSettings(data);
+      console.log('=== ЗАГРУЗКА НАСТРОЕК ===');
+      
+      const token = localStorage.getItem('token');
+      console.log('Token:', token ? 'существует' : 'отсутствует');
+      
+      const url = 'http://localhost:5000/api/settings/master';
+      console.log('Отправка GET запроса на:', url);
+      
+      const response = await fetch(url, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Ответ сервера - статус:', response.status);
+      
+      if (!response.ok) throw new Error('Failed to load settings');
+      
+      const data = await response.json();
+      console.log('Полученные настройки с сервера:', JSON.stringify(data, null, 2));
+      
+      // Объединяем загруженные данные с текущим состоянием
+      const mergedSettings = {
+        ...settings,
+        ...data,
+        notifications: { ...settings.notifications, ...data.notifications },
+        privacy: { ...settings.privacy, ...data.privacy },
+        work: { ...settings.work, ...data.work },
+        finance: { ...settings.finance, ...data.finance }
+      };
+      
+      console.log('Объединенные настройки:', JSON.stringify(mergedSettings, null, 2));
+      setSettings(mergedSettings);
       
       // Синхронизируем язык
-      if (settings.language && settings.language !== i18n.language) {
-        i18n.changeLanguage(settings.language);
+      if (data.language && data.language !== i18n.language) {
+        i18n.changeLanguage(data.language);
       }
+      
+      console.log('=== НАСТРОЙКИ ЗАГРУЖЕНЫ ===');
     } catch (error) {
-      console.error('Failed to load settings:', error);
+      console.error('!!! ОШИБКА ПРИ ЗАГРУЗКЕ:', error);
       showToast('Ошибка загрузки настроек', 'error');
     } finally {
       setLoading(false);
@@ -144,19 +177,47 @@ const MasterSettings = () => {
     try {
       setSaving(true);
       
+      alert('Функция handleSave вызвана!');
+      console.log('=== СОХРАНЕНИЕ НАСТРОЕК ===');
+      console.log('Настройки для сохранения:', JSON.stringify(settings, null, 2));
+      
       // Синхронизируем язык
       if (settings.language) {
         await i18n.changeLanguage(settings.language);
         localStorage.setItem('language', settings.language);
       }
       
-      // TODO: Сохранение настроек на сервер
-      // await masterService.updateSettings(settings);
+      const token = localStorage.getItem('token');
+      console.log('Token:', token ? 'существует' : 'отсутствует');
+      
+      const url = 'http://localhost:5000/api/settings/master';
+      console.log('Отправка PUT запроса на:', url);
+      
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(settings)
+      });
+      
+      console.log('Ответ сервера - статус:', response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Ошибка сервера:', errorData);
+        throw new Error('Failed to save settings');
+      }
+      
+      const result = await response.json();
+      console.log('Результат сохранения:', result);
+      console.log('=== НАСТРОЙКИ УСПЕШНО СОХРАНЕНЫ ===');
       
       showToast('Настройки успешно сохранены', 'success');
     } catch (error) {
-      console.error('Failed to save settings:', error);
-      showToast('Ошибка при сохранении настроек', 'error');
+      console.error('!!! ОШИБКА ПРИ СОХРАНЕНИИ:', error);
+      showToast('Ошибка сохранения настроек', 'error');
     } finally {
       setSaving(false);
     }
@@ -234,14 +295,41 @@ const MasterSettings = () => {
           <MdSettings className={styles.titleIcon} />
           {t('settings.title')}
         </h1>
-        <button 
-          className={styles.saveButton}
-          onClick={handleSave}
-          disabled={saving}
-        >
-          <MdSave size={20} />
-          {saving ? t('settings.saving') : t('settings.saveButton')}
-        </button>
+        <div className={styles.headerButtons}>
+          <button 
+            className={styles.resetButton}
+            onClick={async () => {
+              if (window.confirm('Сбросить все настройки к значениям по умолчанию?')) {
+                try {
+                  const token = localStorage.getItem('token');
+                  const response = await fetch('http://localhost:5000/api/settings/master/reset', {
+                    method: 'POST',
+                    headers: { 
+                      'Authorization': `Bearer ${token}`,
+                      'Content-Type': 'application/json'
+                    }
+                  });
+                  if (!response.ok) throw new Error('Failed to reset');
+                  const data = await response.json();
+                  setSettings(data.settings);
+                  showToast('Настройки сброшены', 'success');
+                } catch (error) {
+                  showToast('Ошибка сброса настроек', 'error');
+                }
+              }
+            }}
+          >
+            Сбросить
+          </button>
+          <button 
+            className={styles.saveButton}
+            onClick={handleSave}
+            disabled={saving}
+          >
+            <MdSave size={20} />
+            {saving ? t('settings.saving') : t('settings.saveButton')}
+          </button>
+        </div>
       </div>
 
       <div className={styles.settingsContent}>
@@ -505,6 +593,89 @@ const MasterSettings = () => {
                 />
                 <span className={styles.slider}></span>
               </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Безопасность */}
+        <div className={styles.settingsSection}>
+          <h2>
+            <MdLock style={{ verticalAlign: 'middle', marginRight: '8px' }} />
+            Безопасность
+          </h2>
+          <div className={styles.settingsList}>
+            <div className={styles.settingItemFull}>
+              <strong>Изменить пароль</strong>
+              <div className={styles.passwordForm}>
+                <input
+                  type="password"
+                  placeholder="Текущий пароль"
+                  id="currentPassword"
+                  className={styles.passwordInput}
+                />
+                <input
+                  type="password"
+                  placeholder="Новый пароль (минимум 6 символов)"
+                  id="newPassword"
+                  className={styles.passwordInput}
+                />
+                <input
+                  type="password"
+                  placeholder="Подтвердите новый пароль"
+                  id="confirmPassword"
+                  className={styles.passwordInput}
+                />
+                <button
+                  className={styles.changePasswordButton}
+                  onClick={async () => {
+                    const current = (document.getElementById('currentPassword') as HTMLInputElement).value;
+                    const newPass = (document.getElementById('newPassword') as HTMLInputElement).value;
+                    const confirm = (document.getElementById('confirmPassword') as HTMLInputElement).value;
+
+                    if (!current || !newPass || !confirm) {
+                      showToast('Заполните все поля', 'error');
+                      return;
+                    }
+
+                    if (newPass !== confirm) {
+                      showToast('Пароли не совпадают', 'error');
+                      return;
+                    }
+
+                    if (newPass.length < 6) {
+                      showToast('Пароль должен быть не менее 6 символов', 'error');
+                      return;
+                    }
+
+                    try {
+                      const token = localStorage.getItem('token');
+                      const response = await fetch('http://localhost:5000/api/settings/change-password', {
+                        method: 'POST',
+                        headers: {
+                          'Authorization': `Bearer ${token}`,
+                          'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ currentPassword: current, newPassword: newPass })
+                      });
+
+                      const data = await response.json();
+
+                      if (!response.ok) {
+                        throw new Error(data.error || 'Ошибка изменения пароля');
+                      }
+
+                      showToast('Пароль успешно изменён', 'success');
+                      (document.getElementById('currentPassword') as HTMLInputElement).value = '';
+                      (document.getElementById('newPassword') as HTMLInputElement).value = '';
+                      (document.getElementById('confirmPassword') as HTMLInputElement).value = '';
+                    } catch (error: any) {
+                      showToast(error.message || 'Ошибка изменения пароля', 'error');
+                    }
+                  }}
+                >
+                  Изменить пароль
+                </button>
+              </div>
             </div>
           </div>
         </div>

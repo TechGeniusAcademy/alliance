@@ -416,6 +416,8 @@ export const initializeDatabase = async () => {
         customer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         master_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         status VARCHAR(50) DEFAULT 'active',
+        customer_accepted_rules BOOLEAN DEFAULT FALSE,
+        master_accepted_rules BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(order_id)
@@ -676,6 +678,41 @@ export const initializeDatabase = async () => {
     `;
     await pool.query(createScheduleTable);
     console.log('✓ Таблица schedule_items создана/проверена');
+
+    // Создаем таблицу для уведомлений
+    const createNotificationsTable = `
+      CREATE TABLE IF NOT EXISTS notifications (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        type VARCHAR(20) NOT NULL CHECK (type IN ('info', 'success', 'warning', 'error')),
+        title VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        link VARCHAR(500),
+        is_read BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+      CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(is_read);
+      CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created_at DESC);
+    `;
+    await pool.query(createNotificationsTable);
+    console.log('✓ Таблица notifications создана/проверена');
+
+    // Создаем таблицу для настроек мастеров
+    const createMasterSettingsTable = `
+      CREATE TABLE IF NOT EXISTS master_settings (
+        id SERIAL PRIMARY KEY,
+        master_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        settings JSONB NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_master_settings_master ON master_settings(master_id);
+    `;
+    await pool.query(createMasterSettingsTable);
+    console.log('✓ Таблица master_settings создана/проверена');
 
     console.log('✅ Инициализация базы данных завершена успешно!\n');
 

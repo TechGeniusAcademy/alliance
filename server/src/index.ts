@@ -17,7 +17,13 @@ import mastersRoutes from './routes/masters';
 import commissionRoutes from './routes/commissionRoutes';
 import walletRoutes from './routes/walletRoutes';
 import scheduleRoutes from './routes/scheduleRoutes';
+import incomeRoutes from './routes/incomeRoutes';
+import notificationsRoutes from './routes/notificationsRoutes';
+import statisticsRoutes from './routes/statisticsRoutes';
+import clientsRoutes from './routes/clientsRoutes';
+import settingsRoutes from './routes/settingsRoutes';
 import pool, { initializeDatabase } from './config/database';
+import whatsappService from './services/whatsappService';
 
 dotenv.config();
 
@@ -55,6 +61,11 @@ app.use('/api/masters', mastersRoutes);
 app.use('/api/commissions', commissionRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/schedule', scheduleRoutes);
+app.use('/api/income', incomeRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/statistics', statisticsRoutes);
+app.use('/api/clients', clientsRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Проверка подключения к базе данных
 app.get('/api/health', async (req, res) => {
@@ -117,12 +128,16 @@ const startServer = async () => {
     // Инициализируем базу данных
     await initializeDatabase();
     
+    // Инициализируем WhatsApp сервис (уже инициализируется при импорте)
+    console.log('📱 WhatsApp сервис инициализирован');
+    console.log('💡 Если это первый запуск, отсканируйте QR код в WhatsApp');
+    
     // Запускаем сервер (используем httpServer вместо app)
     // Слушаем на 0.0.0.0 для доступа по локальной сети
-    httpServer.listen(PORT, () => {
+    httpServer.listen(Number(PORT), '0.0.0.0', () => {
       console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
-      console.log(`🌐 Доступ по сети: http://<your-ip>:${PORT}`);
-      console.log(`🔌 WebSocket готов`);
+      console.log(`🌐 Доступ по сети: http://192.168.0.10:${PORT}`);
+      console.log(`🔌 WebSocket готов на ws://192.168.0.10:${PORT}`);
     });
   } catch (error) {
     console.error('❌ Ошибка запуска сервера:', error);

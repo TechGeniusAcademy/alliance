@@ -9,7 +9,8 @@ import {
   acceptWork,
   getWorkAct,
   getMasterReviews,
-  markMessagesAsRead
+  markMessagesAsRead,
+  acceptChatRules
 } from '../controllers/chatController';
 
 const router = express.Router();
@@ -28,6 +29,9 @@ router.get('/:chatId/messages', getChatMessages);
 
 // Отметить сообщения как прочитанные
 router.post('/:chatId/mark-read', markMessagesAsRead);
+
+// Принять правила чата
+router.post('/accept-rules', acceptChatRules);
 
 // Отправить сообщение
 router.post('/:chatId/messages', sendMessage);

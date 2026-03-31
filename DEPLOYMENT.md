@@ -719,6 +719,127 @@ nslookup alliancemebel.kz
 # Откройте сайт через IP напрямую, чтобы убрать CORS (origin будет совпадать)
 ```
 
+### Проблема: Сайт открывается по IP, но API не работает (Connection refused)
+```bash
+# Симптомы:
+# - Сайт загружается: curl http://alliancemebel.kz возвращает 200 OK
+# - В логах Nginx: connect() failed (111: Connection refused) while connecting to upstream
+# - В браузере: AxiosError: Network Error или Request failed with status code 404
+
+# Проверка проблемы:
+# 1. Проверьте статус Node.js сервера
+pm2 status
+
+# Если сервер показывает много рестартов (↺) - смотрите раздел выше про рестарты
+
+# 2. Проверьте логи сервера для точной ошибки
+pm2 logs alliance-server --lines 50
+
+# 3. Проверьте что сервер слушает порт 5000
+sudo ss -tulpn | grep :5000
+
+# Если порт НЕ слушает, сервер не запущен или падает
+
+# Решение (полная перезагрузка):
+cd /var/www/alliance
+
+# Шаг 1: Получите последние изменения из Git
+git pull origin main
+
+# Шаг 2: Пересоберите и перезапустите backend
+cd server
+npm install     # Установите зависимости (если были изменения)
+npm run build   # Соберите TypeScript
+pm2 stop alliance-server
+pm2 delete alliance-server
+pm2 start dist/index.js --name alliance-server
+
+# Шаг 3: Проверьте что API работает
+curl http://localhost:5000/api/health
+
+# Должен вернуть: {"status":"ok"}
+
+# Шаг 4: Пересоберите frontend (если был старый .env.production)
+cd ../client
+npm run build
+
+# Шаг 5: Проверьте права доступа на dist/
+sudo chown -R www-data:www-data dist/
+sudo chmod -R 755 dist/
+
+# Шаг 6: Перезапустите Nginx
+sudo systemctl restart nginx
+
+# Шаг 7: Проверьте логи Nginx - ошибки должны исчезнуть
+sudo tail -f /var/log/nginx/error.log
+
+# Откройте сайт в браузере: http://alliancemebel.kz
+```
+
+### Проблема: Frontend делает запросы к /api/api (двойной /api)
+```bash
+# Симптомы: В логах Nginx видно:
+# GET /api/api/masters/public 404 (Not Found)
+
+# Причина: Ошибка в .env.production - указан /api в конце
+
+# Решение:
+cd /var/www/alliance/client
+
+# Проверьте содержимое .env.production
+cat .env.production
+
+# Должно быть ИМЕННО так (без /api в конце):
+# VITE_API_URL=http://alliancemebel.kz
+
+# Если неправильно, исправьте:
+nano .env.production
+
+# Замените на:
+VITE_API_URL=http://alliancemebel.kz
+
+# Сохраните: Ctrl+O, Enter, Ctrl+X
+
+# Пересоберите frontend
+npm run build
+
+# Перезапустите Nginx
+sudo systemctl restart nginx
+
+# Теперь запросы должны идти на правильный путь: /api/masters/public
+```
+
+### Проблема: Nginx пытается подключиться к IPv6 [::1]:5000
+```bash
+# Симптомы: В логах Nginx видно:
+# upstream: "http://[::1]:5000/api/..."
+
+# Причина: proxy_pass http://localhost:5000 резолвится в IPv6
+
+# Решение: Изменить Nginx конфиг на использование только IPv4
+
+# Откройте конфиг
+sudo nano /etc/nginx/sites-available/alliance
+
+# Найдите и замените строку:
+#   proxy_pass http://localhost:5000;
+# На:
+#   proxy_pass http://127.0.0.1:5000;
+
+# Измените ОБЕ секции location /api и location /uploads
+
+# Проверьте конфигурацию
+sudo nginx -t
+
+# Должно быть: nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+# Перезапустите Nginx
+sudo systemctl restart nginx
+
+# Проверьте логи - теперь должно быть upstream: "http://127.0.0.1:5000"
+sudo tail -f /var/log/nginx/error.log
+```
+
 ---
 
 ## Информация о безопасности

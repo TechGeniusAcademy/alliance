@@ -142,6 +142,7 @@ interface PortfolioProject {
     }
   ]
 };
+*/
 
 export const ProjectDetailPage = () => {
   const { id } = useParams();

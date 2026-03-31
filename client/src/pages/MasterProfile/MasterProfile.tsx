@@ -128,6 +128,7 @@ import styles from './MasterProfile.module.css';
     }
   ]
 };
+*/
 
 export const MasterProfilePage = () => {
   const { id } = useParams();

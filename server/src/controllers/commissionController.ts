@@ -81,7 +81,7 @@ export const markCommissionAsPaid = async (req: Request, res: Response) => {
     //   return res.status(403).json({ message: 'Недостаточно прав' });
     // }
 
-    await commissionService.markCommissionAsPaid(parseInt(transactionId));
+    await commissionService.markCommissionAsPaid(parseInt(transactionId as string));
 
     res.json({ message: 'Комиссия отмечена как оплаченная' });
   } catch (error) {

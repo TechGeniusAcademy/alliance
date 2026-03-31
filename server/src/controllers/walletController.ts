@@ -277,7 +277,7 @@ export const paySpecificCommission = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Не авторизован' });
     }
 
-    await walletService.payCommissionFromWallet(masterId, parseInt(commissionId));
+    await walletService.payCommissionFromWallet(masterId, parseInt(commissionId as string));
 
     const stats = await walletService.getWalletStats(masterId);
 

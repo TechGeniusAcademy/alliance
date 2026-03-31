@@ -221,7 +221,7 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
 // Получить публичные настройки мастера (для клиентов)
 export const getMasterPublicSettings = async (req: Request, res: Response) => {
   try {
-    const masterId = parseInt(req.params.masterId);
+    const masterId = parseInt(req.params.masterId as string);
     console.log('getMasterPublicSettings called for masterId:', masterId);
 
     const result = await pool.query(

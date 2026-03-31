@@ -90,10 +90,10 @@ cd alliance
 ## 5. Настройка Backend (Server)
 
 ```bash
-cd /var/www/Alliance/server
+cd /var/www/alliance/server
 
 # ВАЖНО: Исправляем права доступа (если клонировали с sudo)
-sudo chown -R $USER:$USER /var/www/Alliance
+sudo chown -R $USER:$USER /var/www/alliance
 
 # Создание .env файла
 nano .env
@@ -138,7 +138,7 @@ ls dist/
 sudo npm install -g pm2
 
 # Запуск сервера через PM2
-cd /var/www/Alliance/server
+cd /var/www/alliance/server
 pm2 start dist/index.js --name alliance-server
 
 # Просмотр логов
@@ -162,7 +162,7 @@ sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -
 ## 7. Настройка Frontend (Client)
 
 ```bash
-cd /var/www/Alliance/client
+cd /var/www/alliance/client
 
 # Создание .env файла
 nano .env
@@ -171,12 +171,12 @@ nano .env
 ### Содержимое .env:
 
 ```env
-VITE_API_URL=http://ваш_IP_или_домен:5000
+VITE_API_URL=http://YOUR_SERVER_IP:5000
 ```
 
-**Пример:**
-- С IP: `VITE_API_URL=http://123.45.67.89:5000`
-- С доменом: `VITE_API_URL=http://alliance.example.com:5000`
+**⚠️ Замените YOUR_SERVER_IP на:**
+- IP адрес сервера: `VITE_API_URL=http://123.45.67.89:5000`
+- Или домен: `VITE_API_URL=http://alliance.example.com:5000`
 
 **Сохранить:** `Ctrl+O`, `Enter`, `Ctrl+X`
 
@@ -215,7 +215,7 @@ server {
 
     # Frontend - React приложение
     location / {
-        root /var/www/Alliance/client/dist;
+        root /var/www/alliance/client/dist;
         index index.html;
         try_files $uri $uri/ /index.html;
     }
@@ -366,7 +366,7 @@ sudo certbot renew --dry-run
 Если установили SSL, обновите:
 
 ```bash
-nano /var/www/Alliance/client/.env
+nano /var/www/alliance/client/.env
 ```
 
 Измените на:
@@ -376,7 +376,7 @@ VITE_API_URL=https://ваш_домен.com/api
 
 Затем пересоберите клиент:
 ```bash
-cd /var/www/Alliance/client
+cd /var/www/alliance/client
 npm run build
 ```
 
@@ -404,7 +404,7 @@ pm2 monit
 
 ### Обновление проекта после изменений в Git:
 ```bash
-cd /var/www/Alliance
+cd /var/www/alliance
 
 # Получение изменений
 git pull origin main
@@ -470,7 +470,7 @@ sudo -u postgres psql alliance_db < ~/backups/alliance_db_YYYYMMDD_HHMMSS.sql
 pm2 logs alliance-server --lines 100
 
 # Проверить .env файл
-cat /var/www/Alliance/server/.env
+cat /var/www/alliance/server/.env
 
 # Проверить подключение к БД
 sudo -u postgres psql -d alliance_db -c "SELECT version();"
@@ -505,19 +505,19 @@ sudo systemctl restart postgresql
 # Ошибка: [ Error writing .env: Permission denied ]
 
 # Решение: Изменить владельца всей директории проекта
-sudo chown -R $USER:$USER /var/www/Alliance
+sudo chown -R $USER:$USER /var/www/alliance
 
 # Проверить, что права изменились
-ls -la /var/www/Alliance
+ls -la /var/www/alliance
 
 # Теперь можно создавать/редактировать файлы без sudo
-nano /var/www/Alliance/server/.env
+nano /var/www/alliance/server/.env
 ```
 
 ### Проблема: Permission denied при загрузке файлов
 ```bash
 # Создать директорию uploads и дать права
-cd /var/www/Alliance/server
+cd /var/www/alliance/server
 mkdir -p uploads/3d-models
 sudo chown -R $USER:$USER uploads
 chmod -R 755 uploads

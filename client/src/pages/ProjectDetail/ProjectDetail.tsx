@@ -50,7 +50,8 @@ interface PortfolioProject {
 }
 
 // Mock project data
-const _projectData = {
+// Commented out unused data
+/* const projectData = {
   id: 1,
   title: 'Современная кухня в стиле минимализм',
   category: 'Кухни на заказ',

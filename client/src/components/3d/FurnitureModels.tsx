@@ -15,17 +15,17 @@ interface FurnitureProps {
   config: FurnitureConfig;
 }
 
-// Базовый компонент - простой бокс
-const _BaseFurniture = ({ config, scaleY = 1 }: FurnitureProps & { scaleY?: number }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  return (
-    <mesh ref={meshRef} position={[0, config.height * scaleY / 2, 0]}>
-      <boxGeometry args={[config.width, config.height * scaleY, config.depth]} />
-      <meshStandardMaterial color={config.color} roughness={0.5} metalness={0.1} />
-    </mesh>
-  );
-};
+// Unused component - commented out
+// const BaseFurniture = ({ config, scaleY = 1 }: FurnitureProps & { scaleY?: number }) => {
+//   const meshRef = useRef<THREE.Mesh>(null);
+//   
+//   return (
+//     <mesh ref={meshRef} position={[0, config.height * scaleY / 2, 0]}>
+//       <boxGeometry args={[config.width, config.height * scaleY, config.depth]} />
+//       <meshStandardMaterial color={config.color} roughness={0.5} metalness={0.1} />
+//     </mesh>
+//   );
+// };
 
 // Кровать
 export const Bed = ({ config }: FurnitureProps) => {

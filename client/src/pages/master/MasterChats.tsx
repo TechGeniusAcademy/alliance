@@ -75,7 +75,7 @@ const MasterChats = () => {
   const [loading, setLoading] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const [_submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   const [showChatWindow, setShowChatWindow] = useState(false);
   const [showRulesModal, setShowRulesModal] = useState(false);
@@ -493,7 +493,7 @@ const MasterChats = () => {
     }
   }, [newMessage, selectedChat]);
 
-  const handleSubmitForReview = async () => {
+  const _handleSubmitForReview = async () => {
     if (!selectedChat) return;
     
     try {

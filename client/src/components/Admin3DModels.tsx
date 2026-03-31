@@ -376,7 +376,7 @@ const Admin3DModels = ({ onShowToast }: Admin3DModelsProps) => {
       
       mtlLoader.load(
         mtlFileName || model.mtl_file_url,
-        (materials: THREE.Material) => {
+        (materials) => {
           console.log('MTL loaded successfully');
           materials.preload();
           objLoader.setMaterials(materials);

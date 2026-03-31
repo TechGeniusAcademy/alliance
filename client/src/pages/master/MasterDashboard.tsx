@@ -206,7 +206,10 @@ const MasterDashboard = () => {
                   border: '1px solid #e0e0e0',
                   borderRadius: '8px'
                 }}
-                formatter={(value: number | undefined) => value ? [`${(value / 1000).toFixed(0)}K ₸`, t('masterDashboard.income')] : ['0K ₸', t('masterDashboard.income')]}
+                formatter={(value) => {
+                  const num = typeof value === 'number' ? value : 0;
+                  return [`${(num / 1000).toFixed(0)}K ₸`, t('masterDashboard.income')];
+                }}
               />
               <Area 
                 type="monotone" 
@@ -233,7 +236,10 @@ const MasterDashboard = () => {
                   border: '1px solid #e0e0e0',
                   borderRadius: '8px'
                 }}
-                formatter={(value: number | undefined) => value ? [`${value}`, t('masterDashboard.orders')] : ['0', t('masterDashboard.orders')]}
+                formatter={(value) => {
+                  const num = typeof value === 'number' ? value : 0;
+                  return [`${num}`, t('masterDashboard.orders')];
+                }}
               />
               <Bar dataKey="orders" fill="#1D1E24" radius={[8, 8, 0, 0]} />
             </BarChart>

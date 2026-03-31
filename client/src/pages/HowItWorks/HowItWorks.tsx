@@ -213,7 +213,6 @@ export const HowItWorksPage = () => {
         <div className={styles.stepsContainer}>
           <div className={styles.stepsList}>
             {steps.map((step, index) => {
-              const _Icon = step.icon;
               return (
                 <div key={index} className={styles.step}>
                   <div className={styles.stepContent}>

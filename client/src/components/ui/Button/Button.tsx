@@ -44,12 +44,18 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       .filter(Boolean)
       .join(' ');
 
+    const Component = href ? 'a' : 'button';
+    const commonProps = {
+      className: classNames,
+      ...(href && { href }),
+      ...(onClick && { onClick }),
+      ...props,
+    };
+
     return (
       <Component
-        ref={Component === 'button' ? ref : undefined}
-        className={classNames}
-        disabled={disabled || isLoading}
-        {...props as any}
+        {...(Component === 'button' ? { ref, disabled: disabled || isLoading } : {})}
+        {...commonProps as any}
       >
         {isLoading && (
           <span className={styles.spinner}>

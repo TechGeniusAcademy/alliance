@@ -20,7 +20,8 @@ import {
 import styles from './MasterProfile.module.css';
 
 // Mock master data
-const _masterData = {
+// Commented out unused data
+/* const masterData = {
   id: 1,
   name: 'Алексей Петров',
   specialty: 'Мастер корпусной мебели',

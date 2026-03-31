@@ -47,14 +47,15 @@ interface Order {
   status: string;
 }
 
-interface _Category {
-  name: string;
-  description: string;
-  icon: string;
-  mastersCount: number;
-  ordersCount: number;
-  avgRating: number;
-}
+// Unused interface - commented out
+// interface Category {
+//   name: string;
+//   description: string;
+//   icon: string;
+//   mastersCount: number;
+//   ordersCount: number;
+//   avgRating: number;
+// }
 
 // Маппинг категорий для фильтрации мастеров
 const categoryKeywords: Record<string, string[]> = {

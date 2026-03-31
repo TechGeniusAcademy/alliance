@@ -551,7 +551,7 @@ const Chats = () => {
     }
   }, [newMessage, selectedChat]);
 
-  const handleAcceptWork = async () => {
+  const _handleAcceptWork = async () => {
     if (!selectedChat) return;
 
     try {

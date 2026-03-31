@@ -176,7 +176,7 @@ VITE_API_URL=http://YOUR_SERVER_IP:5000
 
 **⚠️ Замените YOUR_SERVER_IP на:**
 - IP адрес сервера: `VITE_API_URL=http://123.45.67.89:5000`
-- Или домен: `VITE_API_URL=http://alliance.example.com:5000`
+- Или домен: `VITE_API_URL=http://alliancemebel.kz:5000`
 
 **Сохранить:** `Ctrl+O`, `Enter`, `Ctrl+X`
 
@@ -208,7 +208,7 @@ sudo nano /etc/nginx/sites-available/alliance
 ```nginx
 server {
     listen 80;
-    server_name ваш_домен.com www.ваш_домен.com;
+    server_name alliancemebel.kz www.alliancemebel.kz;
     # Если используете только IP, замените на: server_name ваш_IP_адрес;
 
     client_max_body_size 50M;
@@ -331,7 +331,7 @@ sudo -u postgres psql -d alliance_db -c "\dt"
 
 Откройте браузер и перейдите по адресу:
 - `http://ваш_IP_адрес` или
-- `http://ваш_домен.com`
+- `http://alliancemebel.kz`
 
 Вы должны увидеть главную страницу Alliance.
 
@@ -349,7 +349,7 @@ sudo -u postgres psql -d alliance_db -c "\dt"
 sudo apt install -y certbot python3-certbot-nginx
 
 # Получение SSL сертификата
-sudo certbot --nginx -d ваш_домен.com -d www.ваш_домен.com
+sudo certbot --nginx -d alliancemebel.kz -d www.alliancemebel.kz
 
 # Следуйте инструкциям Certbot (введите email, согласитесь с условиями)
 
@@ -357,7 +357,7 @@ sudo certbot --nginx -d ваш_домен.com -d www.ваш_домен.com
 sudo certbot renew --dry-run
 ```
 
-После установки SSL, сайт будет доступен по `https://ваш_домен.com`
+После установки SSL, сайт будет доступен по `https://alliancemebel.kz`
 
 ---
 
@@ -371,7 +371,7 @@ nano /var/www/alliance/client/.env
 
 Измените на:
 ```env
-VITE_API_URL=https://ваш_домен.com/api
+VITE_API_URL=https://alliancemebel.kz/api
 ```
 
 Затем пересоберите клиент:

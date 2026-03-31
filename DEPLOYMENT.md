@@ -719,6 +719,99 @@ nslookup alliancemebel.kz
 # Откройте сайт через IP напрямую, чтобы убрать CORS (origin будет совпадать)
 ```
 
+### Проблема: API не отвечает на порту 5000 (curl: Failed to connect)
+```bash
+# Симптом: 
+# curl http://localhost:5000/api/health → "Failed to connect to localhost port 5000"
+
+# ПОШАГОВАЯ ИНСТРУКЦИЯ:
+
+# ======= ШАГ 1: Проверка статуса PM2 =======
+pm2 status
+
+# Что смотрим:
+# - online/stopped - статус процесса
+# - ↺ (количество рестартов) - если больше 10-20, значит сервер постоянно падает
+
+# ======= ШАГ 2: Если сервер падает (много рестартов) =======
+# Посмотрите логи чтобы увидеть ПОЧЕМУ падает:
+pm2 logs alliance-server --lines 50
+
+# Распространенные ошибки:
+# - "Error: Neither apiKey nor config.authenticator provided" 
+#   → Не хватает STRIPE_SECRET_KEY в .env
+# - "EADDRINUSE: address already in use 0.0.0.0:5000"
+#   → Порт 5000 занят, читайте раздел ниже
+# - "Error: Failed to launch the browser process"
+#   → WhatsApp bot проблема, читайте раздел выше
+
+# ======= ШАГ 3: Полный перезапуск сервера =======
+cd /var/www/alliance
+
+# Получить последние изменения
+git pull origin main
+
+# Перейти в server директорию
+cd server
+
+# Проверить что .env файл существует и содержит ВСЕ переменные
+cat .env
+
+# Должно быть МИНИМУМ:
+# PORT=5000
+# DB_USER=alliance_user
+# DB_HOST=localhost
+# DB_NAME=alliance_db
+# DB_PASSWORD=00000000
+# DB_PORT=5432
+# JWT_SECRET=...
+# STRIPE_SECRET_KEY=
+# STRIPE_PUBLISHABLE_KEY=
+# WHATSAPP_PHONE_NUMBER=
+# NODE_ENV=production
+
+# Если чего-то не хватает, откройте файл и добавьте:
+nano .env
+
+# Установить зависимости (если были обновления)
+npm install
+
+# Собрать TypeScript код
+npm run build
+
+# Полностью удалить старый процесс PM2
+pm2 stop alliance-server
+pm2 delete alliance-server
+
+# Запустить заново
+pm2 start dist/index.js --name alliance-server
+
+# Сохранить конфигурацию PM2
+pm2 save
+
+# ======= ШАГ 4: Проверка что сервер запустился =======
+# Подождите 5-10 секунд и проверьте статус
+pm2 status
+
+# Статус должен быть "online", рестарты (↺) должны быть 0 или 1
+
+# Проверьте логи - должно быть "Server running on port 5000"
+pm2 logs alliance-server --lines 20
+
+# Проверьте что порт 5000 слушает
+sudo ss -tulpn | grep :5000
+
+# ======= ШАГ 5: Тест API =======
+curl http://localhost:5000/api/health
+
+# Должно вернуть: {"status":"ok"}
+
+# Если всё работает, перезапустите Nginx:
+sudo systemctl restart nginx
+
+# Откройте сайт в браузере: http://alliancemebel.kz
+```
+
 ### Проблема: Сайт открывается по IP, но API не работает (Connection refused)
 ```bash
 # Симптомы:

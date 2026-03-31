@@ -8,25 +8,25 @@ const Dashboard = () => {
   const statsCards = [
     {
       icon: MdShoppingCart,
-      title: 'Всего заказов',
+      title: t('dashboard.totalOrders'),
       value: '0',
       color: '#3b82f6'
     },
     {
       icon: MdHourglassEmpty,
-      title: 'В обработке',
+      title: t('dashboard.inProgress'),
       value: '0',
       color: '#f59e0b'
     },
     {
       icon: MdCheckCircle,
-      title: 'Выполнено',
+      title: t('dashboard.completed'),
       value: '0',
       color: '#10b981'
     },
     {
       icon: MdNotifications,
-      title: 'Уведомления',
+      title: t('dashboard.notifications'),
       value: '0',
       color: '#8b5cf6'
     }
@@ -35,7 +35,7 @@ const Dashboard = () => {
   return (
     <div className={styles.dashboard}>
       <h1 className={styles.title}>{t('sidebar.dashboard')}</h1>
-      <p className={styles.subtitle}>Добро пожаловать в личный кабинет!</p>
+      <p className={styles.subtitle}>{t('dashboard.welcome')}</p>
       
       <div className={styles.grid}>
         {statsCards.map((card, index) => {

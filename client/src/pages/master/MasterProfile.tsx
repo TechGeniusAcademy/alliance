@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
-import { MdPerson, MdSave, MdBusiness, MdWork, MdLanguage, MdSettings, MdAttachMoney, MdVerifiedUser } from 'react-icons/md';
+import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { MdPerson, MdSave, MdBusiness, MdWork, MdLanguage, MdSettings, MdAttachMoney, MdVerifiedUser, MdCameraAlt, MdDelete } from 'react-icons/md';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 import Toast from '../../components/Toast';
 import type { ToastType } from '../../components/Toast';
 import styles from './MasterProfile.module.css';
@@ -55,9 +57,12 @@ interface MasterProfileData {
 }
 
 const MasterProfile = () => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<MasterProfileData>({
     name: '',
@@ -112,7 +117,7 @@ const MasterProfile = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/master-profile', {
+      const response = await axios.get(`${API_BASE_URL}/api/master-profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -153,7 +158,7 @@ const MasterProfile = () => {
       });
     } catch (error) {
       console.error('Error loading profile:', error);
-      showToast('Ошибка при загрузке профиля', 'error');
+      showToast(t('masterProfile.notifications.loadError'), 'error');
     } finally {
       setLoading(false);
     }
@@ -166,14 +171,14 @@ const MasterProfile = () => {
       setSaving(true);
       const token = localStorage.getItem('token');
       
-      await axios.put('http://localhost:5000/api/master-profile', formData, {
+      await axios.put(`${API_BASE_URL}/api/master-profile`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
-      showToast('Профиль успешно обновлен', 'success');
+      showToast(t('masterProfile.notifications.updateSuccess'), 'success');
     } catch (error) {
       console.error('Error updating profile:', error);
-      showToast('Ошибка при сохранении профиля', 'error');
+      showToast(t('masterProfile.notifications.updateError'), 'error');
     } finally {
       setSaving(false);
     }
@@ -182,6 +187,60 @@ const MasterProfile = () => {
   const handleArrayInput = (field: keyof MasterProfileData, value: string) => {
     const array = value.split(',').map(item => item.trim()).filter(item => item);
     setFormData(prev => ({ ...prev, [field]: array }));
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Проверка типа файла
+    if (!file.type.startsWith('image/')) {
+      showToast(t('masterProfile.notifications.imageNotSelected'), 'error');
+      return;
+    }
+
+    // Проверка размера (макс 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showToast(t('masterProfile.notifications.imageTooLarge'), 'error');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      
+      // Преобразуем файл в Base64 и отображаем локально
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, profile_photo: reader.result as string }));
+        showToast(t('masterProfile.notifications.imageSelected'), 'success');
+        setUploading(false);
+      };
+      reader.readAsDataURL(file);
+      
+      // Примечание: Для настоящей загрузки используйте сервис типа Cloudinary, ImgBB или загрузку на свой сервер
+      // Пример с сервисом ImgBB (требуется API ключ):
+      // const formDataImg = new FormData();
+      // formDataImg.append('image', file);
+      // const imgResponse = await axios.post(
+      //   'https://api.imgbb.com/1/upload?key=YOUR_API_KEY',
+      //   formDataImg
+      // );
+      // setFormData(prev => ({ ...prev, profile_photo: imgResponse.data.data.url }));
+      
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      showToast(t('masterProfile.notifications.avatarUploadError'), 'error');
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteAvatar = () => {
+    setFormData(prev => ({ ...prev, profile_photo: '' }));
+    showToast(t('masterProfile.notifications.avatarDeleted'), 'success');
   };
 
   if (loading) {
@@ -197,10 +256,10 @@ const MasterProfile = () => {
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>
           <MdPerson size={32} />
-          Профиль мастера
+          {t('masterProfile.title')}
         </h1>
         <p className={styles.pageSubtitle}>
-          Заполните информацию о себе для привлечения клиентов
+          {t('masterProfile.subtitle')}
         </p>
       </div>
 
@@ -209,11 +268,83 @@ const MasterProfile = () => {
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>
             <MdPerson size={24} />
-            Основная информация
+            {t('masterProfile.sections.basicInfo')}
           </h2>
+          
+          {/* Аватар */}
+          <div className={styles.avatarSection}>
+            <div className={styles.avatarContainer}>
+              {formData.profile_photo ? (
+                <img 
+                  src={formData.profile_photo} 
+                  alt="Аватар" 
+                  className={styles.avatar}
+                  onError={(e) => {
+                    // Если изображение не загрузилось, показываем placeholder
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    const placeholder = (e.target as HTMLImageElement).nextElementSibling;
+                    if (placeholder) (placeholder as HTMLElement).style.display = 'flex';
+                  }}
+                />
+              ) : (
+                <div className={styles.avatarPlaceholder}>
+                  <MdPerson size={64} />
+                </div>
+              )}
+              {uploading && (
+                <div className={styles.avatarOverlay}>
+                  <div className={styles.spinner} />
+                </div>
+              )}
+            </div>
+            <div className={styles.avatarActions}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                style={{ display: 'none' }}
+              />
+              <button
+                type="button"
+                onClick={handleAvatarClick}
+                className={styles.uploadButton}
+                disabled={uploading}
+              >
+                <MdCameraAlt size={20} />
+                {formData.profile_photo ? t('masterProfile.avatar.change') : t('masterProfile.avatar.select')}
+              </button>
+              {formData.profile_photo && (
+                <button
+                  type="button"
+                  onClick={handleDeleteAvatar}
+                  className={styles.deleteButton}
+                  disabled={uploading}
+                >
+                  <MdDelete size={20} />
+                  {t('masterProfile.avatar.delete')}
+                </button>
+              )}
+              <p className={styles.avatarHint}>
+                {t('masterProfile.avatar.hint')}
+              </p>
+            </div>
+          </div>
+
+          {/* Поле для ввода URL изображения */}
+          <div className={styles.formGroup} style={{gridColumn: '1 / -1', marginTop: '-12px'}}>
+            <label>{t('masterProfile.avatar.urlLabel')}</label>
+            <input
+              type="url"
+              value={formData.profile_photo}
+              onChange={(e) => setFormData({...formData, profile_photo: e.target.value})}
+              placeholder={t('masterProfile.avatar.urlPlaceholder')}
+            />
+          </div>
+
           <div className={styles.grid2}>
             <div className={styles.formGroup}>
-              <label>Имя *</label>
+              <label>{t('masterProfile.fields.name')} *</label>
               <input
                 type="text"
                 value={formData.name}
@@ -222,48 +353,39 @@ const MasterProfile = () => {
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Название компании</label>
+              <label>{t('masterProfile.fields.companyName')}</label>
               <input
                 type="text"
                 value={formData.company_name}
                 onChange={(e) => setFormData({...formData, company_name: e.target.value})}
-                placeholder="ИП Мебельщик"
+                placeholder={t('masterProfile.fields.companyPlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Телефон</label>
+              <label>{t('masterProfile.fields.phone')}</label>
               <input
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                placeholder="+7 (777) 123-45-67"
+                placeholder={t('masterProfile.fields.phonePlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Адрес</label>
+              <label>{t('masterProfile.fields.address')}</label>
               <input
                 type="text"
                 value={formData.address}
                 onChange={(e) => setFormData({...formData, address: e.target.value})}
-                placeholder="Город, улица, дом"
+                placeholder={t('masterProfile.fields.addressPlaceholder')}
               />
             </div>
             <div className={styles.formGroup} style={{gridColumn: '1 / -1'}}>
-              <label>Ссылка на фото профиля</label>
-              <input
-                type="url"
-                value={formData.profile_photo}
-                onChange={(e) => setFormData({...formData, profile_photo: e.target.value})}
-                placeholder="https://..."
-              />
-            </div>
-            <div className={styles.formGroup} style={{gridColumn: '1 / -1'}}>
-              <label>О себе</label>
+              <label>{t('masterProfile.fields.bio')}</label>
               <textarea
                 value={formData.bio}
                 onChange={(e) => setFormData({...formData, bio: e.target.value})}
                 rows={4}
-                placeholder="Расскажите о своем опыте, достижениях и подходе к работе..."
+                placeholder={t('masterProfile.fields.bioPlaceholder')}
               />
             </div>
           </div>
@@ -273,11 +395,11 @@ const MasterProfile = () => {
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>
             <MdWork size={24} />
-            Профессиональная информация
+            {t('masterProfile.sections.professionalInfo')}
           </h2>
           <div className={styles.grid2}>
             <div className={styles.formGroup}>
-              <label>Опыт работы (лет)</label>
+              <label>{t('masterProfile.fields.experience')}</label>
               <input
                 type="number"
                 min="0"
@@ -286,30 +408,30 @@ const MasterProfile = () => {
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Специализации (через запятую)</label>
+              <label>{t('masterProfile.fields.specializations')}</label>
               <input
                 type="text"
                 value={formData.specializations.join(', ')}
                 onChange={(e) => handleArrayInput('specializations', e.target.value)}
-                placeholder="Кухни, Шкафы-купе, Корпусная мебель"
+                placeholder={t('masterProfile.fields.specializationsPlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Образование</label>
+              <label>{t('masterProfile.fields.education')}</label>
               <input
                 type="text"
                 value={formData.education}
                 onChange={(e) => setFormData({...formData, education: e.target.value})}
-                placeholder="Учебное заведение, специальность"
+                placeholder={t('masterProfile.fields.educationPlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Сертификаты (через запятую)</label>
+              <label>{t('masterProfile.fields.certifications')}</label>
               <input
                 type="text"
                 value={formData.certifications.join(', ')}
                 onChange={(e) => handleArrayInput('certifications', e.target.value)}
-                placeholder="Сертификат 1, Сертификат 2"
+                placeholder={t('masterProfile.fields.certificationsPlaceholder')}
               />
             </div>
           </div>
@@ -319,20 +441,20 @@ const MasterProfile = () => {
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>
             <MdSettings size={24} />
-            Условия работы
+            {t('masterProfile.sections.workConditions')}
           </h2>
           <div className={styles.grid2}>
             <div className={styles.formGroup}>
-              <label>График работы</label>
+              <label>{t('masterProfile.fields.workSchedule')}</label>
               <input
                 type="text"
                 value={formData.work_schedule}
                 onChange={(e) => setFormData({...formData, work_schedule: e.target.value})}
-                placeholder="Пн-Пт 9:00-18:00"
+                placeholder={t('masterProfile.fields.workSchedulePlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Минимальная сумма заказа (₸)</label>
+              <label>{t('masterProfile.fields.minOrderAmount')}</label>
               <input
                 type="number"
                 min="0"
@@ -341,7 +463,7 @@ const MasterProfile = () => {
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Макс. проектов одновременно</label>
+              <label>{t('masterProfile.fields.maxProjects')}</label>
               <input
                 type="number"
                 min="1"
@@ -351,12 +473,12 @@ const MasterProfile = () => {
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Услуги (через запятую)</label>
+              <label>{t('masterProfile.fields.services')}</label>
               <input
                 type="text"
                 value={formData.services_offered.join(', ')}
                 onChange={(e) => handleArrayInput('services_offered', e.target.value)}
-                placeholder="Изготовление, Ремонт, Реставрация"
+                placeholder={t('masterProfile.fields.servicesPlaceholder')}
               />
             </div>
           </div>
@@ -366,34 +488,34 @@ const MasterProfile = () => {
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>
             <MdBusiness size={24} />
-            Материалы и оборудование
+            {t('masterProfile.sections.materialsEquipment')}
           </h2>
           <div className={styles.grid2}>
             <div className={styles.formGroup}>
-              <label>Материалы (через запятую)</label>
+              <label>{t('masterProfile.fields.materials')}</label>
               <input
                 type="text"
                 value={formData.materials_work_with.join(', ')}
                 onChange={(e) => handleArrayInput('materials_work_with', e.target.value)}
-                placeholder="ЛДСП, МДФ, Массив, Шпон"
+                placeholder={t('masterProfile.fields.materialsPlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Оборудование</label>
+              <label>{t('masterProfile.fields.equipment')}</label>
               <input
                 type="text"
                 value={formData.equipment}
                 onChange={(e) => setFormData({...formData, equipment: e.target.value})}
-                placeholder="ЧПУ станок, Кромкооблицовочный станок"
+                placeholder={t('masterProfile.fields.equipmentPlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Размер мастерской</label>
+              <label>{t('masterProfile.fields.workspaceSize')}</label>
               <input
                 type="text"
                 value={formData.workspace_size}
                 onChange={(e) => setFormData({...formData, workspace_size: e.target.value})}
-                placeholder="50 кв.м"
+                placeholder={t('masterProfile.fields.workspaceSizePlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
@@ -403,17 +525,17 @@ const MasterProfile = () => {
                   checked={formData.has_showroom}
                   onChange={(e) => setFormData({...formData, has_showroom: e.target.checked})}
                 />
-                Есть шоурум
+                {t('masterProfile.fields.hasShowroom')}
               </label>
             </div>
             {formData.has_showroom && (
               <div className={styles.formGroup} style={{gridColumn: '1 / -1'}}>
-                <label>Адрес шоурума</label>
+                <label>{t('masterProfile.fields.showroomAddress')}</label>
                 <input
                   type="text"
                   value={formData.showroom_address}
                   onChange={(e) => setFormData({...formData, showroom_address: e.target.value})}
-                  placeholder="Город, улица, дом"
+                  placeholder={t('masterProfile.fields.showroomPlaceholder')}
                 />
               </div>
             )}
@@ -424,34 +546,34 @@ const MasterProfile = () => {
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>
             <MdAttachMoney size={24} />
-            Финансовые условия
+            {t('masterProfile.sections.financialTerms')}
           </h2>
           <div className={styles.grid2}>
             <div className={styles.formGroup}>
-              <label>Способы оплаты (через запятую)</label>
+              <label>{t('masterProfile.fields.paymentMethods')}</label>
               <input
                 type="text"
                 value={formData.payment_methods.join(', ')}
                 onChange={(e) => handleArrayInput('payment_methods', e.target.value)}
-                placeholder="Наличные, Kaspi, Банковский перевод"
+                placeholder={t('masterProfile.fields.paymentPlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Условия гарантии</label>
+              <label>{t('masterProfile.fields.warrantyTerms')}</label>
               <input
                 type="text"
                 value={formData.warranty_terms}
                 onChange={(e) => setFormData({...formData, warranty_terms: e.target.value})}
-                placeholder="12 месяцев на изделие"
+                placeholder={t('masterProfile.fields.warrantyPlaceholder')}
               />
             </div>
             <div className={styles.formGroup} style={{gridColumn: '1 / -1'}}>
-              <label>Политика возврата</label>
+              <label>{t('masterProfile.fields.returnPolicy')}</label>
               <textarea
                 value={formData.return_policy}
                 onChange={(e) => setFormData({...formData, return_policy: e.target.value})}
                 rows={3}
-                placeholder="Условия возврата и обмена..."
+                placeholder={t('masterProfile.fields.returnPlaceholder')}
               />
             </div>
           </div>
@@ -461,61 +583,61 @@ const MasterProfile = () => {
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>
             <MdLanguage size={24} />
-            Контакты и соцсети
+            {t('masterProfile.sections.contactsSocial')}
           </h2>
           <div className={styles.grid2}>
             <div className={styles.formGroup}>
-              <label>Веб-сайт</label>
+              <label>{t('masterProfile.fields.website')}</label>
               <input
                 type="url"
                 value={formData.website}
                 onChange={(e) => setFormData({...formData, website: e.target.value})}
-                placeholder="https://mysite.com"
+                placeholder={t('masterProfile.fields.websitePlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Instagram</label>
+              <label>{t('masterProfile.fields.instagram')}</label>
               <input
                 type="text"
                 value={formData.instagram}
                 onChange={(e) => setFormData({...formData, instagram: e.target.value})}
-                placeholder="@username"
+                placeholder={t('masterProfile.fields.instagramPlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Facebook</label>
+              <label>{t('masterProfile.fields.facebook')}</label>
               <input
                 type="text"
                 value={formData.facebook}
                 onChange={(e) => setFormData({...formData, facebook: e.target.value})}
-                placeholder="facebook.com/page"
+                placeholder={t('masterProfile.fields.facebookPlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Telegram</label>
+              <label>{t('masterProfile.fields.telegram')}</label>
               <input
                 type="text"
                 value={formData.telegram}
                 onChange={(e) => setFormData({...formData, telegram: e.target.value})}
-                placeholder="@username"
+                placeholder={t('masterProfile.fields.telegramPlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
-              <label>WhatsApp</label>
+              <label>{t('masterProfile.fields.whatsapp')}</label>
               <input
                 type="tel"
                 value={formData.whatsapp}
                 onChange={(e) => setFormData({...formData, whatsapp: e.target.value})}
-                placeholder="+7 777 123 45 67"
+                placeholder={t('masterProfile.fields.whatsappPlaceholder')}
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Языки (через запятую)</label>
+              <label>{t('masterProfile.fields.languages')}</label>
               <input
                 type="text"
                 value={formData.languages.join(', ')}
                 onChange={(e) => handleArrayInput('languages', e.target.value)}
-                placeholder="Русский, Казахский, Английский"
+                placeholder={t('masterProfile.fields.languagesPlaceholder')}
               />
             </div>
           </div>
@@ -525,7 +647,7 @@ const MasterProfile = () => {
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>
             <MdVerifiedUser size={24} />
-            Дополнительные услуги
+            {t('masterProfile.sections.additionalServices')}
           </h2>
           <div className={styles.checkboxGroup}>
             <label className={styles.checkboxLabel}>
@@ -534,7 +656,7 @@ const MasterProfile = () => {
                 checked={formData.delivery_available}
                 onChange={(e) => setFormData({...formData, delivery_available: e.target.checked})}
               />
-              Доставка доступна
+              {t('masterProfile.fields.deliveryAvailable')}
             </label>
             <label className={styles.checkboxLabel}>
               <input
@@ -542,7 +664,7 @@ const MasterProfile = () => {
                 checked={formData.assembly_available}
                 onChange={(e) => setFormData({...formData, assembly_available: e.target.checked})}
               />
-              Сборка доступна
+              {t('masterProfile.fields.assemblyAvailable')}
             </label>
             <label className={styles.checkboxLabel}>
               <input
@@ -550,7 +672,7 @@ const MasterProfile = () => {
                 checked={formData.design_services}
                 onChange={(e) => setFormData({...formData, design_services: e.target.checked})}
               />
-              Услуги дизайна
+              {t('masterProfile.fields.designServices')}
             </label>
             <label className={styles.checkboxLabel}>
               <input
@@ -558,7 +680,7 @@ const MasterProfile = () => {
                 checked={formData.consultation_free}
                 onChange={(e) => setFormData({...formData, consultation_free: e.target.checked})}
               />
-              Бесплатная консультация
+              {t('masterProfile.fields.consultationFree')}
             </label>
           </div>
         </div>
@@ -566,7 +688,7 @@ const MasterProfile = () => {
         <div className={styles.actions}>
           <button type="submit" className={styles.saveButton} disabled={saving}>
             <MdSave size={20} />
-            {saving ? 'Сохранение...' : 'Сохранить профиль'}
+            {saving ? t('masterProfile.actions.saving') : t('masterProfile.actions.save')}
           </button>
         </div>
       </form>

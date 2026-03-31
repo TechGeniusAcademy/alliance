@@ -22,6 +22,13 @@ import notificationsRoutes from './routes/notificationsRoutes';
 import statisticsRoutes from './routes/statisticsRoutes';
 import clientsRoutes from './routes/clientsRoutes';
 import settingsRoutes from './routes/settingsRoutes';
+import favoriteRoutes from './routes/favoriteRoutes';
+import portfolioFavoriteRoutes from './routes/portfolioFavoriteRoutes';
+import reviewRoutes from './routes/reviewRoutes';
+import aiRoutes from './routes/ai';
+import furniture3DRoutes from './routes/furniture3DRoutes';
+import feedbackRoutes from './routes/feedbackRoutes';
+import furnitureCostRoutes from './routes/furnitureCostRoutes';
 import pool, { initializeDatabase } from './config/database';
 import whatsappService from './services/whatsappService';
 
@@ -44,7 +51,8 @@ app.use(cors({
   origin: '*', // Разрешаем все источники для локальной сети
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -66,6 +74,16 @@ app.use('/api/notifications', notificationsRoutes);
 app.use('/api/statistics', statisticsRoutes);
 app.use('/api/clients', clientsRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/favorites', favoriteRoutes);
+app.use('/api/portfolio-favorites', portfolioFavoriteRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/furniture-3d', furniture3DRoutes);
+app.use('/api/feedback', feedbackRoutes);
+app.use('/api/furniture-cost', furnitureCostRoutes);
+
+// Статическая папка для файлов 3D моделей
+app.use('/uploads', express.static('uploads'));
 
 // Проверка подключения к базе данных
 app.get('/api/health', async (req, res) => {
@@ -84,20 +102,20 @@ io.on('connection', (socket) => {
   // Присоединиться к комнате чата
   socket.on('joinChat', (chatId: number) => {
     socket.join(`chat_${chatId}`);
-    console.log(`Пользователь ${socket.id} присоединился к чату ${chatId}`);
+    // console.log(`Пользователь ${socket.id} присоединился к чату ${chatId}`);
   });
 
   // Покинуть комнату чата
   socket.on('leaveChat', (chatId: number) => {
     socket.leave(`chat_${chatId}`);
-    console.log(`Пользователь ${socket.id} покинул чат ${chatId}`);
+    // console.log(`Пользователь ${socket.id} покинул чат ${chatId}`);
   });
 
   // Новое сообщение
   socket.on('sendMessage', async (data: { chatId: number; message: any }) => {
     // Отправляем сообщение всем в комнате чата (включая отправителя)
     io.to(`chat_${data.chatId}`).emit('newMessage', data.message);
-    console.log(`Новое сообщение в чате ${data.chatId}`);
+    // console.log(`Новое сообщение в чате ${data.chatId}`);
   });
 
   // Отметить сообщения как прочитанные
@@ -130,7 +148,7 @@ const startServer = async () => {
     
     // Инициализируем WhatsApp сервис (уже инициализируется при импорте)
     console.log('📱 WhatsApp сервис инициализирован');
-    console.log('💡 Если это первый запуск, отсканируйте QR код в WhatsApp');
+    console.log(' Если это первый запуск, отсканируйте QR код в WhatsApp');
     
     // Запускаем сервер (используем httpServer вместо app)
     // Слушаем на 0.0.0.0 для доступа по локальной сети

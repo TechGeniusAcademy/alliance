@@ -57,7 +57,7 @@ class WhatsAppService {
 
     // Отключение
     this.client.on('disconnected', (reason) => {
-      console.log('⚠️ WhatsApp клиент отключен:', reason);
+      console.log(' WhatsApp клиент отключен:', reason);
       this.isReady = false;
     });
 
@@ -84,7 +84,7 @@ class WhatsAppService {
     }
   ): Promise<boolean> {
     if (!this.isReady || !this.client) {
-      console.error('⚠️ WhatsApp клиент не готов');
+      console.error(' WhatsApp клиент не готов');
       return false;
     }
 
@@ -107,7 +107,7 @@ class WhatsAppService {
       // Проверяем, существует ли номер в WhatsApp
       const numberExists = await this.client.isRegisteredUser(chatId);
       if (!numberExists) {
-        console.warn(`⚠️ Номер ${phoneNumber} не зарегистрирован в WhatsApp`);
+        console.warn(` Номер ${phoneNumber} не зарегистрирован в WhatsApp`);
         return false;
       }
 
@@ -143,7 +143,7 @@ class WhatsAppService {
 
     return `🔔 *Новый заказ на аукционе!*
 
-📋 *Заказ #${orderData.id}*
+ *Заказ #${orderData.id}*
 ${orderData.title}
 
 📂 *Категория:* ${this.translateCategory(orderData.category)}
@@ -175,7 +175,7 @@ _Не упустите возможность получить новый зак
     }
   ): Promise<boolean> {
     if (!this.isReady || !this.client) {
-      console.error('⚠️ WhatsApp клиент не готов');
+      console.error(' WhatsApp клиент не готов');
       return false;
     }
 
@@ -192,7 +192,7 @@ _Не упустите возможность получить новый зак
 
       const message = `🎉 *Поздравляем! Ваша ставка принята!*
 
-📋 *Заказ #${orderData.id}*
+ *Заказ #${orderData.id}*
 ${orderData.title}
 
 💰 *Сумма:* ${orderData.acceptedPrice.toLocaleString('ru-RU')} ₸
@@ -209,6 +209,86 @@ _Начинайте работу над проектом!_ 🚀`;
     } catch (error) {
       console.error('❌ Ошибка отправки уведомления о ставке:', error);
       return false;
+    }
+  }
+
+  /**
+   * Отправить уведомление клиенту о новой ставке на его заказ
+   */
+  async sendNewBidNotification(
+    phoneNumber: string,
+    bidData: {
+      orderId: number;
+      orderTitle: string;
+      masterName: string;
+      masterRating: number;
+      proposedPrice: number;
+      estimatedDays: number;
+      comment: string;
+      completedProjectsCount: number;
+    }
+  ): Promise<boolean> {
+    if (!this.isReady || !this.client) {
+      console.error('⚠️ WhatsApp клиент не готов');
+      return false;
+    }
+
+    try {
+      // Форматируем номер телефона
+      let formattedPhone = phoneNumber.replace(/\D/g, '');
+      if (formattedPhone.startsWith('8')) {
+        formattedPhone = '7' + formattedPhone.substring(1);
+      }
+      if (!formattedPhone.startsWith('7') && formattedPhone.length === 10) {
+        formattedPhone = '7' + formattedPhone;
+      }
+
+      const chatId = formattedPhone + '@c.us';
+
+      // Проверяем, существует ли номер в WhatsApp
+      const numberExists = await this.client.isRegisteredUser(chatId);
+      if (!numberExists) {
+        console.warn(`⚠️ Номер ${phoneNumber} не зарегистрирован в WhatsApp`);
+        return false;
+      }
+
+      // Формируем сообщение
+      const ratingStars = '⭐'.repeat(Math.round(bidData.masterRating));
+      const message = `🔔 *Новый отклик на ваш заказ!*
+
+📋 *Заказ #${bidData.orderId}*
+${bidData.orderTitle}
+
+👨‍🔧 *Мебельщик:* ${bidData.masterName}
+${ratingStars} *${bidData.masterRating.toFixed(1)}* (${bidData.completedProjectsCount} выполненных заказов)
+
+💰 *Предложенная цена:* ${bidData.proposedPrice.toLocaleString('ru-RU')} ₸
+⏱ *Срок выполнения:* ${bidData.estimatedDays} ${this.getDaysWord(bidData.estimatedDays)}
+
+${bidData.comment ? `💬 *Комментарий мебельщика:*\n"${bidData.comment}"\n` : ''}
+🔗 *Смотреть все отклики:* http://localhost:5173/orders/${bidData.orderId}/bids
+
+_Выберите лучшее предложение!_ ✨`;
+
+      await this.client.sendMessage(chatId, message);
+      console.log(`✅ Уведомление о новой ставке отправлено клиенту: ${phoneNumber}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Ошибка отправки уведомления о ставке клиенту:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Вспомогательная функция для склонения слова "день"
+   */
+  private getDaysWord(days: number): string {
+    if (days % 10 === 1 && days % 100 !== 11) {
+      return 'день';
+    } else if ([2, 3, 4].includes(days % 10) && ![12, 13, 14].includes(days % 100)) {
+      return 'дня';
+    } else {
+      return 'дней';
     }
   }
 
@@ -236,8 +316,77 @@ _Начинайте работу над проектом!_ 🚀`;
       }
     }
 
-    console.log(`📊 Результаты массовой рассылки: успешно ${success}, ошибок ${failed}`);
+    console.log(`Результаты массовой рассылки: успешно ${success}, ошибок ${failed}`);
     return { success, failed };
+  }
+
+  /**
+   * Отправить уведомление клиенту о завершении этапа работы
+   */
+  async sendWorkStageNotification(
+    phoneNumber: string,
+    orderData: {
+      id: number;
+      title: string;
+      stage: string;
+      stageName: string;
+      masterName: string;
+    }
+  ): Promise<boolean> {
+    if (!this.isReady || !this.client) {
+      console.error(' WhatsApp клиент не готов');
+      return false;
+    }
+
+    try {
+      let formattedPhone = phoneNumber.replace(/\D/g, '');
+      if (formattedPhone.startsWith('8')) {
+        formattedPhone = '7' + formattedPhone.substring(1);
+      }
+      if (!formattedPhone.startsWith('7') && formattedPhone.length === 10) {
+        formattedPhone = '7' + formattedPhone;
+      }
+
+      const chatId = formattedPhone + '@c.us';
+
+      const numberExists = await this.client.isRegisteredUser(chatId);
+      if (!numberExists) {
+        console.warn(` Номер ${phoneNumber} не зарегистрирован в WhatsApp`);
+        return false;
+      }
+
+      const stageEmojis: { [key: string]: string } = {
+        'design': '📐',
+        'materials': '🛒',
+        'production': '🔨',
+        'assembly': '🔧',
+        'quality_check': '✅',
+        'packaging': '📦',
+        'ready_for_delivery': '🚚'
+      };
+
+      const emoji = stageEmojis[orderData.stage] || '✔️';
+
+      const message = `${emoji} *Обновление по заказу!*
+
+ *Заказ #${orderData.id}*
+${orderData.title}
+
+📋 *Этап:* ${orderData.stageName}
+
+👨‍🔧 *Мастер:* ${orderData.masterName}
+
+_Работа продвигается по плану!_ 🎯
+
+🔗 *Подробнее:* http://localhost:5173/dashboard/active-orders`;
+
+      await this.client.sendMessage(chatId, message);
+      console.log(`✅ Уведомление об этапе "${orderData.stage}" отправлено: ${phoneNumber}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Ошибка отправки уведомления об этапе:', error);
+      return false;
+    }
   }
 
   /**

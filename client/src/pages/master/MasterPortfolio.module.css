@@ -3,7 +3,7 @@
   max-width: 1400px;
   margin: 0 auto;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #f5f7fa;
 }
 
 .pageHeader {
@@ -314,9 +314,9 @@
 .modal {
   background: white;
   border-radius: 16px;
-  max-width: 700px;
+  max-width: 900px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 95vh;
   overflow-y: auto;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.3s ease;

@@ -12,7 +12,7 @@ interface AuthRequest extends Request {
 // Получить все уведомления пользователя
 export const getNotifications = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.id || req.userId;
 
     const result = await pool.query(
       `SELECT 
@@ -30,9 +30,18 @@ export const getNotifications = async (req: AuthRequest, res: Response) => {
       [userId]
     );
 
-    res.json({
-      notifications: result.rows
-    });
+    // Маппим поля БД на frontend формат
+    const notifications = result.rows.map(row => ({
+      id: row.id,
+      type: row.type,
+      title: row.title,
+      message: row.message,
+      isRead: row.is_read,
+      createdAt: row.created_at,
+      actionUrl: row.link || undefined
+    }));
+
+    res.json(notifications);
   } catch (error) {
     console.error('Ошибка получения уведомлений:', error);
     res.status(500).json({ error: 'Ошибка сервера' });
@@ -42,7 +51,7 @@ export const getNotifications = async (req: AuthRequest, res: Response) => {
 // Отметить уведомление как прочитанное
 export const markAsRead = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.id || req.userId;
     const { id } = req.params;
 
     await pool.query(
@@ -62,7 +71,7 @@ export const markAsRead = async (req: AuthRequest, res: Response) => {
 // Отметить все уведомления как прочитанные
 export const markAllAsRead = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.id || req.userId;
 
     await pool.query(
       `UPDATE notifications 
@@ -81,7 +90,7 @@ export const markAllAsRead = async (req: AuthRequest, res: Response) => {
 // Удалить уведомление
 export const deleteNotification = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.id || req.userId;
     const { id } = req.params;
 
     await pool.query(
@@ -100,7 +109,7 @@ export const deleteNotification = async (req: AuthRequest, res: Response) => {
 // Удалить все прочитанные уведомления
 export const deleteAllRead = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.id || req.userId;
 
     await pool.query(
       `DELETE FROM notifications 
@@ -118,7 +127,7 @@ export const deleteAllRead = async (req: AuthRequest, res: Response) => {
 // Получить количество непрочитанных уведомлений
 export const getUnreadCount = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.id || req.userId;
 
     const result = await pool.query(
       `SELECT COUNT(*) as count 

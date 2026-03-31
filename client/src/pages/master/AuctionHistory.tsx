@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { MdHistory, MdAttachMoney, MdTimer, MdCheckCircle, MdCancel, MdHourglassEmpty } from 'react-icons/md';
+import { useTranslation } from 'react-i18next';
+import { MdAttachMoney, MdTimer, MdCheckCircle, MdCancel, MdHourglassEmpty } from 'react-icons/md';
 import bidService from '../../services/bidService';
 import type { Bid } from '../../services/bidService';
 import Toast from '../../components/Toast';
@@ -13,6 +14,7 @@ interface ToastMessage {
 }
 
 const AuctionHistory = () => {
+  const { t } = useTranslation();
   const [bids, setBids] = useState<Bid[]>([]);
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -38,7 +40,7 @@ const AuctionHistory = () => {
       setBids(data);
     } catch (error) {
       console.error('Error loading bids:', error);
-      showToast('Ошибка при загрузке ставок', 'error');
+      showToast(t('auctionHistory.notifications.errorLoading'), 'error');
     } finally {
       setLoading(false);
     }
@@ -47,11 +49,11 @@ const AuctionHistory = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'accepted':
-        return { icon: <MdCheckCircle size={18} />, text: 'Принята', color: '#48bb78' };
+        return { icon: <MdCheckCircle size={18} />, text: t('auctionHistory.status.accepted'), color: '#48bb78' };
       case 'rejected':
-        return { icon: <MdCancel size={18} />, text: 'Отклонена', color: '#f56565' };
+        return { icon: <MdCancel size={18} />, text: t('auctionHistory.status.rejected'), color: '#f56565' };
       default:
-        return { icon: <MdHourglassEmpty size={18} />, text: 'В ожидании', color: '#ed8936' };
+        return { icon: <MdHourglassEmpty size={18} />, text: t('auctionHistory.status.pending'), color: '#ed8936' };
     }
   };
 
@@ -76,18 +78,17 @@ const AuctionHistory = () => {
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>
-          <MdHistory style={{ verticalAlign: 'middle', marginRight: '12px' }} />
-          Мои ставки
+          {t('auctionHistory.title')}
         </h1>
         <p style={{ color: '#718096', marginTop: '8px' }}>
-          Все ваши предложения на заказы
+          {t('auctionHistory.subtitle')}
         </p>
       </div>
 
       {bids.length === 0 ? (
         <div className={styles.section}>
           <p style={{ textAlign: 'center', color: '#718096', padding: '40px' }}>
-            У вас пока нет ставок
+            {t('auctionHistory.noBids')}
           </p>
         </div>
       ) : (
@@ -103,7 +104,7 @@ const AuctionHistory = () => {
                     </h3>
                     {bid.customer_name && (
                       <p style={{ margin: '0 0 8px 0', color: '#718096', fontSize: '0.9rem' }}>
-                        Клиент: {bid.customer_name}
+                        {t('auctionHistory.labels.client')} {bid.customer_name}
                       </p>
                     )}
                   </div>
@@ -127,7 +128,7 @@ const AuctionHistory = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: '#f7fafc', borderRadius: '8px' }}>
                     <MdAttachMoney size={24} color="#667eea" />
                     <div>
-                      <div style={{ fontSize: '0.75rem', color: '#718096' }}>Ваше предложение</div>
+                      <div style={{ fontSize: '0.75rem', color: '#718096' }}>{t('auctionHistory.labels.yourOffer')}</div>
                       <div style={{ fontSize: '1rem', fontWeight: '600', color: '#2d3748' }}>
                         {formatPrice(bid.proposed_price)}
                       </div>
@@ -137,9 +138,9 @@ const AuctionHistory = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: '#f7fafc', borderRadius: '8px' }}>
                     <MdTimer size={24} color="#667eea" />
                     <div>
-                      <div style={{ fontSize: '0.75rem', color: '#718096' }}>Срок выполнения</div>
+                      <div style={{ fontSize: '0.75rem', color: '#718096' }}>{t('auctionHistory.labels.completionTime')}</div>
                       <div style={{ fontSize: '1rem', fontWeight: '600', color: '#2d3748' }}>
-                        {bid.estimated_days} {bid.estimated_days === 1 ? 'день' : 'дней'}
+                        {bid.estimated_days} {bid.estimated_days === 1 ? t('auctionHistory.labels.day') : t('auctionHistory.labels.days')}
                       </div>
                     </div>
                   </div>
@@ -148,7 +149,7 @@ const AuctionHistory = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: '#f7fafc', borderRadius: '8px' }}>
                       <MdAttachMoney size={24} color="#718096" />
                       <div>
-                        <div style={{ fontSize: '0.75rem', color: '#718096' }}>Бюджет клиента</div>
+                        <div style={{ fontSize: '0.75rem', color: '#718096' }}>{t('auctionHistory.labels.clientBudget')}</div>
                         <div style={{ fontSize: '1rem', fontWeight: '600', color: '#2d3748' }}>
                           {formatPrice(bid.budget_min)} - {formatPrice(bid.budget_max)}
                         </div>
@@ -160,7 +161,7 @@ const AuctionHistory = () => {
                 {bid.comment && (
                   <div style={{ marginBottom: '12px', padding: '12px', background: '#f7fafc', borderRadius: '8px' }}>
                     <div style={{ fontSize: '0.85rem', fontWeight: '600', color: '#4a5568', marginBottom: '4px' }}>
-                      Ваш комментарий:
+                      {t('auctionHistory.labels.yourComment')}
                     </div>
                     <p style={{ margin: 0, color: '#718096', fontSize: '0.9rem' }}>
                       {bid.comment}
@@ -169,7 +170,7 @@ const AuctionHistory = () => {
                 )}
 
                 <div style={{ fontSize: '0.85rem', color: '#a0aec0' }}>
-                  Создано: {formatDate(bid.created_at)}
+                  {t('auctionHistory.labels.created')} {formatDate(bid.created_at)}
                 </div>
               </div>
             );

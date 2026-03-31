@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, Grid } from '@react-three/drei';
-import { MdShoppingCart, MdAttachMoney, MdCalendarToday, MdLocationOn, MdPerson, MdTimer, MdClose, MdTrendingUp, MdEdit, MdImage, MdViewInAr, MdLocalShipping, MdBuild, MdCategory, MdStraighten } from 'react-icons/md';
+import { MdShoppingCart, MdAttachMoney, MdCalendarToday, MdLocationOn, MdPerson, MdTimer, MdClose, MdTrendingUp, MdEdit, MdImage, MdViewInAr, MdLocalShipping, MdBuild, MdCategory, MdStraighten, MdSearch, MdSort, MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import { orderService, type AuctionOrder } from '../../services/orderService';
 import bidService from '../../services/bidService';
 import type { Bid, BidCompetition } from '../../services/bidService';
@@ -9,7 +10,7 @@ import { commissionService, type CommissionCalculation } from '../../services/co
 import { Bed, Wardrobe, Table, Chair, Sofa, Dresser, Grill } from '../../components/3d/FurnitureModels';
 import Toast from '../../components/Toast';
 import type { ToastType } from '../../components/Toast';
-import styles from './Master.module.css';
+import styles from './MasterOrders.module.css';
 
 interface ToastMessage {
   id: number;
@@ -18,6 +19,7 @@ interface ToastMessage {
 }
 
 const MasterOrders = () => {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<AuctionOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -32,6 +34,17 @@ const MasterOrders = () => {
   const [submittingBid, setSubmittingBid] = useState(false);
   const [commissionInfo, setCommissionInfo] = useState<CommissionCalculation | null>(null);
 
+  // Фильтры и поиск
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterBudget, setFilterBudget] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'date' | 'price' | 'bids'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  
+  // Пагинация
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 9;
+
   const showToast = (message: string, type: ToastType) => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, type }]);
@@ -41,10 +54,20 @@ const MasterOrders = () => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   };
 
+  const getBidsText = (count: number) => {
+    if (count === 1) return t('masterOrders.bids');
+    return t('masterOrders.bidsPlural');
+  };
+
   useEffect(() => {
     loadAuctionOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Сбросить на первую страницу при изменении фильтров
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterCategory, filterBudget, sortBy, sortOrder]);
 
   const loadAuctionOrders = async () => {
     try {
@@ -55,7 +78,7 @@ const MasterOrders = () => {
       setOrders(data);
     } catch (error) {
       console.error('Error loading auction orders:', error);
-      showToast('Ошибка при загрузке заказов', 'error');
+      showToast(t('masterOrders.notifications.errorLoading'), 'error');
     } finally {
       setLoading(false);
     }
@@ -137,12 +160,12 @@ const MasterOrders = () => {
     const days = parseInt(bidDays);
 
     if (isNaN(price) || price <= 0) {
-      showToast('Укажите корректную цену', 'error');
+      showToast(t('masterOrders.notifications.errorPrice'), 'error');
       return;
     }
 
     if (isNaN(days) || days <= 0) {
-      showToast('Укажите корректный срок выполнения', 'error');
+      showToast(t('masterOrders.notifications.errorDuration'), 'error');
       return;
     }
 
@@ -154,7 +177,7 @@ const MasterOrders = () => {
         comment: bidComment,
       });
 
-      showToast(existingBid ? 'Ставка обновлена!' : 'Ставка успешно создана!', 'success');
+      showToast(existingBid ? t('masterOrders.notifications.bidUpdated') : t('masterOrders.notifications.bidCreated'), 'success');
       handleCloseBidModal();
       loadAuctionOrders(); // Перезагружаем заказы
     } catch (error: unknown) {
@@ -166,11 +189,11 @@ const MasterOrders = () => {
         const unpaidCount = err.response.data.unpaidCount || 0;
         const totalUnpaid = err.response.data.totalUnpaid || 0;
         showToast(
-          `У вас есть ${unpaidCount} неоплаченных комиссий на сумму ${totalUnpaid.toFixed(2)}₸. Пожалуйста, оплатите их в разделе "Комиссии" или пополните кошелек.`,
+          t('masterOrders.notifications.errorUnpaid', { count: unpaidCount, total: totalUnpaid.toFixed(2) }),
           'error'
         );
       } else {
-        showToast(err.response?.data?.message || 'Ошибка при создании ставки', 'error');
+        showToast(err.response?.data?.message || t('masterOrders.notifications.errorGeneral'), 'error');
       }
     } finally {
       setSubmittingBid(false);
@@ -187,6 +210,84 @@ const MasterOrders = () => {
     return new Intl.NumberFormat('ru-RU').format(price) + ' ₸';
   };
 
+  // Фильтрация и сортировка заказов
+  const filteredAndSortedOrders = useMemo(() => {
+    let filtered = [...orders];
+
+    // Поиск по названию и описанию
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(order => 
+        order.title.toLowerCase().includes(query) ||
+        order.description.toLowerCase().includes(query) ||
+        order.customer_name?.toLowerCase().includes(query)
+      );
+    }
+
+    // Фильтр по категории
+    if (filterCategory !== 'all') {
+      filtered = filtered.filter(order => 
+        order.category === filterCategory || order.furniture_type === filterCategory
+      );
+    }
+
+    // Фильтр по бюджету
+    if (filterBudget !== 'all') {
+      filtered = filtered.filter(order => {
+        if (!order.budget_max) return true;
+        
+        switch (filterBudget) {
+          case 'low':
+            return order.budget_max <= 100000;
+          case 'medium':
+            return order.budget_max > 100000 && order.budget_max <= 500000;
+          case 'high':
+            return order.budget_max > 500000;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Сортировка
+    filtered.sort((a, b) => {
+      let compareValue = 0;
+
+      switch (sortBy) {
+        case 'date':
+          compareValue = new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          break;
+        case 'price':
+          compareValue = (b.budget_max || 0) - (a.budget_max || 0);
+          break;
+        case 'bids':
+          compareValue = (b.bids_count || 0) - (a.bids_count || 0);
+          break;
+      }
+
+      return sortOrder === 'asc' ? -compareValue : compareValue;
+    });
+
+    return filtered;
+  }, [orders, searchQuery, filterCategory, filterBudget, sortBy, sortOrder]);
+
+  // Пагинация
+  const totalPages = Math.ceil(filteredAndSortedOrders.length / ordersPerPage);
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * ordersPerPage;
+    return filteredAndSortedOrders.slice(startIndex, startIndex + ordersPerPage);
+  }, [filteredAndSortedOrders, currentPage, ordersPerPage]);
+
+  // Получить уникальные категории
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    orders.forEach(order => {
+      if (order.category) cats.add(order.category);
+      if (order.furniture_type) cats.add(order.furniture_type);
+    });
+    return Array.from(cats);
+  }, [orders]);
+
   if (loading) {
     return (
       <div className={styles.pageContainer}>
@@ -199,95 +300,195 @@ const MasterOrders = () => {
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>
-          <MdShoppingCart style={{ verticalAlign: 'middle', marginRight: '12px' }} />
-          Аукцион заказов
+          <MdShoppingCart className={styles.titleIcon} />
+          {t('masterOrders.title')}
+          {(searchQuery || filterCategory !== 'all' || filterBudget !== 'all') && (
+            <span className={styles.filterBadge}>
+              {[searchQuery ? 1 : 0, filterCategory !== 'all' ? 1 : 0, filterBudget !== 'all' ? 1 : 0].reduce((a, b) => a + b, 0)} {t('masterOrders.activeFilters')}
+            </span>
+          )}
         </h1>
-        <p style={{ color: '#718096', marginTop: '8px' }}>
-          Все доступные заказы от клиентов
+        <p className={styles.pageSubtitle}>
+          {t('masterOrders.subtitle')}
         </p>
       </div>
 
+      {/* Фильтры и поиск */}
+      {orders.length > 0 && (
+        <div className={styles.filterSection}>
+          {/* Поиск */}
+          <div className={styles.searchBox}>
+            <MdSearch size={20} className={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder={t('masterOrders.searchPlaceholder')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={styles.searchInput}
+            />
+          </div>
+
+          {/* Фильтры */}
+          <div className={styles.filtersRow}>
+            <div className={styles.filterGroup}>
+              <label className={styles.filterLabel}>
+                <MdCategory size={18} />
+                {t('masterOrders.category')}
+              </label>
+              <select 
+                value={filterCategory} 
+                onChange={(e) => setFilterCategory(e.target.value)}
+                className={styles.filterSelect}
+              >
+                <option value="all">{t('masterOrders.allCategories')}</option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.filterGroup}>
+              <label className={styles.filterLabel}>
+                <MdAttachMoney size={18} />
+                {t('masterOrders.budgetFilter')}
+              </label>
+              <select 
+                value={filterBudget} 
+                onChange={(e) => setFilterBudget(e.target.value)}
+                className={styles.filterSelect}
+              >
+                <option value="all">{t('masterOrders.anyBudget')}</option>
+                <option value="low">{t('masterOrders.budgetLow')}</option>
+                <option value="medium">{t('masterOrders.budgetMedium')}</option>
+                <option value="high">{t('masterOrders.budgetHigh')}</option>
+              </select>
+            </div>
+
+            <div className={styles.filterGroup}>
+              <label className={styles.filterLabel}>
+                <MdSort size={18} />
+                {t('masterOrders.sortBy')}
+              </label>
+              <select 
+                value={`${sortBy}-${sortOrder}`}
+                onChange={(e) => {
+                  const [by, order] = e.target.value.split('-') as ['date' | 'price' | 'bids', 'asc' | 'desc'];
+                  setSortBy(by);
+                  setSortOrder(order);
+                }}
+                className={styles.filterSelect}
+              >
+                <option value="date-desc">{t('masterOrders.sortNewest')}</option>
+                <option value="date-asc">{t('masterOrders.sortOldest')}</option>
+                <option value="price-desc">{t('masterOrders.sortPriceDesc')}</option>
+                <option value="price-asc">{t('masterOrders.sortPriceAsc')}</option>
+                <option value="bids-desc">{t('masterOrders.sortBidsDesc')}</option>
+                <option value="bids-asc">{t('masterOrders.sortBidsAsc')}</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Информация о результатах */}
+          <div className={styles.resultsInfo}>
+            <div>
+              {t('masterOrders.found')} <span className={styles.resultsCount}>{filteredAndSortedOrders.length}</span> {t('masterOrders.of')} {orders.length} {t('masterOrders.orders')}
+            </div>
+            {(searchQuery || filterCategory !== 'all' || filterBudget !== 'all') && (
+              <button 
+                onClick={() => {
+                  setSearchQuery('');
+                  setFilterCategory('all');
+                  setFilterBudget('all');
+                  setCurrentPage(1);
+                }}
+                className={styles.clearFilters}
+              >
+                {t('masterOrders.clearFilters')}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {orders.length === 0 ? (
-        <div className={styles.section}>
-          <p style={{ textAlign: 'center', color: '#718096', padding: '40px' }}>
-            Нет доступных заказов в аукционе
-          </p>
+        <div className={styles.emptyState}>
+          <p>{t('masterOrders.noOrders')}</p>
+        </div>
+      ) : filteredAndSortedOrders.length === 0 ? (
+        <div className={styles.emptyState}>
+          <p>{t('masterOrders.noResults')}</p>
+          <button 
+            onClick={() => {
+              setSearchQuery('');
+              setFilterCategory('all');
+              setFilterBudget('all');
+            }}
+            className={styles.clearFilters}
+            style={{ marginTop: '16px' }}
+          >
+            {t('masterOrders.clearFilters')}
+          </button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: '20px' }}>
-          {orders.map((order) => (
+        <>
+          <div className={styles.ordersGrid}>
+            {paginatedOrders.map((order) => (
             <div 
               key={order.id} 
-              className={styles.section} 
-              style={{ padding: '24px', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}
+              className={styles.orderCard}
               onClick={() => handleOpenDetailsModal(order)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+              <div className={styles.orderHeader}>
                 <div>
-                  <h3 style={{ margin: '0 0 8px 0', fontSize: '1.3rem', color: '#2d3748' }}>
+                  <h3 className={styles.orderTitle}>
                     {order.title}
                   </h3>
-                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '0.9rem', color: '#718096' }}>
+                  <div className={styles.orderMeta}>
                     {order.customer_name && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div className={styles.metaItem}>
                         <MdPerson size={18} />
                         <span>{order.customer_name}</span>
                       </div>
                     )}
                     {order.customer_address && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div className={styles.metaItem}>
                         <MdLocationOn size={18} />
                         <span>{order.customer_address}</span>
                       </div>
                     )}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div className={styles.metaItem}>
                       <MdTimer size={18} />
-                      <span>Создан: {formatDate(order.created_at)}</span>
+                      <span>{t('masterOrders.createdOn')} {formatDate(order.created_at)}</span>
                     </div>
                   </div>
                 </div>
-                <div style={{ 
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  padding: '8px 16px',
-                  borderRadius: '20px',
-                  fontSize: '0.85rem',
-                  fontWeight: '600'
-                }}>
-                  {order.bids_count || 0} {order.bids_count === 1 ? 'ставка' : 'ставок'}
+                <div className={styles.bidsBadge}>
+                  {order.bids_count || 0} {getBidsText(order.bids_count || 0)}
                 </div>
               </div>
 
-              <p style={{ margin: '0 0 16px 0', color: '#4a5568', lineHeight: '1.6' }}>
+              <p className={styles.orderDescription}>
                 {order.description}
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+              <div className={styles.orderDetails}>
                 {order.budget_min && order.budget_max && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: '#f7fafc', borderRadius: '8px' }}>
+                  <div className={styles.detailItem}>
                     <MdAttachMoney size={24} color="#667eea" />
                     <div>
-                      <div style={{ fontSize: '0.75rem', color: '#718096' }}>Бюджет</div>
-                      <div style={{ fontSize: '1rem', fontWeight: '600', color: '#2d3748' }}>
+                      <div className={styles.detailLabel}>{t('masterOrders.budgetLabel')}</div>
+                      <div className={styles.detailValue}>
                         {formatPrice(order.budget_min)} - {formatPrice(order.budget_max)}
                       </div>
                     </div>
                   </div>
                 )}
                 {order.deadline && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: '#f7fafc', borderRadius: '8px' }}>
+                  <div className={styles.detailItem}>
                     <MdCalendarToday size={24} color="#667eea" />
                     <div>
-                      <div style={{ fontSize: '0.75rem', color: '#718096' }}>Срок выполнения</div>
-                      <div style={{ fontSize: '1rem', fontWeight: '600', color: '#2d3748' }}>
+                      <div className={styles.detailLabel}>{t('masterOrders.deadline')}</div>
+                      <div className={styles.detailValue}>
                         {formatDate(order.deadline)}
                       </div>
                     </div>
@@ -296,163 +497,147 @@ const MasterOrders = () => {
               </div>
 
               {(order.materials || order.dimensions) && (
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                <div className={styles.orderSpecs}>
                   {order.materials && (
-                    <div style={{ fontSize: '0.9rem', color: '#4a5568' }}>
-                      <strong>Материалы:</strong> {order.materials}
+                    <div>
+                      <strong>{t('masterOrders.materials')}</strong> {order.materials}
                     </div>
                   )}
                   {order.dimensions && (
-                    <div style={{ fontSize: '0.9rem', color: '#4a5568' }}>
-                      <strong>Размеры:</strong> {order.dimensions}
+                    <div>
+                      <strong>{t('masterOrders.dimensions')}</strong> {order.dimensions}
                     </div>
                   )}
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div className={styles.orderTags}>
                 {order.delivery_required && (
-                  <span style={{ 
-                    padding: '6px 12px', 
-                    background: '#edf2f7', 
-                    borderRadius: '6px', 
-                    fontSize: '0.85rem',
-                    color: '#4a5568'
-                  }}>
-                    Требуется доставка
+                  <span className={styles.tag}>
+                    {t('masterOrders.deliveryRequired')}
                   </span>
                 )}
                 {order.assembly_required && (
-                  <span style={{ 
-                    padding: '6px 12px', 
-                    background: '#edf2f7', 
-                    borderRadius: '6px', 
-                    fontSize: '0.85rem',
-                    color: '#4a5568'
-                  }}>
-                    Требуется сборка
+                  <span className={styles.tag}>
+                    {t('masterOrders.assemblyRequired')}
                   </span>
                 )}
               </div>
 
-              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e2e8f0' }}>
+              <div className={styles.orderActions}>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleOpenBidModal(order);
                   }}
-                  style={{
-                    padding: '12px 24px',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s',
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                  className={styles.bidButton}
                 >
-                  {order.bids_count && order.bids_count > 0 ? <MdEdit size={20} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> : null}
-                  {order.bids_count && order.bids_count > 0 ? 'Изменить предложение' : 'Сделать предложение'}
+                  {order.bids_count && order.bids_count > 0 ? <MdEdit size={20} className={styles.buttonIcon} /> : null}
+                  {order.bids_count && order.bids_count > 0 ? t('masterOrders.updateBid') : t('masterOrders.makeBid')}
                 </button>
               </div>
             </div>
           ))}
         </div>
+
+        {/* Пагинация */}
+        {totalPages > 1 && (
+          <div className={styles.pagination}>
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className={styles.pageButton}
+              title={t('masterOrders.pagination.previous')}
+            >
+              <MdChevronLeft size={20} />
+            </button>
+
+            {[...Array(totalPages)].map((_, index) => {
+              const pageNum = index + 1;
+              // Показываем только некоторые страницы
+              if (
+                pageNum === 1 ||
+                pageNum === totalPages ||
+                (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+              ) {
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`${styles.pageButton} ${currentPage === pageNum ? styles.active : ''}`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                return <span key={pageNum} className={styles.pageInfo}>...</span>;
+              }
+              return null;
+            })}
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className={styles.pageButton}
+              title={t('masterOrders.pagination.next')}
+            >
+              <MdChevronRight size={20} />
+            </button>
+
+            <span className={styles.pageInfo}>
+              {t('masterOrders.pagination.page')} {currentPage} {t('masterOrders.pagination.of')} {totalPages}
+            </span>
+          </div>
+        )}
+      </>
       )}
 
       {/* Модальное окно с деталями заказа */}
       {showDetailsModal && selectedOrder && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.7)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 10000,
-          padding: '20px',
-        }}
-        onClick={handleCloseDetailsModal}
-        >
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            maxWidth: '1200px',
-            width: '100%',
-            maxHeight: '90vh',
-            overflow: 'auto',
-            position: 'relative',
-          }}
-          onClick={(e) => e.stopPropagation()}
+        <div className={styles.modalOverlay} onClick={handleCloseDetailsModal}>
+          <div 
+            className={`${styles.modalContent} ${styles.modalContentLarge}`}
+            onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ padding: '32px' }}>
+            <div className={styles.modalBody}>
               {/* Заголовок */}
-              <div style={{ marginBottom: '24px' }}>
-                <button
-                  onClick={handleCloseDetailsModal}
-                  style={{
-                    position: 'absolute',
-                    top: '20px',
-                    right: '20px',
-                    background: '#edf2f7',
-                    border: 'none',
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
+              <div className={styles.modalHeader}>
+                <button onClick={handleCloseDetailsModal} className={styles.closeButton}>
                   <MdClose size={24} />
                 </button>
-                <h2 style={{ margin: '0 0 8px 0', fontSize: '1.8rem', color: '#2d3748' }}>
+                <h2 className={styles.modalTitle}>
                   {selectedOrder.title}
                 </h2>
-                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '0.9rem', color: '#718096', marginTop: '12px' }}>
+                <div className={styles.orderMeta}>
                   {selectedOrder.customer_name && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div className={styles.metaItem}>
                       <MdPerson size={18} />
                       <span>{selectedOrder.customer_name}</span>
                     </div>
                   )}
                   {selectedOrder.customer_address && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div className={styles.metaItem}>
                       <MdLocationOn size={18} />
                       <span>{selectedOrder.customer_address}</span>
                     </div>
                   )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div className={styles.metaItem}>
                     <MdTimer size={18} />
                     <span>Создан: {formatDate(selectedOrder.created_at)}</span>
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+              <div className={styles.detailsGrid}>
                 {/* Левая колонка - 3D Визуализация */}
-                <div>
-                  <div style={{ 
-                    borderRadius: '12px',
-                    minHeight: '400px',
-                    overflow: 'hidden',
-                    background: '#f0f0f0',
-                    position: 'relative',
-                  }}>
+                <div className={styles.visualSection}>
+                  <div className={styles.canvas3d}>
                     {selectedOrder.furniture_config ? (
                       <Canvas 
                         camera={{ position: [3, 2, 5], fov: 50 }}
                         shadows
                         gl={{ antialias: true, alpha: false }}
-                        style={{ width: '100%', height: '400px' }}
+                        className={styles.canvas3d}
                       >
                         <color attach="background" args={['#ffffff']} />
                         <ambientLight intensity={0.4} />
@@ -502,73 +687,33 @@ const MasterOrders = () => {
                         />
                       </Canvas>
                     ) : (
-                      <div style={{ 
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        height: '400px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white',
-                        position: 'relative',
-                        overflow: 'hidden',
-                      }}>
-                        <MdViewInAr size={80} style={{ opacity: 0.3, marginBottom: '16px' }} />
-                        <h3 style={{ margin: '0 0 8px 0', fontSize: '1.2rem' }}>3D Визуализация</h3>
-                        <p style={{ margin: 0, opacity: 0.8, textAlign: 'center' }}>
+                      <div className={styles.noModel}>
+                        <MdViewInAr size={80} className={styles.noModelIcon} />
+                        <h3 className={styles.noModelTitle}>3D Визуализация</h3>
+                        <p className={styles.noModelText}>
                           3D модель не была создана для этого заказа
                         </p>
                         {/* Декоративные элементы */}
-                        <div style={{
-                          position: 'absolute',
-                          top: '-50px',
-                          right: '-50px',
-                          width: '200px',
-                          height: '200px',
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          borderRadius: '50%',
-                        }} />
-                        <div style={{
-                          position: 'absolute',
-                          bottom: '-30px',
-                          left: '-30px',
-                          width: '150px',
-                          height: '150px',
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          borderRadius: '50%',
-                        }} />
+                        <div className={styles.decorCircle1} />
+                        <div className={styles.decorCircle2} />
                       </div>
                     )}
                   </div>
 
                   {/* Фотографии */}
                   {selectedOrder.photos && selectedOrder.photos.length > 0 && (
-                    <div style={{ marginTop: '16px' }}>
-                      <h4 style={{ margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className={styles.photosSection}>
+                      <h4 className={styles.sectionTitle}>
                         <MdImage size={20} />
                         Фотографии
                       </h4>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '8px' }}>
+                      <div className={styles.photosGrid}>
                         {selectedOrder.photos.map((photo, index) => (
-                          <div key={index} style={{
-                            width: '100%',
-                            paddingBottom: '100%',
-                            position: 'relative',
-                            borderRadius: '8px',
-                            overflow: 'hidden',
-                            background: '#f7fafc',
-                          }}>
+                          <div key={index} className={styles.photoItem}>
                             <img
                               src={photo}
                               alt={`Фото ${index + 1}`}
-                              style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
-                              }}
+                              className={styles.photoImage}
                             />
                           </div>
                         ))}
@@ -580,41 +725,20 @@ const MasterOrders = () => {
                 {/* Правая колонка - Детали */}
                 <div>
                   {/* Описание */}
-                  <div style={{ marginBottom: '24px' }}>
-                    <h4 style={{ margin: '0 0 12px 0', color: '#2d3748' }}>Описание заказа</h4>
-                    <div style={{ 
-                      background: '#f7fafc', 
-                      borderRadius: '8px', 
-                      padding: '16px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '8px',
-                    }}>
+                  <div className={styles.infoSection}>
+                    <h4 className={styles.sectionTitle}>Описание заказа</h4>
+                    <div className={styles.descriptionBox}>
                       {selectedOrder.description.split('\n').filter(line => line.trim()).map((line, index) => {
                         const [label, ...valueParts] = line.split(':');
                         const value = valueParts.join(':').trim();
                         
                         if (value) {
                           return (
-                            <div key={index} style={{ 
-                              display: 'flex', 
-                              padding: '8px',
-                              background: 'white',
-                              borderRadius: '6px',
-                              borderLeft: '3px solid #667eea',
-                            }}>
-                              <strong style={{ 
-                                color: '#4a5568', 
-                                minWidth: '140px',
-                                fontSize: '0.9rem',
-                              }}>
+                            <div key={index} className={styles.descriptionLine}>
+                              <strong className={styles.descriptionLabel}>
                                 {label.trim()}:
                               </strong>
-                              <span style={{ 
-                                color: '#718096',
-                                fontSize: '0.9rem',
-                                flex: 1,
-                              }}>
+                              <span className={styles.descriptionValue}>
                                 {value}
                               </span>
                             </div>
@@ -626,42 +750,37 @@ const MasterOrders = () => {
                   </div>
 
                   {/* Основные параметры */}
-                  <div style={{ 
-                    background: '#f7fafc', 
-                    borderRadius: '12px', 
-                    padding: '20px',
-                    marginBottom: '20px',
-                  }}>
-                    <h4 style={{ margin: '0 0 16px 0', color: '#2d3748' }}>Основные параметры</h4>
-                    <div style={{ display: 'grid', gap: '12px' }}>
+                  <div className={styles.paramBox}>
+                    <h4 className={styles.sectionTitle}>Основные параметры</h4>
+                    <div className={styles.paramGrid}>
                       {selectedOrder.budget_min && selectedOrder.budget_max && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <MdAttachMoney size={24} color="#667eea" />
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.85rem', color: '#718096' }}>Бюджет</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#2d3748' }}>
+                        <div className={styles.paramItem}>
+                          <MdAttachMoney size={24} color="#667eea" className={styles.paramIcon} />
+                          <div className={styles.paramContent}>
+                            <div className={styles.detailLabel}>Бюджет</div>
+                            <div className={styles.detailValue}>
                               {formatPrice(selectedOrder.budget_min)} - {formatPrice(selectedOrder.budget_max)}
                             </div>
                           </div>
                         </div>
                       )}
                       {selectedOrder.deadline && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <MdCalendarToday size={24} color="#667eea" />
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.85rem', color: '#718096' }}>Срок выполнения</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#2d3748' }}>
+                        <div className={styles.paramItem}>
+                          <MdCalendarToday size={24} color="#667eea" className={styles.paramIcon} />
+                          <div className={styles.paramContent}>
+                            <div className={styles.detailLabel}>Срок выполнения</div>
+                            <div className={styles.detailValue}>
                               {formatDate(selectedOrder.deadline)}
                             </div>
                           </div>
                         </div>
                       )}
                       {selectedOrder.category && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <MdCategory size={24} color="#667eea" />
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.85rem', color: '#718096' }}>Категория</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#2d3748' }}>
+                        <div className={styles.paramItem}>
+                          <MdCategory size={24} color="#667eea" className={styles.paramIcon} />
+                          <div className={styles.paramContent}>
+                            <div className={styles.detailLabel}>Категория</div>
+                            <div className={styles.detailValue}>
                               {selectedOrder.furniture_type || selectedOrder.category}
                             </div>
                           </div>
@@ -672,28 +791,28 @@ const MasterOrders = () => {
 
                   {/* Дополнительные параметры */}
                   {(selectedOrder.materials || selectedOrder.dimensions || selectedOrder.style) && (
-                    <div style={{ marginBottom: '20px' }}>
-                      <h4 style={{ margin: '0 0 12px 0', color: '#2d3748' }}>Дополнительно</h4>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div className={styles.infoSection}>
+                      <h4 className={styles.sectionTitle}>Дополнительно</h4>
+                      <div className={styles.additionalList}>
                         {selectedOrder.materials && (
-                          <div style={{ padding: '10px', background: '#f7fafc', borderRadius: '8px', display: 'flex', gap: '8px' }}>
-                            <strong style={{ color: '#4a5568', minWidth: '100px' }}>Материалы:</strong>
-                            <span style={{ color: '#718096' }}>{selectedOrder.materials}</span>
+                          <div className={styles.additionalItem}>
+                            <strong className={styles.descriptionLabel}>Материалы:</strong>
+                            <span className={styles.descriptionValue}>{selectedOrder.materials}</span>
                           </div>
                         )}
                         {selectedOrder.dimensions && (
-                          <div style={{ padding: '10px', background: '#f7fafc', borderRadius: '8px', display: 'flex', gap: '8px' }}>
-                            <MdStraighten size={20} color="#667eea" style={{ minWidth: '20px' }} />
+                          <div className={styles.additionalItem}>
+                            <MdStraighten size={20} color="#667eea" className={styles.paramIcon} />
                             <div>
-                              <strong style={{ color: '#4a5568' }}>Размеры:</strong>
-                              <span style={{ color: '#718096', marginLeft: '8px' }}>{selectedOrder.dimensions}</span>
+                              <strong className={styles.descriptionLabel}>Размеры:</strong>
+                              <span className={styles.descriptionValue}>{selectedOrder.dimensions}</span>
                             </div>
                           </div>
                         )}
                         {selectedOrder.style && (
-                          <div style={{ padding: '10px', background: '#f7fafc', borderRadius: '8px', display: 'flex', gap: '8px' }}>
-                            <strong style={{ color: '#4a5568', minWidth: '100px' }}>Стиль:</strong>
-                            <span style={{ color: '#718096' }}>{selectedOrder.style}</span>
+                          <div className={styles.additionalItem}>
+                            <strong className={styles.descriptionLabel}>Стиль:</strong>
+                            <span className={styles.descriptionValue}>{selectedOrder.style}</span>
                           </div>
                         )}
                       </div>
@@ -702,25 +821,25 @@ const MasterOrders = () => {
 
                   {/* Требования */}
                   {(selectedOrder.delivery_required || selectedOrder.assembly_required || selectedOrder.delivery_address) && (
-                    <div style={{ marginBottom: '20px' }}>
-                      <h4 style={{ margin: '0 0 12px 0', color: '#2d3748' }}>Требования</h4>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div className={styles.infoSection}>
+                      <h4 className={styles.sectionTitle}>Требования</h4>
+                      <div className={styles.additionalList}>
                         {selectedOrder.delivery_address && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px', background: '#f7fafc', borderRadius: '8px' }}>
+                          <div className={styles.requirementItem}>
                             <MdLocationOn size={20} color="#667eea" />
-                            <span style={{ color: '#4a5568' }}>{selectedOrder.delivery_address}</span>
+                            <span>{selectedOrder.delivery_address}</span>
                           </div>
                         )}
                         {selectedOrder.delivery_required && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px', background: '#e6fffa', borderRadius: '8px', border: '1px solid #81e6d9' }}>
+                          <div className={`${styles.requirementItem} ${styles.requirementItemHighlight}`}>
                             <MdLocalShipping size={20} color="#319795" />
-                            <span style={{ color: '#234e52', fontWeight: '500' }}>Требуется доставка</span>
+                            <span className={styles.requirementText}>Требуется доставка</span>
                           </div>
                         )}
                         {selectedOrder.assembly_required && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px', background: '#e6fffa', borderRadius: '8px', border: '1px solid #81e6d9' }}>
+                          <div className={`${styles.requirementItem} ${styles.requirementItemHighlight}`}>
                             <MdBuild size={20} color="#319795" />
-                            <span style={{ color: '#234e52', fontWeight: '500' }}>Требуется сборка</span>
+                            <span className={styles.requirementText}>Требуется сборка</span>
                           </div>
                         )}
                       </div>
@@ -729,17 +848,12 @@ const MasterOrders = () => {
 
                   {/* Конкуренция */}
                   {selectedOrder.bids_count && selectedOrder.bids_count > 0 && (
-                    <div style={{
-                      background: 'linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%)',
-                      padding: '16px',
-                      borderRadius: '12px',
-                      marginBottom: '20px',
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <div className={styles.competitionBox}>
+                      <div className={styles.competitionHeader}>
                         <MdTrendingUp size={20} color="#667eea" />
-                        <strong style={{ color: '#2d3748' }}>Конкуренция</strong>
+                        <strong>Конкуренция</strong>
                       </div>
-                      <div style={{ fontSize: '1.1rem', color: '#4a5568' }}>
+                      <div className={styles.competitionValue}>
                         <strong>{selectedOrder.bids_count}</strong> {selectedOrder.bids_count === 1 ? 'мастер уже сделал' : 'мастеров уже сделали'} предложение
                       </div>
                     </div>
@@ -752,22 +866,9 @@ const MasterOrders = () => {
                       handleCloseDetailsModal();
                       handleOpenBidModal(selectedOrder);
                     }}
-                    style={{
-                      width: '100%',
-                      padding: '14px 24px',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '1.05rem',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s',
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                    className={styles.submitButton}
                   >
-                    {selectedOrder.bids_count && selectedOrder.bids_count > 0 ? <MdEdit size={20} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> : null}
+                    {selectedOrder.bids_count && selectedOrder.bids_count > 0 ? <MdEdit size={20} className={styles.buttonIcon} /> : null}
                     {selectedOrder.bids_count && selectedOrder.bids_count > 0 ? 'Изменить предложение' : 'Сделать предложение'}
                   </button>
                 </div>
@@ -779,88 +880,46 @@ const MasterOrders = () => {
 
       {/* Модальное окно для создания ставки */}
       {showBidModal && selectedOrder && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.7)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 10000,
-          padding: '20px',
-        }}
-        onClick={handleCloseBidModal}
-        >
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            maxWidth: '600px',
-            width: '100%',
-            maxHeight: '90vh',
-            overflow: 'auto',
-            position: 'relative',
-          }}
-          onClick={(e) => e.stopPropagation()}
+        <div className={styles.modalOverlay} onClick={handleCloseBidModal}>
+          <div 
+            className={`${styles.modalContent} ${styles.modalContentSmall}`}
+            onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ padding: '32px' }}>
+            <div className={styles.modalBody}>
               {/* Заголовок */}
-              <div style={{ marginBottom: '24px' }}>
-                <button
-                  onClick={handleCloseBidModal}
-                  style={{
-                    position: 'absolute',
-                    top: '20px',
-                    right: '20px',
-                    background: '#edf2f7',
-                    border: 'none',
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
+              <div className={styles.modalHeader}>
+                <button onClick={handleCloseBidModal} className={styles.closeButton}>
                   <MdClose size={24} />
                 </button>
-                <h2 style={{ margin: '0 0 8px 0', fontSize: '1.5rem', color: '#2d3748' }}>
+                <h2 className={styles.modalTitle}>
                   {existingBid ? 'Изменить предложение' : 'Сделать предложение'}
                 </h2>
-                <p style={{ margin: 0, color: '#718096', fontSize: '0.95rem' }}>
+                <p className={styles.modalSubtitle}>
                   {selectedOrder.title}
                 </p>
               </div>
 
               {/* Информация о конкуренции */}
               {competition && competition.bids_count > 0 && (
-                <div style={{
-                  background: 'linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%)',
-                  padding: '16px',
-                  borderRadius: '12px',
-                  marginBottom: '24px',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <div className={styles.competitionBox}>
+                  <div className={styles.competitionHeader}>
                     <MdTrendingUp size={20} color="#667eea" />
-                    <strong style={{ color: '#2d3748' }}>Конкуренция</strong>
+                    <strong>Конкуренция</strong>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', fontSize: '0.9rem' }}>
-                    <div>
-                      <div style={{ color: '#718096', marginBottom: '4px' }}>Ставок</div>
-                      <div style={{ fontWeight: '600', color: '#2d3748' }}>{competition.bids_count}</div>
+                  <div className={styles.competitionStats}>
+                    <div className={styles.competitionStat}>
+                      <div className={styles.competitionLabel}>Ставок</div>
+                      <div className={styles.competitionValue}>{competition.bids_count}</div>
                     </div>
-                    <div>
-                      <div style={{ color: '#718096', marginBottom: '4px' }}>Мин. цена</div>
-                      <div style={{ fontWeight: '600', color: '#2d3748' }}>
+                    <div className={styles.competitionStat}>
+                      <div className={styles.competitionLabel}>Мин. цена</div>
+                      <div className={styles.competitionValue}>
                         {new Intl.NumberFormat('ru-RU').format(competition.min_bid)} ₸
                       </div>
                     </div>
-                    <div>
-                      <div style={{ color: '#718096', marginBottom: '4px' }}>Средняя</div>
-                      <div style={{ fontWeight: '600', color: '#2d3748' }}>
+                    <div className={styles.competitionStat}>
+                      <div className={styles.competitionLabel}>Средняя</div>
+                      <div className={styles.competitionValue}>
                         {new Intl.NumberFormat('ru-RU').format(Math.round(competition.avg_bid))} ₸
                       </div>
                     </div>
@@ -870,46 +929,33 @@ const MasterOrders = () => {
 
               {/* Бюджет клиента */}
               {selectedOrder.budget_min && selectedOrder.budget_max && (
-                <div style={{ marginBottom: '24px', padding: '12px', background: '#f7fafc', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#718096', marginBottom: '4px' }}>Бюджет клиента</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#2d3748' }}>
+                <div className={styles.budgetBox}>
+                  <div className={styles.budgetLabel}>Бюджет клиента</div>
+                  <div className={styles.budgetValue}>
                     {new Intl.NumberFormat('ru-RU').format(selectedOrder.budget_min)} - {new Intl.NumberFormat('ru-RU').format(selectedOrder.budget_max)} ₸
                   </div>
                 </div>
               )}
 
               {/* Форма */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div className={styles.bidForm}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#4a5568' }}>
-                    Ваша цена <span style={{ color: '#e53e3e' }}>*</span>
+                  <label className={styles.formLabel}>
+                    Ваша цена <span className={styles.required}>*</span>
                   </label>
                   <input
                     type="number"
                     value={bidPrice}
                     onChange={(e) => handleBidPriceChange(e.target.value)}
                     placeholder="Введите цену в тенге"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '2px solid #e2e8f0',
-                      borderRadius: '8px',
-                      fontSize: '1rem',
-                      boxSizing: 'border-box',
-                    }}
+                    className={styles.formInput}
                   />
                   {commissionInfo && (
-                    <div style={{
-                      marginTop: '8px',
-                      padding: '12px',
-                      background: commissionInfo.type === 'first_month' ? '#dbeafe' : '#fef3c7',
-                      borderRadius: '8px',
-                      fontSize: '0.9rem',
-                    }}>
-                      <div style={{ fontWeight: '600', marginBottom: '4px', color: '#2d3748' }}>
+                    <div className={`${styles.commissionInfo} ${commissionInfo.type === 'first_month' ? styles.commissionInfoFirst : styles.commissionInfoPercent}`}>
+                      <div className={styles.commissionTitle}>
                         Комиссия платформы:
                       </div>
-                      <div style={{ color: '#4a5568' }}>
+                      <div className={styles.commissionText}>
                         {commissionInfo.type === 'first_month' ? (
                           <>
                             <strong>{new Intl.NumberFormat('ru-RU').format(commissionInfo.amount)} ₸</strong>
@@ -922,8 +968,8 @@ const MasterOrders = () => {
                           </>
                         )}
                       </div>
-                      <div style={{ marginTop: '8px', fontSize: '0.85rem', color: '#718096' }}>
-                        Вы получите: <strong style={{ color: '#2d3748' }}>
+                      <div className={styles.commissionResult}>
+                        Вы получите: <strong className={styles.commissionAmount}>
                           {new Intl.NumberFormat('ru-RU').format(parseFloat(bidPrice) - commissionInfo.amount)} ₸
                         </strong>
                       </div>
@@ -932,27 +978,20 @@ const MasterOrders = () => {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#4a5568' }}>
-                    Срок выполнения (дней) <span style={{ color: '#e53e3e' }}>*</span>
+                  <label className={styles.formLabel}>
+                    Срок выполнения (дней) <span className={styles.required}>*</span>
                   </label>
                   <input
                     type="number"
                     value={bidDays}
                     onChange={(e) => setBidDays(e.target.value)}
                     placeholder="Сколько дней потребуется"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '2px solid #e2e8f0',
-                      borderRadius: '8px',
-                      fontSize: '1rem',
-                      boxSizing: 'border-box',
-                    }}
+                    className={styles.formInput}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#4a5568' }}>
+                  <label className={styles.formLabel}>
                     Комментарий
                   </label>
                   <textarea
@@ -960,33 +999,14 @@ const MasterOrders = () => {
                     onChange={(e) => setBidComment(e.target.value)}
                     placeholder="Дополнительная информация о вашем предложении"
                     rows={4}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '2px solid #e2e8f0',
-                      borderRadius: '8px',
-                      fontSize: '1rem',
-                      boxSizing: 'border-box',
-                      resize: 'vertical',
-                      fontFamily: 'inherit',
-                    }}
+                    className={styles.formTextarea}
                   />
                 </div>
 
                 <button
                   onClick={handleSubmitBid}
                   disabled={submittingBid}
-                  style={{
-                    padding: '14px 24px',
-                    background: submittingBid ? '#cbd5e0' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '1.05rem',
-                    fontWeight: '600',
-                    cursor: submittingBid ? 'not-allowed' : 'pointer',
-                    marginTop: '8px',
-                  }}
+                  className={`${styles.submitButton} ${submittingBid ? styles.submitButtonDisabled : ''}`}
                 >
                   {submittingBid ? 'Отправка...' : existingBid ? 'Обновить предложение' : 'Отправить предложение'}
                 </button>
@@ -997,7 +1017,7 @@ const MasterOrders = () => {
       )}
 
       {/* Toast notifications */}
-      <div style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div className={styles.toastsContainer}>
         {toasts.map((toast) => (
           <Toast
             key={toast.id}

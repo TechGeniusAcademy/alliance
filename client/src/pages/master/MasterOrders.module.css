@@ -1,0 +1,856 @@
+/* Основной контейнер */
+.pageContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.pageHeader {
+  margin-bottom: 42px;
+}
+
+.pageTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 32px 0 8px 0;
+  display: flex;
+  align-items: center;
+}
+
+.titleIcon {
+  vertical-align: middle;
+  margin-right: 12px;
+}
+
+.pageSubtitle {
+  color: #718096;
+  margin-top: 8px;
+  font-size: 1rem;
+}
+
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 100px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Фильтры и поиск */
+.filterSection {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+}
+
+.searchBox {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a0aec0;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.filtersRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filterLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4a5568;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filterSelect {
+  padding: 10px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filterSelect:hover {
+  border-color: #cbd5e0;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.resultsInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+  color: #718096;
+}
+
+.resultsCount {
+  font-weight: 600;
+  color: #667eea;
+}
+
+.clearFilters {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #718096;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clearFilters:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+  color: #4a5568;
+}
+
+.filterBadge {
+  display: inline-flex;
+  align-items: center;
+  background: #667eea;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+}
+
+/* Список заказов */
+.ordersGrid {
+  display: grid;
+  gap: 20px;
+}
+
+.orderCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.orderCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.orderTitle {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  color: #2d3748;
+}
+
+.orderMeta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: #718096;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+}
+
+.bidsBadge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.orderDescription {
+  margin: 0 0 16px 0;
+  color: #4a5568;
+  line-height: 1.6;
+  font-size: 0.875rem;
+}
+
+.orderDetails {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #f7fafc;
+  border-radius: 8px;
+}
+
+.detailLabel {
+  font-size: 0.875rem;
+  color: #718096;
+}
+
+.detailValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.orderSpecs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+  color: #4a5568;
+}
+
+.orderTags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  padding: 6px 12px;
+  background: #edf2f7;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #4a5568;
+}
+
+.orderActions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.bidButton {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bidButton:hover {
+  transform: translateY(-2px);
+}
+
+.buttonIcon {
+  vertical-align: middle;
+}
+
+/* Модальные окна */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  position: relative;
+}
+
+.modalContentSmall {
+  max-width: 600px;
+}
+
+.modalContentLarge {
+  max-width: 1200px;
+}
+
+.modalBody {
+  padding: 32px;
+}
+
+.closeButton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #edf2f7;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.closeButton:hover {
+  background: #e2e8f0;
+}
+
+.modalHeader {
+  margin-bottom: 24px;
+}
+
+.modalTitle {
+  margin: 0 0 8px 0;
+  font-size: 1.125rem;
+  color: #2d3748;
+}
+
+.modalSubtitle {
+  margin: 0;
+  color: #718096;
+  font-size: 0.95rem;
+}
+
+/* Детали заказа */
+.detailsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.visualSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.canvas3d {
+  border-radius: 12px;
+  min-height: 400px;
+  overflow: hidden;
+  background: #f0f0f0;
+  position: relative;
+}
+
+.noModel {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.noModelIcon {
+  opacity: 0.3;
+  margin-bottom: 16px;
+}
+
+.noModelTitle {
+  margin: 0 0 8px 0;
+  font-size: 0.875rem;
+}
+
+.noModelText {
+  margin: 0;
+  opacity: 0.8;
+  text-align: center;
+}
+
+.decorCircle1 {
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.decorCircle2 {
+  position: absolute;
+  bottom: -30px;
+  left: -30px;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.photosSection {
+  margin-top: 16px;
+}
+
+.sectionTitle {
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.photosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+.photoItem {
+  width: 100%;
+  padding-bottom: 100%;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f7fafc;
+}
+
+.photoImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Информационные блоки */
+.infoSection {
+  margin-bottom: 24px;
+}
+
+.descriptionBox {
+  background: #f7fafc;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.descriptionLine {
+  display: flex;
+  font-size: 0.875rem;
+  padding: 8px;
+  background: white;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+}
+
+.descriptionLabel {
+  color: #4a5568;
+  min-width: 140px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.descriptionValue {
+  color: #718096;
+  flex: 1;
+  font-size: 0.875rem;
+}
+
+.paramBox {
+  background: #f7fafc;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.paramGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.paramItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.paramIcon {
+  flex-shrink: 0;
+}
+
+.paramContent {
+  flex: 1;
+}
+
+.additionalList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.additionalItem {
+  padding: 10px;
+  background: #f7fafc;
+  border-radius: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+.requirementItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: #f7fafc;
+  border-radius: 8px;
+}
+
+.requirementItemHighlight {
+  background: #e6fffa;
+  border: 1px solid #81e6d9;
+}
+
+.requirementText {
+  color: #234e52;
+  font-weight: 500;
+}
+
+.competitionBox {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.competitionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.competitionStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  font-size: 0.9rem;
+}
+
+.competitionStat {
+  display: flex;
+  flex-direction: column;
+}
+
+.competitionLabel {
+  color: #718096;
+  margin-bottom: 4px;
+}
+
+.competitionValue {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.budgetBox {
+  margin-bottom: 24px;
+  padding: 12px;
+  background: #f7fafc;
+  border-radius: 8px;
+}
+
+.budgetLabel {
+  font-size: 0.85rem;
+  color: #718096;
+  margin-bottom: 4px;
+}
+
+.budgetValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+/* Форма ставки */
+.bidForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.required {
+  color: #e53e3e;
+}
+
+.formInput {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.formTextarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.formTextarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.commissionInfo {
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.commissionInfoFirstMonth {
+  background: #dbeafe;
+}
+
+.commissionInfoRegular {
+  background: #fef3c7;
+}
+
+.commissionTitle {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #2d3748;
+}
+
+.commissionAmount {
+  color: #4a5568;
+}
+
+.commissionNet {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+.submitButton {
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: transform 0.2s;
+}
+
+.submitButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.submitButton:disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+}
+
+/* Пустое состояние */
+.emptyState {
+  text-align: center;
+  color: #718096;
+  padding: 40px;
+}
+
+/* Toast контейнер */
+.toastContainer {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Пагинация */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 20px;
+}
+
+.pageButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #4a5568;
+  font-weight: 600;
+}
+
+.pageButton:hover:not(:disabled) {
+  border-color: #667eea;
+  color: #667eea;
+  background: #f7fafc;
+}
+
+.pageButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageButton.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+}
+
+.pageInfo {
+  font-size: 0.95rem;
+  color: #718096;
+  margin: 0 8px;
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .filtersRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .pageTitle {
+    font-size: 1.25rem;
+  }
+
+  .modalBody {
+    padding: 20px;
+  }
+
+  .modalTitle {
+    font-size: 1rem;
+  }
+
+  .orderDetails {
+    grid-template-columns: 1fr;
+  }
+
+  .competitionStats {
+    grid-template-columns: 1fr;
+  }
+  
+  .searchInput {
+    font-size: 0.875rem;
+  }
+  
+  .filterSection {
+    padding: 16px;
+  }
+}

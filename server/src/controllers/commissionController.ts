@@ -47,7 +47,7 @@ export const calculateCommission = async (req: Request, res: Response) => {
     const masterId = req.userId;
     const { orderAmount } = req.body;
 
-    console.log('📊 Calculate commission request:', { masterId, orderAmount });
+    console.log('Calculate commission request:', { masterId, orderAmount });
 
     if (!masterId) {
       return res.status(401).json({ message: 'Не авторизован' });

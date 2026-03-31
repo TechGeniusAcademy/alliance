@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MdPerson, MdEmail, MdPhone, MdLocationOn, MdLock, MdSave, MdCameraAlt } from 'react-icons/md';
+import { API_BASE_URL } from '../config/api';
 import styles from './Profile.module.css';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import Toast from '../components/Toast';
@@ -43,7 +44,7 @@ const Profile = () => {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -104,7 +105,7 @@ const Profile = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -123,6 +124,8 @@ const Profile = () => {
       if (response.ok) {
         setProfile(data.user);
         showToast('Профиль успешно обновлен!', 'success');
+        // Отправляем событие для обновления сайдбара
+        window.dispatchEvent(new Event('profileUpdated'));
       } else {
         showToast(data.message || 'Ошибка обновления профиля', 'error');
       }

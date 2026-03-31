@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { API_BASE_URL } from '../config/api';
 import styles from './AuthModal.module.css';
 
 interface AuthModalProps {
@@ -21,7 +22,7 @@ const AuthModal = ({ isOpen, onClose, onSwitchToRegister }: AuthModalProps) => {
     e.preventDefault();
     
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

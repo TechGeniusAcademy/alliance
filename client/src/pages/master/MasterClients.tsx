@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   MdPeople,
   MdEmail,
@@ -49,6 +50,7 @@ interface ClientDetails {
 }
 
 const MasterClients = () => {
+  const { t } = useTranslation();
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<ClientDetails | null>(null);
   const [loading, setLoading] = useState(false);
@@ -73,7 +75,7 @@ const MasterClients = () => {
       setClients(response.data.clients || []);
     } catch (error) {
       console.error('Ошибка загрузки клиентов:', error);
-      setToast({ message: 'Не удалось загрузить клиентов', type: 'error' });
+      setToast({ message: t('masterClients.notifications.loadError'), type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -89,7 +91,7 @@ const MasterClients = () => {
       setShowModal(true);
     } catch (error) {
       console.error('Ошибка загрузки данных клиента:', error);
-      setToast({ message: 'Не удалось загрузить данные клиента', type: 'error' });
+      setToast({ message: t('masterClients.notifications.detailsError'), type: 'error' });
     }
   };
 
@@ -116,9 +118,9 @@ const MasterClients = () => {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'active': return 'Активный';
-      case 'completed': return 'Завершён';
-      case 'inactive': return 'Неактивный';
+      case 'active': return t('masterClients.status.active');
+      case 'completed': return t('masterClients.status.completed');
+      case 'inactive': return t('masterClients.status.inactive');
       default: return status;
     }
   };
@@ -135,8 +137,8 @@ const MasterClients = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h1>Клиенты</h1>
-          <p>Ваша база клиентов и история работы с ними</p>
+          <h1>{t('masterClients.title')}</h1>
+          <p>{t('masterClients.subtitle')}</p>
         </div>
       </div>
 
@@ -146,7 +148,7 @@ const MasterClients = () => {
           <MdSearch size={20} />
           <input
             type="text"
-            placeholder="Поиск по имени или email..."
+            placeholder={t('masterClients.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -154,17 +156,17 @@ const MasterClients = () => {
 
         <div className={styles.filters}>
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as any)}>
-            <option value="all">Все клиенты</option>
-            <option value="active">Активные</option>
-            <option value="completed">Завершённые</option>
-            <option value="inactive">Неактивные</option>
+            <option value="all">{t('masterClients.filters.all')}</option>
+            <option value="active">{t('masterClients.filters.active')}</option>
+            <option value="completed">{t('masterClients.filters.completed')}</option>
+            <option value="inactive">{t('masterClients.filters.inactive')}</option>
           </select>
 
           <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)}>
-            <option value="recent">По дате</option>
-            <option value="name">По имени</option>
-            <option value="orders">По заказам</option>
-            <option value="spent">По сумме</option>
+            <option value="recent">{t('masterClients.sortBy.recent')}</option>
+            <option value="name">{t('masterClients.sortBy.name')}</option>
+            <option value="orders">{t('masterClients.sortBy.orders')}</option>
+            <option value="spent">{t('masterClients.sortBy.spent')}</option>
           </select>
         </div>
       </div>
@@ -174,21 +176,21 @@ const MasterClients = () => {
         <div className={styles.statCard}>
           <MdPeople size={24} />
           <div>
-            <span>Всего клиентов</span>
+            <span>{t('masterClients.stats.totalClients')}</span>
             <strong>{clients.length}</strong>
           </div>
         </div>
         <div className={styles.statCard}>
           <MdWork size={24} />
           <div>
-            <span>Активных проектов</span>
+            <span>{t('masterClients.stats.activeProjects')}</span>
             <strong>{clients.reduce((sum, c) => sum + c.active_orders, 0)}</strong>
           </div>
         </div>
         <div className={styles.statCard}>
           <MdAttachMoney size={24} />
           <div>
-            <span>Общая выручка</span>
+            <span>{t('masterClients.stats.totalRevenue')}</span>
             <strong>{clients.reduce((sum, c) => sum + c.total_spent, 0).toLocaleString('ru-RU')} ₸</strong>
           </div>
         </div>
@@ -197,12 +199,12 @@ const MasterClients = () => {
       {/* Список клиентов */}
       <div className={styles.clientsGrid}>
         {loading ? (
-          <div className={styles.loading}>Загрузка...</div>
+          <div className={styles.loading}>{t('masterClients.loading')}</div>
         ) : filteredClients.length === 0 ? (
           <div className={styles.emptyState}>
             <MdPeople size={64} />
-            <p>Клиенты не найдены</p>
-            <span>Попробуйте изменить параметры поиска</span>
+            <p>{t('masterClients.notFound')}</p>
+            <span>{t('masterClients.notFoundHint')}</span>
           </div>
         ) : (
           filteredClients.map(client => (
@@ -249,16 +251,16 @@ const MasterClients = () => {
 
               <div className={styles.clientStats}>
                 <div className={styles.statItem}>
-                  <span>Заказов</span>
+                  <span>{t('masterClients.orders')}</span>
                   <strong>{client.total_orders}</strong>
                 </div>
                 <div className={styles.statItem}>
-                  <span>Выручка</span>
+                  <span>{t('masterClients.revenue')}</span>
                   <strong>{client.total_spent.toLocaleString('ru-RU')} ₸</strong>
                 </div>
                 {client.average_rating && (
                   <div className={styles.statItem}>
-                    <span>Рейтинг</span>
+                    <span>{t('masterClients.rating')}</span>
                     <strong><MdStar size={14} /> {client.average_rating.toFixed(1)}</strong>
                   </div>
                 )}
@@ -266,7 +268,7 @@ const MasterClients = () => {
 
               <div className={styles.clientFooter}>
                 <span className={styles.dateInfo}>
-                  Последний заказ: {formatDate(client.last_order_date)}
+                  {t('masterClients.lastOrder')} {formatDate(client.last_order_date)}
                 </span>
                 <div className={styles.actions}>
                   <button onClick={() => openChat(client.id)} className={styles.chatButton}>
@@ -274,7 +276,7 @@ const MasterClients = () => {
                   </button>
                   <button onClick={() => loadClientDetails(client.id)} className={styles.detailsButton}>
                     <MdHistory size={18} />
-                    История
+                    {t('masterClients.history')}
                   </button>
                 </div>
               </div>
@@ -289,18 +291,18 @@ const MasterClients = () => {
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2>{selectedClient.client.name}</h2>
-              <button onClick={() => setShowModal(false)} className={styles.closeButton}>×</button>
+              <button onClick={() => setShowModal(false)} className={styles.closeButton}>{t('masterClients.modal.close')}</button>
             </div>
 
             <div className={styles.modalContent}>
               {/* Информация о клиенте */}
               <div className={styles.clientDetailSection}>
-                <h3>Информация о клиенте</h3>
+                <h3>{t('masterClients.modal.clientInfo')}</h3>
                 <div className={styles.detailGrid}>
                   <div className={styles.detailItem}>
                     <MdEmail size={18} />
                     <div>
-                      <span>Email</span>
+                      <span>{t('masterClients.modal.email')}</span>
                       <strong>{selectedClient.client.email}</strong>
                     </div>
                   </div>
@@ -308,7 +310,7 @@ const MasterClients = () => {
                     <div className={styles.detailItem}>
                       <MdPhone size={18} />
                       <div>
-                        <span>Телефон</span>
+                        <span>{t('masterClients.modal.phone')}</span>
                         <strong>{selectedClient.client.phone}</strong>
                       </div>
                     </div>
@@ -317,7 +319,7 @@ const MasterClients = () => {
                     <div className={styles.detailItem}>
                       <MdLocationOn size={18} />
                       <div>
-                        <span>Адрес</span>
+                        <span>{t('masterClients.modal.address')}</span>
                         <strong>{selectedClient.client.address}</strong>
                       </div>
                     </div>
@@ -325,7 +327,7 @@ const MasterClients = () => {
                   <div className={styles.detailItem}>
                     <MdWork size={18} />
                     <div>
-                      <span>Первый заказ</span>
+                      <span>{t('masterClients.modal.firstOrder')}</span>
                       <strong>{formatDate(selectedClient.client.first_order_date)}</strong>
                     </div>
                   </div>
@@ -334,22 +336,22 @@ const MasterClients = () => {
 
               {/* Статистика по заказам */}
               <div className={styles.clientDetailSection}>
-                <h3>Статистика</h3>
+                <h3>{t('masterClients.modal.statistics')}</h3>
                 <div className={styles.statsRow}>
                   <div className={styles.statBox}>
-                    <span>Всего заказов</span>
+                    <span>{t('masterClients.modal.totalOrders')}</span>
                     <strong>{selectedClient.client.total_orders}</strong>
                   </div>
                   <div className={styles.statBox}>
-                    <span>Завершено</span>
+                    <span>{t('masterClients.modal.completed')}</span>
                     <strong>{selectedClient.client.completed_orders}</strong>
                   </div>
                   <div className={styles.statBox}>
-                    <span>Активных</span>
+                    <span>{t('masterClients.modal.active')}</span>
                     <strong>{selectedClient.client.active_orders}</strong>
                   </div>
                   <div className={styles.statBox}>
-                    <span>Общая сумма</span>
+                    <span>{t('masterClients.modal.totalAmount')}</span>
                     <strong>{selectedClient.client.total_spent.toLocaleString('ru-RU')} ₸</strong>
                   </div>
                 </div>
@@ -357,7 +359,7 @@ const MasterClients = () => {
 
               {/* История заказов */}
               <div className={styles.clientDetailSection}>
-                <h3>История заказов</h3>
+                <h3>{t('masterClients.modal.orderHistory')}</h3>
                 <div className={styles.ordersList}>
                   {selectedClient.orders.map(order => (
                     <div key={order.id} className={styles.orderItem}>
@@ -369,7 +371,7 @@ const MasterClients = () => {
                         <span className={styles.orderStatus}>{order.status}</span>
                       </div>
                       <div className={styles.orderDetails}>
-                        <span>Создан: {formatDate(order.created_at)}</span>
+                        <span>{t('masterClients.modal.created')} {formatDate(order.created_at)}</span>
                         {order.final_price && (
                           <span className={styles.price}>{order.final_price.toLocaleString('ru-RU')} ₸</span>
                         )}

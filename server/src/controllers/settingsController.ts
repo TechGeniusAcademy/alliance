@@ -195,7 +195,7 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
 
     // Проверяем текущий пароль
     const bcrypt = require('bcryptjs');
-    const isValid = await bcrypt.compare(currentPassword, result.rows[0].password);
+    const isValid = await bcrypt.compare(currentPassword, result.rows[0].password_hash);
 
     if (!isValid) {
       return res.status(401).json({ error: 'Неверный текущий пароль' });
@@ -207,7 +207,7 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
 
     // Обновляем пароль
     await pool.query(
-      `UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2`,
+      `UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2`,
       [hashedPassword, userId]
     );
 

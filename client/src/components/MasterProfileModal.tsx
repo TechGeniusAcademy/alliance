@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MdClose, MdStar, MdLocationOn, MdEmail, MdChat, MdVerified, MdWork, MdBusiness, MdLanguage, MdCheckCircle, MdLocalShipping, MdBuild, MdDesignServices, MdQuestionAnswer, MdWeb } from 'react-icons/md';
 import { FaInstagram, FaFacebook, FaTelegram, FaWhatsapp } from 'react-icons/fa';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 import styles from './MasterProfileModal.module.css';
 
 interface MasterInfo {
@@ -66,7 +67,7 @@ const MasterProfileModal = ({ masterId, onClose }: MasterProfileModalProps) => {
   const loadMasterInfo = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:5000/api/master-profile/public/${masterId}`);
+      const response = await axios.get(`${API_BASE_URL}/api/master-profile/public/${masterId}`);
       setMaster(response.data.profile);
     } catch (error) {
       console.error('Error loading master info:', error);

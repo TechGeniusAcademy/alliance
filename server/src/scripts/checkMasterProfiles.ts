@@ -12,7 +12,7 @@ async function checkMasterProfiles() {
       ORDER BY ordinal_position
     `);
 
-    console.log('📋 Колонки таблицы master_profiles:');
+    console.log(' Колонки таблицы master_profiles:');
     console.table(columns.rows);
 
     // Проверяем данные

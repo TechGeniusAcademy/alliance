@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   MdAttachMoney, 
   MdTrendingUp, 
@@ -40,6 +41,7 @@ interface IncomeSummary {
 }
 
 const MasterIncome = () => {
+  const { t } = useTranslation();
   const [incomeOrders, setIncomeOrders] = useState<IncomeOrder[]>([]);
   const [summary, setSummary] = useState<IncomeSummary>({
     totalIncome: 0,
@@ -74,7 +76,7 @@ const MasterIncome = () => {
       setSummary(response.data.summary || summary);
     } catch (error) {
       console.error('Ошибка загрузки данных о доходах:', error);
-      setToast({ message: 'Не удалось загрузить данные о доходах', type: 'error' });
+      setToast({ message: t('masterIncome.notifications.loadError'), type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -100,12 +102,12 @@ const MasterIncome = () => {
       link.remove();
 
       setToast({ 
-        message: `${type === 'invoice' ? 'Счет' : 'Акт выполненных работ'} успешно скачан`, 
+        message: type === 'invoice' ? t('masterIncome.notifications.invoiceSuccess') : t('masterIncome.notifications.actSuccess'), 
         type: 'success' 
       });
     } catch (error) {
       console.error('Ошибка скачивания документа:', error);
-      setToast({ message: 'Не удалось скачать документ', type: 'error' });
+      setToast({ message: t('masterIncome.notifications.downloadError'), type: 'error' });
     }
   };
 
@@ -144,8 +146,8 @@ const MasterIncome = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h1>Доходы</h1>
-          <p>Отчет о доходах с завершенных заказов</p>
+          <h1>{t('masterIncome.title')}</h1>
+          <p>{t('masterIncome.subtitle')}</p>
         </div>
       </div>
 
@@ -156,10 +158,10 @@ const MasterIncome = () => {
             <MdAttachMoney size={32} />
           </div>
           <div className={styles.summaryContent}>
-            <div className={styles.summaryLabel}>Общий доход</div>
+            <div className={styles.summaryLabel}>{t('masterIncome.summary.totalIncome')}</div>
             <div className={styles.summaryValue}>{formatCurrency(summary.totalIncome)}</div>
             <div className={styles.summarySubtext}>
-              Комиссия: {formatCurrency(summary.totalCommission)}
+              {t('masterIncome.summary.commission')} {formatCurrency(summary.totalCommission)}
             </div>
           </div>
         </div>
@@ -169,10 +171,10 @@ const MasterIncome = () => {
             <MdCheckCircle size={32} />
           </div>
           <div className={styles.summaryContent}>
-            <div className={styles.summaryLabel}>Чистый доход</div>
+            <div className={styles.summaryLabel}>{t('masterIncome.summary.netIncome')}</div>
             <div className={styles.summaryValue}>{formatCurrency(summary.netIncome)}</div>
             <div className={styles.summarySubtext}>
-              После вычета комиссии
+              {t('masterIncome.summary.afterCommission')}
             </div>
           </div>
         </div>
@@ -182,12 +184,12 @@ const MasterIncome = () => {
             <MdTrendingUp size={32} />
           </div>
           <div className={styles.summaryContent}>
-            <div className={styles.summaryLabel}>Этот месяц</div>
+            <div className={styles.summaryLabel}>{t('masterIncome.summary.thisMonth')}</div>
             <div className={styles.summaryValue}>{formatCurrency(summary.thisMonthIncome)}</div>
             <div className={styles.summarySubtext} style={{ 
               color: Number(getIncomeGrowth()) >= 0 ? '#10b981' : '#e94560' 
             }}>
-              {Number(getIncomeGrowth()) >= 0 ? '↑' : '↓'} {Math.abs(Number(getIncomeGrowth()))}% от прошлого
+              {Number(getIncomeGrowth()) >= 0 ? '↑' : '↓'} {Math.abs(Number(getIncomeGrowth()))}% {t('masterIncome.summary.fromLast')}
             </div>
           </div>
         </div>
@@ -197,10 +199,10 @@ const MasterIncome = () => {
             <MdReceipt size={32} />
           </div>
           <div className={styles.summaryContent}>
-            <div className={styles.summaryLabel}>Заказов завершено</div>
+            <div className={styles.summaryLabel}>{t('masterIncome.summary.ordersCompleted')}</div>
             <div className={styles.summaryValue}>{summary.ordersCount}</div>
             <div className={styles.summarySubtext}>
-              Средний чек: {formatCurrency(summary.averageOrder)}
+              {t('masterIncome.summary.averageCheck')} {formatCurrency(summary.averageOrder)}
             </div>
           </div>
         </div>
@@ -212,7 +214,7 @@ const MasterIncome = () => {
           <MdSearch size={20} />
           <input
             type="text"
-            placeholder="Поиск по названию, клиенту или номеру..."
+            placeholder={t('masterIncome.search.placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -221,41 +223,41 @@ const MasterIncome = () => {
         <div className={styles.filterGroup}>
           <MdFilterList size={20} />
           <select value={filterPeriod} onChange={(e) => setFilterPeriod(e.target.value)}>
-            <option value="all">Все время</option>
-            <option value="today">Сегодня</option>
-            <option value="week">Эта неделя</option>
-            <option value="month">Этот месяц</option>
-            <option value="quarter">Этот квартал</option>
-            <option value="year">Этот год</option>
+            <option value="all">{t('masterIncome.filters.all')}</option>
+            <option value="today">{t('masterIncome.filters.today')}</option>
+            <option value="week">{t('masterIncome.filters.week')}</option>
+            <option value="month">{t('masterIncome.filters.month')}</option>
+            <option value="quarter">{t('masterIncome.filters.quarter')}</option>
+            <option value="year">{t('masterIncome.filters.year')}</option>
           </select>
         </div>
       </div>
 
       {/* Список заказов */}
       <div className={styles.ordersSection}>
-        <h2>История завершенных заказов</h2>
+        <h2>{t('masterIncome.history.title')}</h2>
         
         {loading ? (
-          <div className={styles.loading}>Загрузка...</div>
+          <div className={styles.loading}>{t('masterIncome.loading')}</div>
         ) : filteredOrders.length === 0 ? (
           <div className={styles.emptyState}>
             <MdReceipt size={64} />
-            <p>Нет завершенных заказов</p>
-            <span>Завершенные заказы будут отображаться здесь</span>
+            <p>{t('masterIncome.history.empty')}</p>
+            <span>{t('masterIncome.history.emptyHint')}</span>
           </div>
         ) : (
           <div className={styles.ordersTable}>
             <table>
               <thead>
                 <tr>
-                  <th>№ Заказа</th>
-                  <th>Название</th>
-                  <th>Клиент</th>
-                  <th>Дата завершения</th>
-                  <th>Сумма заказа</th>
-                  <th>Комиссия</th>
-                  <th>Чистый доход</th>
-                  <th>Документы</th>
+                  <th>{t('masterIncome.table.orderNumber')}</th>
+                  <th>{t('masterIncome.table.title')}</th>
+                  <th>{t('masterIncome.table.client')}</th>
+                  <th>{t('masterIncome.table.completedDate')}</th>
+                  <th>{t('masterIncome.table.orderAmount')}</th>
+                  <th>{t('masterIncome.table.commission')}</th>
+                  <th>{t('masterIncome.table.netIncome')}</th>
+                  <th>{t('masterIncome.table.documents')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -294,10 +296,10 @@ const MasterIncome = () => {
                             e.stopPropagation();
                             downloadDocument(order.order_id, 'invoice');
                           }}
-                          title="Скачать счет"
+                          title={t('masterIncome.documents.downloadInvoice')}
                         >
                           <MdDescription size={18} />
-                          Счет
+                          {t('masterIncome.documents.invoice')}
                         </button>
                         <button
                           className={styles.downloadBtn}
@@ -305,10 +307,10 @@ const MasterIncome = () => {
                             e.stopPropagation();
                             downloadDocument(order.order_id, 'act');
                           }}
-                          title="Скачать акт"
+                          title={t('masterIncome.documents.downloadAct')}
                         >
                           <MdReceipt size={18} />
-                          Акт
+                          {t('masterIncome.documents.act')}
                         </button>
                       </div>
                     </td>
@@ -325,63 +327,63 @@ const MasterIncome = () => {
         <div className={styles.modal} onClick={() => setSelectedOrder(null)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2>Детали заказа #{selectedOrder.order_id}</h2>
+              <h2>{t('masterIncome.modal.title')} #{selectedOrder.order_id}</h2>
               <button onClick={() => setSelectedOrder(null)} className={styles.closeButton}>×</button>
             </div>
 
             <div className={styles.modalBody}>
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Название заказа:</span>
+                <span className={styles.detailLabel}>{t('masterIncome.modal.orderTitle')}</span>
                 <span className={styles.detailValue}>{selectedOrder.order_title}</span>
               </div>
 
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Клиент:</span>
+                <span className={styles.detailLabel}>{t('masterIncome.modal.client')}</span>
                 <span className={styles.detailValue}>{selectedOrder.customer_name}</span>
               </div>
 
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Дата завершения:</span>
+                <span className={styles.detailLabel}>{t('masterIncome.modal.completedDate')}</span>
                 <span className={styles.detailValue}>{formatDate(selectedOrder.completed_date)}</span>
               </div>
 
               <div className={styles.incomeBreakdown}>
-                <h3>Разбивка дохода</h3>
+                <h3>{t('masterIncome.modal.breakdown')}</h3>
                 
                 <div className={styles.breakdownItem}>
-                  <span>Сумма заказа:</span>
+                  <span>{t('masterIncome.modal.orderAmount')}</span>
                   <span className={styles.breakdownAmount}>{formatCurrency(selectedOrder.order_amount)}</span>
                 </div>
 
                 <div className={styles.breakdownItem}>
-                  <span>Комиссия платформы ({selectedOrder.commission_rate}%):</span>
+                  <span>{t('masterIncome.modal.platformCommission')} ({selectedOrder.commission_rate}%):</span>
                   <span className={styles.breakdownCommission}>-{formatCurrency(selectedOrder.commission_amount)}</span>
                 </div>
 
                 <div className={styles.breakdownDivider}></div>
 
                 <div className={styles.breakdownItem}>
-                  <span><strong>Чистый доход:</strong></span>
+                  <span><strong>{t('masterIncome.modal.netIncome')}</strong></span>
                   <span className={styles.breakdownNet}>{formatCurrency(selectedOrder.net_income)}</span>
                 </div>
               </div>
 
               <div className={styles.documentSection}>
-                <h3>Документы</h3>
+                <h3>{t('masterIncome.documents.title')}</h3>
                 <div className={styles.documentButtons}>
                   <button
                     className={styles.documentButton}
                     onClick={() => downloadDocument(selectedOrder.order_id, 'invoice')}
                   >
                     <MdDescription size={24} />
-                    <span>Скачать счет</span>
+                    <span>{t('masterIncome.documents.downloadInvoice')}</span>
                   </button>
                   <button
                     className={styles.documentButton}
                     onClick={() => downloadDocument(selectedOrder.order_id, 'act')}
                   >
                     <MdReceipt size={24} />
-                    <span>Скачать акт выполненных работ</span>
+                    <span>{t('masterIncome.documents.downloadActFull')}</span>
                   </button>
                 </div>
               </div>

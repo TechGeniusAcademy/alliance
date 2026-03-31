@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef, memo, useCallback, useMemo, useLayoutEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { MdChat, MdSearch, MdSend, MdAttachFile, MdShoppingCart, MdCheckCircle } from 'react-icons/md';
 import { io, Socket } from 'socket.io-client';
 import chatService, { type Chat, type Message } from '../../services/chatService';
 import Toast, { type ToastType } from '../../components/Toast';
 import ChatRulesModal from '../../components/ChatRulesModal';
+import SelectOrderModal from '../../components/SelectOrderModal';
 import chatStyles from '../Chats.module.css';
 import { WS_URL } from '../../config/api';
 
@@ -43,6 +46,13 @@ const ChatMessage = memo(({ msg, isMyMessage }: { msg: Message; isMyMessage: boo
           <span className={chatStyles.messageSender}>{msg.sender_name}</span>
         )}
         <div className={chatStyles.messageBubble}>
+          {msg.image_url && (
+            <img 
+              src={msg.image_url} 
+              alt="Shared image" 
+              style={{ maxWidth: '300px', borderRadius: '8px', marginBottom: '8px', display: 'block' }}
+            />
+          )}
           <p>{msg.message}</p>
         </div>
         <span className={chatStyles.messageTime}>
@@ -56,6 +66,8 @@ const ChatMessage = memo(({ msg, isMyMessage }: { msg: Message; isMyMessage: boo
 ChatMessage.displayName = 'ChatMessage';
 
 const MasterChats = () => {
+  const { t } = useTranslation();
+  const location = useLocation();
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -67,6 +79,9 @@ const MasterChats = () => {
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   const [showChatWindow, setShowChatWindow] = useState(false);
   const [showRulesModal, setShowRulesModal] = useState(false);
+  const [showSelectOrderModal, setShowSelectOrderModal] = useState(false);
+  const [activeOrders, setActiveOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
   const currentUserId = (() => {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -182,7 +197,56 @@ const MasterChats = () => {
   useEffect(() => {
     loadChats(true);
     // НЕТ POLLING - список чатов обновится через WebSocket события
-  }, []);
+  }, [location.pathname]);
+
+  // Обработка навигации с параметрами (открытие конкретного чата)
+  useEffect(() => {
+    const state = location.state as { chatId?: number; forceReload?: boolean } | null;
+    
+    // Если есть chatId с forceReload - перезагружаем чаты и затем открываем нужный
+    if (state?.chatId && state?.forceReload) {
+      const targetChatId = state.chatId; // Сохраняем ID до очистки state
+      
+      // ВАЖНО: Очищаем state СРАЗУ, чтобы избежать повторного срабатывания useEffect
+      window.history.replaceState({}, document.title);
+      
+      const loadAndSelectChat = async () => {
+        try {
+          const data = await chatService.getMyChats();
+          setChats(data);
+          
+          // Ищем нужный чат после загрузки
+          const chatToOpen = data.find((chat: any) => chat.id === targetChatId);
+          if (chatToOpen) {
+            setSelectedChat(chatToOpen);
+            setShowChatWindow(true);
+          } else {
+            // Если не нашли - выбираем первый (активный)
+            if (data.length > 0) {
+              setSelectedChat(data[0]);
+            }
+          }
+        } catch (error) {
+          console.error('Ошибка загрузки чатов:', error);
+        }
+      };
+      
+      loadAndSelectChat();
+      return;
+    }
+    
+    // Если есть chatId без forceReload - открываем из существующего списка
+    if (state?.chatId && chats.length > 0) {
+      const chatToOpen = chats.find(chat => chat.id === state.chatId);
+      if (chatToOpen) {
+        setSelectedChat(chatToOpen);
+        setShowChatWindow(true);
+      }
+      // Очищаем state после обработки
+      window.history.replaceState({}, document.title);
+      return;
+    }
+  }, [location.state, chats]);
 
   useEffect(() => {
     if (selectedChat) {
@@ -248,12 +312,32 @@ const MasterChats = () => {
     try {
       if (showLoader) setLoading(true);
       const data = await chatService.getMyChats();
+      if (!data || !Array.isArray(data)) {
+        setChats([]);
+        return;
+      }
       setChats(data);
-      if (data.length > 0 && !selectedChat) {
-        setSelectedChat(data[0]);
+      
+      if (data.length > 0) {
+        // Если нет выбранного чата - выбираем первый
+        if (!selectedChat) {
+          setSelectedChat(data[0]);
+        } else {
+          // Если текущий чат завершен, а есть активные - переключаемся на первый активный
+          const currentChatStillExists = data.find(c => c.id === selectedChat.id);
+          
+          if (currentChatStillExists) {
+            // Обновляем данные текущего чата (статус мог измениться)
+            setSelectedChat(currentChatStillExists);
+          } else {
+            // Если текущего чата нет в списке - выбираем первый
+            setSelectedChat(data[0]);
+          }
+        }
       }
     } catch (error) {
       console.error('Failed to load chats:', error);
+      setChats([]);
     } finally {
       if (showLoader) setLoading(false);
     }
@@ -324,7 +408,7 @@ const MasterChats = () => {
     });
   }, [chats, searchQuery, currentUserId]);
 
-  const unreadCount = chats.reduce((sum, chat) => sum + chat.unread_count, 0);
+  const unreadCount = Array.isArray(chats) ? chats.reduce((sum, chat) => sum + chat.unread_count, 0) : 0;
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -412,13 +496,49 @@ const MasterChats = () => {
   const handleSubmitForReview = async () => {
     if (!selectedChat) return;
     
+    try {
+      // Определяем ID клиента
+      const customerId = selectedChat.customer_id === currentUserId 
+        ? selectedChat.master_id 
+        : selectedChat.customer_id;
+      
+      // Проверяем активные заказы с этим клиентом
+      setLoadingOrders(true);
+      const orders = await chatService.getActiveOrdersWithUser(customerId, 'customer');
+      setLoadingOrders(false);
+      
+      if (orders.length > 1) {
+        // Несколько заказов - показываем модальное окно
+        setActiveOrders(orders);
+        setShowSelectOrderModal(true);
+        return;
+      }
+      
+      // Один заказ - продолжаем как обычно
+      await handleActualSubmitForReview(selectedChat.order_id);
+    } catch (error) {
+      console.error('Failed to load active orders:', error);
+      setLoadingOrders(false);
+      // Если ошибка - продолжаем с текущим заказом
+      if (selectedChat.order_id) {
+        await handleActualSubmitForReview(selectedChat.order_id);
+      }
+    }
+  };
+
+  const handleSelectOrder = async (orderId: number) => {
+    setShowSelectOrderModal(false);
+    await handleActualSubmitForReview(orderId);
+  };
+
+  const handleActualSubmitForReview = async (orderId: number) => {
     if (!confirm('Вы уверены, что хотите отправить работу на оценку клиенту?')) {
       return;
     }
 
     try {
       setSubmitting(true);
-      await chatService.submitForReview(selectedChat.order_id);
+      await chatService.submitForReview(orderId);
       
       // Отправляем событие через WebSocket о смене статуса
       socketRef.current?.emit('orderStatusChanged', {
@@ -586,30 +706,6 @@ const MasterChats = () => {
                   <p>Заказ: {selectedChat.order_title}</p>
                 )}
               </div>
-              {selectedChat.order_status === 'in_progress' && selectedChat.master_id === currentUserId && (
-                <button
-                  onClick={handleSubmitForReview}
-                  disabled={submitting}
-                  className={chatStyles.actionButton}
-                  style={{
-                    background: submitting ? '#9ca3af' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    cursor: submitting ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  <MdCheckCircle size={20} />
-                  <span className={chatStyles.actionButtonText}>
-                    {submitting ? 'Отправка...' : 'Отправить на оценку'}
-                  </span>
-                </button>
-              )}
-              {selectedChat.order_status === 'review' && (
-                <div className={chatStyles.statusBadge} style={{
-                  background: '#fef3c7',
-                  color: '#92400e'
-                }}>
-                  Ожидает оценки клиента
-                </div>
-              )}
               {selectedChat.order_status === 'completed' && (
                 <div className={chatStyles.statusBadge} style={{
                   background: '#d1fae5',
@@ -688,6 +784,17 @@ const MasterChats = () => {
         <ChatRulesModal
           onAccept={handleAcceptRules}
           userType="master"
+        />
+      )}
+
+      {showSelectOrderModal && (
+        <SelectOrderModal
+          orders={activeOrders}
+          onSelect={handleSelectOrder}
+          onClose={() => setShowSelectOrderModal(false)}
+          title={t('selectOrder.title')}
+          subtitle={t('selectOrder.forSubmit')}
+          loading={loadingOrders}
         />
       )}
     </div>

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, Grid } from '@react-three/drei';
 import { 
@@ -8,14 +9,18 @@ import {
   MdWeekend, 
   MdStoreMallDirectory,
   MdKitchen,
-  MdCheck
+  MdCheck,
+  MdAttachMoney,
+  MdAccessTime,
+  MdInfo,
+  MdTrendingUp
 } from 'react-icons/md';
-import { Bed, Wardrobe, Table, Chair, Sofa, Dresser, Grill } from '../components/3d/FurnitureModels';
+import { Bed, Wardrobe, Table, Chair, Dresser } from '../components/3d/FurnitureModels';
 import Toast from '../components/Toast';
 import type { ToastType } from '../components/Toast';
 import styles from './CreateOrder.module.css';
 
-type FurnitureType = 'bed' | 'wardrobe' | 'table' | 'chair' | 'sofa' | 'dresser' | 'grill';
+type FurnitureType = 'kitchen' | 'bedroom' | 'hallway' | 'office' | 'bathroom' | 'bed' | 'tv-stand' | 'wardrobe' | 'dressing-room' | 'other';
 type MaterialType = 'wood' | 'metal' | 'plastic' | 'fabric';
 type WoodType = 'oak' | 'pine' | 'birch' | 'walnut' | 'mahogany' | 'mdf';
 type FinishType = 'matte' | 'glossy' | 'satin' | 'natural';
@@ -40,6 +45,10 @@ interface FurnitureConfig {
   maxBudget: number;
   deadline: string;
   urgency: 'low' | 'medium' | 'high';
+  // Подтип мебели (для конфигураций)
+  subType?: string;
+  // Комплектация (для некоторых типов)
+  configuration?: string[];
 }
 
 interface ToastMessage {
@@ -48,7 +57,8 @@ interface ToastMessage {
 }
 
 const CreateOrder = () => {
-  const [selectedFurniture, setSelectedFurniture] = useState<FurnitureType>('bed');
+  const { t } = useTranslation();
+  const [selectedFurniture, setSelectedFurniture] = useState<FurnitureType>('kitchen');
   const [toast, setToast] = useState<ToastMessage | null>(null);
   
   const [config, setConfig] = useState<FurnitureConfig>({
@@ -66,90 +76,492 @@ const CreateOrder = () => {
     assemblyRequired: true,
     warrantyYears: 1,
     notes: '',
-    desiredPrice: 50000,
-    maxBudget: 100000,
+    desiredPrice: 0,
+    maxBudget: 0,
     deadline: '',
     urgency: 'medium',
+    subType: '',
+    configuration: [],
   });
+
+  // Цены на материалы (за квадратный метр)
+  const materialPrices: Record<MaterialType, number> = {
+    wood: 25000,
+    metal: 30000,
+    plastic: 15000,
+    fabric: 20000,
+  };
+
+  // Коэффициенты для типов дерева
+  const woodTypeMultipliers: Record<WoodType, number> = {
+    pine: 1.0,
+    mdf: 0.8,
+    birch: 1.2,
+    oak: 1.5,
+    walnut: 1.8,
+    mahogany: 2.5,
+  };
+
+  // Цены на отделку
+  const finishPrices: Record<FinishType, number> = {
+    natural: 0,
+    matte: 5000,
+    satin: 7000,
+    glossy: 10000,
+  };
+
+  // Цены на фурнитуру
+  const hardwarePrices: Record<string, number> = {
+    standard: 5000,
+    premium: 15000,
+    hidden: 20000,
+    decorative: 12000,
+  };
+
+  // Цены на дополнительные опции
+  const extraPrices: Record<string, number> = {
+    'Встроенное освещение': 15000,
+    'Мягкое закрывание дверей': 8000,
+    'Выдвижные ящики': 12000,
+    'Встроенная бытовая техника': 50000,
+    'Столешница из камня': 80000,
+    'Фартук из стекла': 25000,
+    'Доводчики': 6000,
+    'Мягкая обивка': 20000,
+    'Зеркало': 15000,
+    'Ящики для хранения': 10000,
+    'Подъемный механизм': 25000,
+    'Ортопедическое основание': 30000,
+    'Мягкая обивка сиденья': 18000,
+    'Крючки для одежды': 3000,
+    'Полка для обуви': 5000,
+    'Мягкая спинка': 15000,
+    'Регулируемая высота': 12000,
+    'Колесики': 4000,
+    'Кабель-каналы': 3000,
+    'Выдвижная клавиатурная полка': 7000,
+    'Замки на ящики': 5000,
+    'Эргономичный дизайн': 8000,
+    'Влагостойкое покрытие': 10000,
+    'Зеркало с подогревом': 35000,
+    'Антибактериальное покрытие': 8000,
+    'Мягкая обивка изголовья': 22000,
+    'Боковые тумбочки': 40000,
+    'Отверстия для кабелей': 2000,
+    'Стеклянные дверцы': 18000,
+    'Полки для техники': 6000,
+    'Зеркальные дверцы': 30000,
+    'Штанги для одежды': 5000,
+    'Полки разной высоты': 8000,
+    'Полки для обуви': 7000,
+    'Зеркало в рост': 25000,
+    'Корзины для белья': 6000,
+    'Вешалки с крючками': 4000,
+    'Регулируемые полки': 6000,
+    'Выдвижные механизмы': 9000,
+    'Защита от опрокидывания': 3000,
+  };
+
+  // Цены на комплектацию спальни
+  const bedroomConfigPrices: Record<string, number> = {
+    'Комод': 80000,
+    'Тумба': 35000,
+    'Консоль с зеркалом': 60000,
+  };
+
+  // Базовые цены по типам мебели
+  const baseFurniturePrices: Record<FurnitureType, number> = {
+    kitchen: 150000,
+    bedroom: 120000,
+    hallway: 80000,
+    office: 90000,
+    bathroom: 70000,
+    bed: 100000,
+    'tv-stand': 50000,
+    wardrobe: 110000,
+    'dressing-room': 200000,
+    other: 40000,
+  };
+
+  // Множители для конфигураций
+  const subTypeMultipliers: Record<string, number> = {
+    'straight': 1.0,
+    'l-shaped': 1.3,
+    'u-shaped': 1.6,
+    'two-part': 1.4,
+    'with-island': 1.8,
+    'corner': 1.2,
+    'straight-soft': 1.2,
+    'corner-soft': 1.4,
+    'straight-mirror': 1.3,
+    'corner-mirror': 1.5,
+    'table-chairs': 1.0,
+    'office-wardrobe': 1.2,
+    'reception': 1.5,
+    'sink-cabinet-tall': 1.3,
+    'sink-cabinet-straight': 1.0,
+    'washing-machine-cabinet': 1.1,
+    'storage-cabinets': 0.9,
+    'single-hard': 0.8,
+    'single-soft': 0.9,
+    'single-lift': 1.0,
+    'double-hard': 1.0,
+    'double-soft': 1.1,
+    'double-lift': 1.3,
+    'with-cabinet': 1.3,
+    'hinged': 1.0,
+    'sliding': 1.4,
+    'shelving': 0.7,
+    'shelves': 0.5,
+    'cabinets': 0.9,
+    'showcases': 1.1,
+  };
+
+  // Функция расчета цены
+  const calculatePrice = (): number => {
+    // 1. Базовая цена по типу мебели
+    let basePrice = baseFurniturePrices[selectedFurniture] || 50000;
+
+    // 2. Множитель за конфигурацию
+    const subTypeMultiplier = config.subType ? (subTypeMultipliers[config.subType] || 1.0) : 1.0;
+    basePrice *= subTypeMultiplier;
+
+    // 3. Расчет по размерам (площадь поверхности для материала)
+    const area = (config.width * config.height + config.width * config.depth + config.height * config.depth) * 2;
+    const materialCost = materialPrices[config.material] * area;
+
+    // 4. Множитель за тип дерева (если дерево)
+    let materialMultiplier = 1.0;
+    if (config.material === 'wood' && config.woodType) {
+      materialMultiplier = woodTypeMultipliers[config.woodType];
+    }
+
+    // 5. Стоимость отделки
+    const finishCost = finishPrices[config.finish] || 0;
+
+    // 6. Стоимость фурнитуры
+    const hardwareCost = hardwarePrices[config.hardware] || 5000;
+
+    // 7. Дополнительные опции
+    const extrasCost = config.extras.reduce((sum, extra) => {
+      return sum + (extraPrices[extra] || 0);
+    }, 0);
+
+    // 8. Комплектация спальни
+    const configurationCost = (config.configuration || []).reduce((sum, item) => {
+      return sum + (bedroomConfigPrices[item] || 0);
+    }, 0);
+
+    // 9. Стоимость доставки
+    const deliveryOption = deliveryTypes.find(d => d.value === config.deliveryType);
+    const deliveryCost = deliveryOption?.price || 0;
+
+    // 10. Стоимость сборки
+    const assemblyCost = (config.assemblyRequired || alwaysRequiresAssembly.includes(selectedFurniture)) 
+      ? 15000 
+      : 0;
+
+    // 11. Стоимость гарантии
+    const warrantyOption = warrantyOptions.find(w => w.value === config.warrantyYears);
+    const warrantyCost = warrantyOption?.price || 0;
+
+    // Итоговая цена за одну единицу
+    const unitPrice = 
+      basePrice + 
+      (materialCost * materialMultiplier) + 
+      finishCost + 
+      hardwareCost + 
+      extrasCost + 
+      configurationCost +
+      deliveryCost +
+      assemblyCost +
+      warrantyCost;
+
+    // Умножаем на количество
+    const totalPrice = Math.round(unitPrice * config.quantity);
+
+    return totalPrice;
+  };
 
   const showToast = (message: string, type: ToastType) => {
     setToast({ message, type });
   };
 
   const furnitureOptions = [
-    { type: 'bed' as FurnitureType, name: 'Кровать', icon: MdBed, defaultSize: { width: 2, height: 0.6, depth: 2.2 } },
-    { type: 'wardrobe' as FurnitureType, name: 'Шкаф', icon: MdStoreMallDirectory, defaultSize: { width: 2, height: 2.5, depth: 0.6 } },
-    { type: 'table' as FurnitureType, name: 'Стол', icon: MdTableRestaurant, defaultSize: { width: 1.5, height: 0.8, depth: 1 } },
-    { type: 'chair' as FurnitureType, name: 'Стул', icon: MdChair, defaultSize: { width: 0.5, height: 1, depth: 0.5 } },
-    { type: 'sofa' as FurnitureType, name: 'Диван', icon: MdWeekend, defaultSize: { width: 2.5, height: 0.9, depth: 1 } },
-    { type: 'dresser' as FurnitureType, name: 'Комод', icon: MdKitchen, defaultSize: { width: 1.2, height: 1, depth: 0.5 } },
-    { type: 'grill' as FurnitureType, name: 'Гриль', icon: MdKitchen, defaultSize: { width: 1, height: 1, depth: 1 } },
+    { type: 'kitchen' as FurnitureType, name: t('createOrder.furnitureTypes.kitchen'), icon: MdKitchen, defaultSize: { width: 3, height: 2.2, depth: 0.6 } },
+    { type: 'bedroom' as FurnitureType, name: t('createOrder.furnitureTypes.bedroom'), icon: MdBed, defaultSize: { width: 3.5, height: 2, depth: 0.6 } },
+    { type: 'hallway' as FurnitureType, name: t('createOrder.furnitureTypes.hallway'), icon: MdStoreMallDirectory, defaultSize: { width: 2, height: 2, depth: 0.4 } },
+    { type: 'office' as FurnitureType, name: t('createOrder.furnitureTypes.office'), icon: MdTableRestaurant, defaultSize: { width: 1.6, height: 0.75, depth: 0.8 } },
+    { type: 'bathroom' as FurnitureType, name: t('createOrder.furnitureTypes.bathroom'), icon: MdStoreMallDirectory, defaultSize: { width: 0.8, height: 1.8, depth: 0.4 } },
+    { type: 'bed' as FurnitureType, name: t('createOrder.furnitureTypes.bed'), icon: MdBed, defaultSize: { width: 2, height: 0.6, depth: 2.2 } },
+    { type: 'tv-stand' as FurnitureType, name: t('createOrder.furnitureTypes.tvStand'), icon: MdWeekend, defaultSize: { width: 1.8, height: 0.5, depth: 0.4 } },
+    { type: 'wardrobe' as FurnitureType, name: t('createOrder.furnitureTypes.wardrobe'), icon: MdStoreMallDirectory, defaultSize: { width: 2, height: 2.5, depth: 0.6 } },
+    { type: 'dressing-room' as FurnitureType, name: t('createOrder.furnitureTypes.dressingRoom'), icon: MdStoreMallDirectory, defaultSize: { width: 3, height: 2.5, depth: 2 } },
+    { type: 'other' as FurnitureType, name: t('createOrder.furnitureTypes.other'), icon: MdChair, defaultSize: { width: 1, height: 1.5, depth: 0.4 } },
+  ];
+
+  // Подтипы для каждого типа мебели
+  const furnitureSubTypes: Record<FurnitureType, { value: string; label: string }[]> = {
+    kitchen: [
+      { value: 'straight', label: t('createOrder.configuration.straight') },
+      { value: 'l-shaped', label: t('createOrder.configuration.lShaped') },
+      { value: 'u-shaped', label: t('createOrder.configuration.uShaped') },
+      { value: 'two-part', label: t('createOrder.configuration.twoPart') },
+      { value: 'with-island', label: t('createOrder.configuration.withIsland') },
+    ],
+    bedroom: [
+      { value: 'straight', label: t('createOrder.configuration.straight') },
+      { value: 'corner', label: t('createOrder.configuration.corner') },
+    ],
+    hallway: [
+      { value: 'straight', label: t('createOrder.configuration.straight') },
+      { value: 'corner', label: t('createOrder.configuration.corner') },
+      { value: 'straight-soft', label: t('createOrder.configuration.straightSoft') },
+      { value: 'corner-soft', label: t('createOrder.configuration.cornerSoft') },
+      { value: 'straight-mirror', label: t('createOrder.configuration.straightMirror') },
+      { value: 'corner-mirror', label: t('createOrder.configuration.cornerMirror') },
+    ],
+    office: [
+      { value: 'table-chairs', label: t('createOrder.configuration.tableChairs') },
+      { value: 'office-wardrobe', label: t('createOrder.configuration.officeWardrobe') },
+      { value: 'reception', label: t('createOrder.configuration.reception') },
+    ],
+    bathroom: [
+      { value: 'sink-cabinet-tall', label: t('createOrder.configuration.sinkCabinetTall') },
+      { value: 'sink-cabinet-straight', label: t('createOrder.configuration.sinkCabinetStraight') },
+      { value: 'washing-machine-cabinet', label: t('createOrder.configuration.washingMachineCabinet') },
+      { value: 'storage-cabinets', label: t('createOrder.configuration.storageCabinets') },
+    ],
+    bed: [
+      { value: 'single-hard', label: t('createOrder.configuration.singleHard') },
+      { value: 'single-soft', label: t('createOrder.configuration.singleSoft') },
+      { value: 'single-lift', label: t('createOrder.configuration.singleLift') },
+      { value: 'double-hard', label: t('createOrder.configuration.doubleHard') },
+      { value: 'double-soft', label: t('createOrder.configuration.doubleSoft') },
+      { value: 'double-lift', label: t('createOrder.configuration.doubleLift') },
+    ],
+    'tv-stand': [
+      { value: 'straight', label: t('createOrder.configuration.straight') },
+      { value: 'with-cabinet', label: t('createOrder.configuration.withCabinet') },
+    ],
+    wardrobe: [
+      { value: 'hinged', label: t('createOrder.configuration.hinged') },
+      { value: 'sliding', label: t('createOrder.configuration.sliding') },
+    ],
+    'dressing-room': [
+      { value: 'u-shaped', label: t('createOrder.configuration.uShaped') },
+      { value: 'l-shaped', label: t('createOrder.configuration.lShaped') },
+      { value: 'straight', label: t('createOrder.configuration.straight') },
+    ],
+    other: [
+      { value: 'shelving', label: t('createOrder.configuration.shelving') },
+      { value: 'shelves', label: t('createOrder.configuration.shelves') },
+      { value: 'cabinets', label: t('createOrder.configuration.cabinets') },
+      { value: 'showcases', label: t('createOrder.configuration.showcases') },
+    ],
+  };
+
+  // Опции комплектации для спальной гарнитуры
+  const bedroomConfigOptions = [
+    t('createOrder.bedroomConfig.dresser'),
+    t('createOrder.bedroomConfig.nightstand'),
+    t('createOrder.bedroomConfig.consoleWithMirror'),
   ];
 
   const colors = [
-    { name: 'Коричневый', value: '#8B4513' },
-    { name: 'Белый', value: '#FFFFFF' },
-    { name: 'Черный', value: '#2C2C2C' },
-    { name: 'Серый', value: '#808080' },
-    { name: 'Бежевый', value: '#D2B48C' },
-    { name: 'Синий', value: '#4A90E2' },
-    { name: 'Зеленый', value: '#6B8E23' },
-    { name: 'Красный', value: '#C41E3A' },
+    { name: t('createOrder.color.brown'), value: '#8B4513' },
+    { name: t('createOrder.color.white'), value: '#FFFFFF' },
+    { name: t('createOrder.color.black'), value: '#2C2C2C' },
+    { name: t('createOrder.color.gray'), value: '#808080' },
+    { name: t('createOrder.color.beige'), value: '#D2B48C' },
+    { name: t('createOrder.color.blue'), value: '#4A90E2' },
+    { name: t('createOrder.color.green'), value: '#6B8E23' },
+    { name: t('createOrder.color.red'), value: '#C41E3A' },
   ];
 
   const materials = [
-    { name: 'Дерево', value: 'wood' as MaterialType },
-    { name: 'Металл', value: 'metal' as MaterialType },
-    { name: 'Пластик', value: 'plastic' as MaterialType },
-    { name: 'Ткань', value: 'fabric' as MaterialType },
+    { name: t('createOrder.material.wood'), value: 'wood' as MaterialType },
+    { name: t('createOrder.material.metal'), value: 'metal' as MaterialType },
+    { name: t('createOrder.material.plastic'), value: 'plastic' as MaterialType },
+    { name: t('createOrder.material.fabric'), value: 'fabric' as MaterialType },
   ];
 
   const hardwareOptions = [
-    { name: 'Стандартная фурнитура', value: 'standard' },
-    { name: 'Премиум фурнитура', value: 'premium' },
-    { name: 'Скрытая фурнитура', value: 'hidden' },
-    { name: 'Декоративная фурнитура', value: 'decorative' },
+    { name: t('createOrder.hardware.standard'), value: 'standard' },
+    { name: t('createOrder.hardware.premium'), value: 'premium' },
+    { name: t('createOrder.hardware.hidden'), value: 'hidden' },
+    { name: t('createOrder.hardware.decorative'), value: 'decorative' },
   ];
 
-  const extraOptions = [
-    'Мягкая обивка',
-    'Встроенное освещение',
-    'Зеркало',
-    'Ящики для хранения',
-    'Регулируемая высота',
-    'Колесики',
-    'Защита от детей',
-    'Антибактериальное покрытие',
-  ];
+  // Дополнительные опции для каждого типа мебели
+  const extraOptionsByType: Record<FurnitureType, string[]> = {
+    kitchen: [
+      'Встроенное освещение',
+      'Мягкое закрывание дверей',
+      'Выдвижные ящики',
+      'Встроенная бытовая техника',
+      'Столешница из камня',
+      'Фартук из стекла',
+      'Доводчики',
+    ],
+    bedroom: [
+      'Мягкая обивка',
+      'Встроенное освещение',
+      'Зеркало',
+      'Ящики для хранения',
+      'Подъемный механизм',
+      'Ортопедическое основание',
+    ],
+    hallway: [
+      'Мягкая обивка сиденья',
+      'Зеркало',
+      'Крючки для одежды',
+      'Полка для обуви',
+      'Встроенное освещение',
+      'Мягкая спинка',
+    ],
+    office: [
+      'Регулируемая высота',
+      'Колесики',
+      'Кабель-каналы',
+      'Выдвижная клавиатурная полка',
+      'Замки на ящики',
+      'Эргономичный дизайн',
+    ],
+    bathroom: [
+      'Влагостойкое покрытие',
+      'Встроенное освещение',
+      'Зеркало с подогревом',
+      'Выдвижные ящики',
+      'Антибактериальное покрытие',
+      'Мягкое закрывание',
+    ],
+    bed: [
+      'Мягкая обивка изголовья',
+      'Подъемный механизм',
+      'Ящики для хранения',
+      'Ортопедическое основание',
+      'Встроенное освещение',
+      'Боковые тумбочки',
+    ],
+    'tv-stand': [
+      'Отверстия для кабелей',
+      'Стеклянные дверцы',
+      'Встроенное освещение',
+      'Полки для техники',
+      'Колесики',
+      'Доводчики',
+    ],
+    wardrobe: [
+      'Зеркальные дверцы',
+      'Встроенное освещение',
+      'Выдвижные ящики',
+      'Штанги для одежды',
+      'Полки разной высоты',
+      'Мягкое закрывание',
+      'Доводчики',
+    ],
+    'dressing-room': [
+      'Встроенное освещение',
+      'Выдвижные ящики',
+      'Штанги для одежды',
+      'Полки для обуви',
+      'Зеркало в рост',
+      'Корзины для белья',
+      'Вешалки с крючками',
+    ],
+    other: [
+      'Регулируемые полки',
+      'Стеклянные дверцы',
+      'Встроенное освещение',
+      'Колесики',
+      'Выдвижные механизмы',
+      'Защита от опрокидывания',
+    ],
+  };
+
+  // Mapping function to translate extras
+  const getExtraTranslation = (extra: string): string => {
+    const extraKeyMap: Record<string, string> = {
+      'Встроенное освещение': t('createOrder.extras.builtInLighting'),
+      'Мягкое закрывание дверей': t('createOrder.extras.softCloseDoors'),
+      'Выдвижные ящики': t('createOrder.extras.drawers'),
+      'Встроенная бытовая техника': t('createOrder.extras.builtInAppliances'),
+      'Столешница из камня': t('createOrder.extras.stoneCountertop'),
+      'Фартук из стекла': t('createOrder.extras.glassBacksplash'),
+      'Доводчики': t('createOrder.extras.doorClosers'),
+      'Мягкая обивка': t('createOrder.extras.softUpholstery'),
+      'Зеркало': t('createOrder.extras.mirror'),
+      'Ящики для хранения': t('createOrder.extras.storageBoxes'),
+      'Подъемный механизм': t('createOrder.extras.liftMechanism'),
+      'Ортопедическое основание': t('createOrder.extras.orthopedicBase'),
+      'Мягкая обивка сиденья': t('createOrder.extras.softSeatUpholstery'),
+      'Крючки для одежды': t('createOrder.extras.clothingHooks'),
+      'Полка для обуви': t('createOrder.extras.shoeRack'),
+      'Мягкая спинка': t('createOrder.extras.softBackrest'),
+      'Регулируемая высота': t('createOrder.extras.adjustableHeight'),
+      'Колесики': t('createOrder.extras.casters'),
+      'Кабель-каналы': t('createOrder.extras.cableManagement'),
+      'Выдвижная клавиатурная полка': t('createOrder.extras.keyboardTray'),
+      'Замки на ящики': t('createOrder.extras.drawerLocks'),
+      'Эргономичный дизайн': t('createOrder.extras.ergonomicDesign'),
+      'Влагостойкое покрытие': t('createOrder.extras.moistureResistant'),
+      'Зеркало с подогревом': t('createOrder.extras.heatedMirror'),
+      'Антибактериальное покрытие': t('createOrder.extras.antibacterialCoating'),
+      'Мягкая обивка изголовья': t('createOrder.extras.softHeadboard'),
+      'Боковые тумбочки': t('createOrder.extras.sideNightstands'),
+      'Отверстия для кабелей': t('createOrder.extras.cableHoles'),
+      'Стеклянные дверцы': t('createOrder.extras.glassDoors'),
+      'Полки для техники': t('createOrder.extras.equipmentShelves'),
+      'Зеркальные дверцы': t('createOrder.extras.mirrorDoors'),
+      'Штанги для одежды': t('createOrder.extras.clothingRods'),
+      'Полки разной высоты': t('createOrder.extras.variableHeightShelves'),
+      'Полки для обуви': t('createOrder.extras.shoeShelves'),
+      'Зеркало в рост': t('createOrder.extras.fullLengthMirror'),
+      'Корзины для белья': t('createOrder.extras.laundryBaskets'),
+      'Вешалки с крючками': t('createOrder.extras.hangersWithHooks'),
+      'Регулируемые полки': t('createOrder.extras.adjustableShelves'),
+      'Выдвижные механизмы': t('createOrder.extras.slideOutMechanisms'),
+      'Защита от опрокидывания': t('createOrder.extras.antiTipProtection'),
+      'Мягкое закрывание': t('createOrder.extras.softCloseDoors'),
+    };
+    return extraKeyMap[extra] || extra;
+  };
 
   const woodTypes = [
-    { name: 'Дуб', value: 'oak' as WoodType, description: 'Прочный, благородный' },
-    { name: 'Сосна', value: 'pine' as WoodType, description: 'Легкий, доступный' },
-    { name: 'Береза', value: 'birch' as WoodType, description: 'Светлый, прочный' },
-    { name: 'Орех', value: 'walnut' as WoodType, description: 'Элитный, темный' },
-    { name: 'Махагон', value: 'mahogany' as WoodType, description: 'Премиум класс' },
-    { name: 'МДФ', value: 'mdf' as WoodType, description: 'Экономный вариант' },
+    { name: t('createOrder.woodType.oak'), value: 'oak' as WoodType, description: t('createOrder.woodType.oakDesc') },
+    { name: t('createOrder.woodType.pine'), value: 'pine' as WoodType, description: t('createOrder.woodType.pineDesc') },
+    { name: t('createOrder.woodType.birch'), value: 'birch' as WoodType, description: t('createOrder.woodType.birchDesc') },
+    { name: t('createOrder.woodType.walnut'), value: 'walnut' as WoodType, description: t('createOrder.woodType.walnutDesc') },
+    { name: t('createOrder.woodType.mahogany'), value: 'mahogany' as WoodType, description: t('createOrder.woodType.mahoganyDesc') },
+    { name: t('createOrder.woodType.mdf'), value: 'mdf' as WoodType, description: t('createOrder.woodType.mdfDesc') },
   ];
 
   const finishTypes = [
-    { name: 'Матовый', value: 'matte' as FinishType },
-    { name: 'Глянцевый', value: 'glossy' as FinishType },
-    { name: 'Полуматовый', value: 'satin' as FinishType },
-    { name: 'Натуральный', value: 'natural' as FinishType },
+    { name: t('createOrder.finish.matte'), value: 'matte' as FinishType },
+    { name: t('createOrder.finish.glossy'), value: 'glossy' as FinishType },
+    { name: t('createOrder.finish.satin'), value: 'satin' as FinishType },
+    { name: t('createOrder.finish.natural'), value: 'natural' as FinishType },
   ];
 
   const deliveryTypes = [
-    { name: 'Стандартная доставка (5-7 дней)', value: 'standard', price: 5000 },
-    { name: 'Экспресс доставка (1-2 дня)', value: 'express', price: 15000 },
-    { name: 'Самовывоз (бесплатно)', value: 'pickup', price: 0 },
-    { name: 'Доставка + подъем на этаж', value: 'floor-delivery', price: 8000 },
+    { name: t('createOrder.delivery.standard'), value: 'standard', price: 5000 },
+    { name: t('createOrder.delivery.express'), value: 'express', price: 15000 },
+    { name: t('createOrder.delivery.pickup'), value: 'pickup', price: 0 },
+    { name: t('createOrder.delivery.floorDelivery'), value: 'floor-delivery', price: 8000 },
   ];
 
+  // Типы мебели, для которых сборка всегда требуется
+  const alwaysRequiresAssembly: FurnitureType[] = ['kitchen', 'bedroom', 'dressing-room'];
+  
+  // Типы мебели, для которых НЕ нужна опция сборки (слишком простые)
+  const noAssemblyOption: FurnitureType[] = ['other'];
+
   const warrantyOptions = [
-    { name: '1 год', value: 1, price: 0 },
-    { name: '2 года', value: 2, price: 3000 },
-    { name: '3 года', value: 3, price: 5000 },
-    { name: '5 лет', value: 5, price: 10000 },
+    { name: t('createOrder.warranty.oneYear'), value: 1, price: 0 },
+    { name: t('createOrder.warranty.twoYears'), value: 2, price: 3000 },
+    { name: t('createOrder.warranty.threeYears'), value: 3, price: 5000 },
+    { name: t('createOrder.warranty.fiveYears'), value: 5, price: 10000 },
   ];
 
   const handleFurnitureChange = (type: FurnitureType) => {
@@ -159,9 +571,52 @@ const CreateOrder = () => {
       setConfig(prev => ({
         ...prev,
         ...furniture.defaultSize,
+        subType: '',
+        configuration: [],
+        extras: [], // Сбрасываем доп. опции
+        assemblyRequired: alwaysRequiresAssembly.includes(type) ? true : !noAssemblyOption.includes(type),
       }));
     }
   };
+
+  const toggleConfiguration = (item: string) => {
+    setConfig(prev => ({
+      ...prev,
+      configuration: prev.configuration?.includes(item)
+        ? prev.configuration.filter(i => i !== item)
+        : [...(prev.configuration || []), item],
+    }));
+  };
+
+  // Автоматически пересчитываем цену при изменении конфигурации
+  useEffect(() => {
+    const calculatedPrice = calculatePrice();
+    const desiredPrice = calculatedPrice;
+    const maxBudget = Math.round(calculatedPrice * 1.15); // +15% запас
+
+    setConfig(prev => ({
+      ...prev,
+      desiredPrice,
+      maxBudget,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    selectedFurniture,
+    config.width,
+    config.height,
+    config.depth,
+    config.material,
+    config.woodType,
+    config.finish,
+    config.hardware,
+    config.extras.length,
+    config.quantity,
+    config.deliveryType,
+    config.assemblyRequired,
+    config.warrantyYears,
+    config.subType,
+    config.configuration?.length,
+  ]);
 
   const handleConfigChange = (key: keyof FurnitureConfig, value: string | number | MaterialType | WoodType | FinishType | string[] | boolean) => {
     setConfig(prev => ({ ...prev, [key]: value }));
@@ -177,64 +632,64 @@ const CreateOrder = () => {
   };
 
   const urgencyOptions = [
-    { value: 'low', label: 'Низкий приоритет', description: 'Не срочно, можно подождать' },
-    { value: 'medium', label: 'Средний приоритет', description: 'Желательно в ближайшее время' },
-    { value: 'high', label: 'Высокий приоритет', description: 'Срочно, нужно как можно быстрее' },
+    { value: 'low', label: t('createOrder.timing.urgency.low'), description: t('createOrder.timing.urgency.lowDesc') },
+    { value: 'medium', label: t('createOrder.timing.urgency.medium'), description: t('createOrder.timing.urgency.mediumDesc') },
+    { value: 'high', label: t('createOrder.timing.urgency.high'), description: t('createOrder.timing.urgency.highDesc') },
   ] as const;
 
   const handleSubmitOrder = async () => {
     try {
       // Валидация
       if (!config.deadline) {
-        showToast('Укажите желаемый срок выполнения', 'error');
+        showToast(t('createOrder.validation.deadlineRequired'), 'error');
         return;
       }
 
       if (config.desiredPrice <= 0 || config.maxBudget <= 0) {
-        showToast('Укажите корректный бюджет', 'error');
+        showToast(t('createOrder.validation.budgetRequired'), 'error');
         return;
       }
 
       if (config.maxBudget < config.desiredPrice) {
-        showToast('Максимальный бюджет должен быть больше желаемой цены', 'error');
+        showToast(t('createOrder.validation.maxBudgetTooLow'), 'error');
         return;
       }
 
       // Словари для перевода
       const materialNames: Record<string, string> = {
-        wood: 'Дерево',
-        metal: 'Металл',
-        plastic: 'Пластик',
-        fabric: 'Ткань',
+        wood: t('createOrder.material.wood'),
+        metal: t('createOrder.material.metal'),
+        plastic: t('createOrder.material.plastic'),
+        fabric: t('createOrder.material.fabric'),
       };
 
       const woodTypeNames: Record<string, string> = {
-        oak: 'Дуб',
-        pine: 'Сосна',
-        birch: 'Береза',
-        walnut: 'Орех',
-        mahogany: 'Махагони',
-        mdf: 'МДФ',
+        oak: t('createOrder.woodType.oak'),
+        pine: t('createOrder.woodType.pine'),
+        birch: t('createOrder.woodType.birch'),
+        walnut: t('createOrder.woodType.walnut'),
+        mahogany: t('createOrder.woodType.mahogany'),
+        mdf: t('createOrder.woodType.mdf'),
       };
 
       const finishNames: Record<string, string> = {
-        matte: 'Матовая',
-        glossy: 'Глянцевая',
-        satin: 'Сатиновая',
-        natural: 'Натуральная',
+        matte: t('createOrder.finish.matte'),
+        glossy: t('createOrder.finish.glossy'),
+        satin: t('createOrder.finish.satin'),
+        natural: t('createOrder.finish.natural'),
       };
 
       const hardwareNames: Record<string, string> = {
-        standard: 'Стандартная',
-        premium: 'Премиум',
-        hidden: 'Скрытая',
-        decorative: 'Декоративная',
+        standard: t('createOrder.hardware.standard'),
+        premium: t('createOrder.hardware.premium'),
+        hidden: t('createOrder.hardware.hidden'),
+        decorative: t('createOrder.hardware.decorative'),
       };
 
       const deliveryNames: Record<string, string> = {
-        standard: 'Стандартная доставка',
-        express: 'Экспресс доставка',
-        pickup: 'Самовывоз',
+        standard: t('createOrder.delivery.standard'),
+        express: t('createOrder.delivery.express'),
+        pickup: t('createOrder.delivery.pickup'),
       };
 
       // Формируем описание заказа
@@ -242,8 +697,14 @@ const CreateOrder = () => {
         ? `${materialNames[config.material] || config.material} (${woodTypeNames[config.woodType] || config.woodType})` 
         : materialNames[config.material] || config.material;
 
+      const furnitureName = furnitureOptions.find(f => f.type === selectedFurniture)?.name || '';
+      const subTypeName = config.subType 
+        ? furnitureSubTypes[selectedFurniture]?.find(st => st.value === config.subType)?.label 
+        : '';
+
       const description = `
-Тип мебели: ${furnitureOptions.find(f => f.type === selectedFurniture)?.name}
+Тип мебели: ${furnitureName}${subTypeName ? ` - ${subTypeName}` : ''}
+${config.configuration && config.configuration.length > 0 ? `Комплектация: ${config.configuration.join(', ')}` : ''}
 Размеры: ${config.width}м (Ш) × ${config.depth}м (Г) × ${config.height}м (В)
 Материал: ${materialText}
 Отделка: ${finishNames[config.finish] || config.finish}
@@ -257,7 +718,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
       `.trim();
 
       const orderData = {
-        title: `${furnitureOptions.find(f => f.type === selectedFurniture)?.name} ${config.woodType || config.material}`,
+        title: `${furnitureName}${subTypeName ? ` - ${subTypeName}` : ''} ${config.woodType || config.material}`,
         description: description,
         furnitureType: selectedFurniture,
         price: {
@@ -275,6 +736,8 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
         // Сохраняем полную конфигурацию для 3D визуализации
         furnitureConfig: {
           type: selectedFurniture,
+          subType: config.subType,
+          configuration: config.configuration,
           width: config.width,
           height: config.height,
           depth: config.depth,
@@ -291,7 +754,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
       const { orderService } = await import('../services/orderService');
       await orderService.createOrder(orderData);
       
-      showToast('Заказ успешно создан и отправлен на аукцион!', 'success');
+      showToast(t('createOrder.success'), 'success');
       
       // Сбрасываем форму после небольшой задержки
       setTimeout(() => {
@@ -299,28 +762,31 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
       }, 2000);
     } catch (error) {
       console.error('Error creating order:', error);
-      showToast('Ошибка создания заказа', 'error');
+      showToast(t('createOrder.error'), 'error');
     }
   };
 
   const renderFurniture = () => {
     const props = { config };
     
+    // Используем базовые модели, так как у нас теперь новые типы мебели
     switch (selectedFurniture) {
+      case 'kitchen': return <Table {...props} />; // Временная замена
+      case 'bedroom': return <Bed {...props} />;
+      case 'hallway': return <Wardrobe {...props} />;
+      case 'office': return <Table {...props} />;
+      case 'bathroom': return <Wardrobe {...props} />;
       case 'bed': return <Bed {...props} />;
+      case 'tv-stand': return <Dresser {...props} />;
       case 'wardrobe': return <Wardrobe {...props} />;
-      case 'table': return <Table {...props} />;
-      case 'chair': return <Chair {...props} />;
-      case 'sofa': return <Sofa {...props} />;
-      case 'dresser': return <Dresser {...props} />;
-      case 'grill': return <Grill {...props} />;
+      case 'dressing-room': return <Wardrobe {...props} />;
+      case 'other': return <Chair {...props} />;
       default: return <Bed {...props} />;
     }
   };
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Создать заказ</h1>
       
       <div className={styles.content}>
         {/* 3D Viewport */}
@@ -392,7 +858,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
         {/* Панель настроек */}
         <div className={styles.controls}>
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Тип мебели</h2>
+            <h2 className={styles.sectionTitle}>{t('createOrder.furnitureTypes.title')}</h2>
             <div className={styles.furnitureGrid}>
               {furnitureOptions.map((furniture) => {
                 const Icon = furniture.icon;
@@ -410,11 +876,49 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
             </div>
           </div>
 
+          {/* Подтип мебели */}
+          {furnitureSubTypes[selectedFurniture] && furnitureSubTypes[selectedFurniture].length > 0 && (
+            <div className={styles.section}>
+              <h2 className={styles.sectionTitle}>{t('createOrder.configuration.title')}</h2>
+              <div className={styles.buttonGroup}>
+                {furnitureSubTypes[selectedFurniture].map((subType) => (
+                  <button
+                    key={subType.value}
+                    className={`${styles.optionButton} ${config.subType === subType.value ? styles.active : ''}`}
+                    onClick={() => handleConfigChange('subType', subType.value)}
+                  >
+                    {subType.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Комплектация для спальной гарнитуры */}
+          {selectedFurniture === 'bedroom' && (
+            <div className={styles.section}>
+              <h2 className={styles.sectionTitle}>{t('createOrder.bedroomConfig.title')}</h2>
+              <div className={styles.extrasList}>
+                {bedroomConfigOptions.map((item) => (
+                  <label key={item} className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={config.configuration?.includes(item)}
+                      onChange={() => toggleConfiguration(item)}
+                      className={styles.checkbox}
+                    />
+                    <span>{item}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Размеры (метры)</h2>
+            <h2 className={styles.sectionTitle}>{t('createOrder.dimensions.title')}</h2>
             <div className={styles.inputGroup}>
               <label className={styles.label}>
-                Ширина: {config.width.toFixed(2)} м
+                {t('createOrder.dimensions.width')}: {config.width.toFixed(2)} м
                 <input
                   type="range"
                   min="0.5"
@@ -427,7 +931,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
               </label>
               
               <label className={styles.label}>
-                Высота: {config.height.toFixed(2)} м
+                {t('createOrder.dimensions.height')}: {config.height.toFixed(2)} м
                 <input
                   type="range"
                   min="0.3"
@@ -440,7 +944,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
               </label>
               
               <label className={styles.label}>
-                Глубина: {config.depth.toFixed(2)} м
+                {t('createOrder.dimensions.depth')}: {config.depth.toFixed(2)} м
                 <input
                   type="range"
                   min="0.3"
@@ -455,7 +959,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
           </div>
 
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Цвет</h2>
+            <h2 className={styles.sectionTitle}>{t('createOrder.color.title')}</h2>
             <div className={styles.colorGrid}>
               {colors.map((color) => (
                 <button
@@ -472,7 +976,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
           </div>
 
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Материал</h2>
+            <h2 className={styles.sectionTitle}>{t('createOrder.material.title')}</h2>
             <div className={styles.buttonGroup}>
               {materials.map((material) => (
                 <button
@@ -489,7 +993,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
           {/* Тип дерева - показывать только если выбрано дерево */}
           {config.material === 'wood' && (
             <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>Тип дерева</h2>
+              <h2 className={styles.sectionTitle}>{t('createOrder.woodType.title')}</h2>
               <div className={styles.woodGrid}>
                 {woodTypes.map((wood) => (
                   <button
@@ -506,7 +1010,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
           )}
 
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Покрытие</h2>
+            <h2 className={styles.sectionTitle}>{t('createOrder.finish.title')}</h2>
             <div className={styles.buttonGroup}>
               {finishTypes.map((finish) => (
                 <button
@@ -521,7 +1025,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
           </div>
 
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Фурнитура</h2>
+            <h2 className={styles.sectionTitle}>{t('createOrder.hardware.title')}</h2>
             <div className={styles.buttonGroup}>
               {hardwareOptions.map((hardware) => (
                 <button
@@ -535,25 +1039,27 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
             </div>
           </div>
 
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Дополнительные опции</h2>
-            <div className={styles.extrasList}>
-              {extraOptions.map((extra) => (
-                <label key={extra} className={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    checked={config.extras.includes(extra)}
-                    onChange={() => toggleExtra(extra)}
-                    className={styles.checkbox}
-                  />
-                  <span>{extra}</span>
-                </label>
-              ))}
+          {extraOptionsByType[selectedFurniture] && extraOptionsByType[selectedFurniture].length > 0 && (
+            <div className={styles.section}>
+              <h2 className={styles.sectionTitle}>{t('createOrder.extras.title')}</h2>
+              <div className={styles.extrasList}>
+                {extraOptionsByType[selectedFurniture].map((extra) => (
+                  <label key={extra} className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={config.extras.includes(extra)}
+                      onChange={() => toggleExtra(extra)}
+                      className={styles.checkbox}
+                    />
+                    <span>{getExtraTranslation(extra)}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Количество</h2>
+            <h2 className={styles.sectionTitle}>{t('createOrder.quantity.title')}</h2>
             <div className={styles.quantityControl}>
               <button 
                 className={styles.quantityButton}
@@ -572,7 +1078,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
           </div>
 
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Доставка</h2>
+            <h2 className={styles.sectionTitle}>{t('createOrder.delivery.title')}</h2>
             <div className={styles.deliveryList}>
               {deliveryTypes.map((delivery) => (
                 <label key={delivery.value} className={styles.radioLabel}>
@@ -586,7 +1092,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
                   <div className={styles.radioContent}>
                     <span className={styles.radioName}>{delivery.name}</span>
                     <span className={styles.radioPrice}>
-                      {delivery.price === 0 ? 'Бесплатно' : `+${delivery.price.toLocaleString()} ₸`}
+                      {delivery.price === 0 ? t('createOrder.delivery.free') : `+${delivery.price.toLocaleString()} ₸`}
                     </span>
                   </div>
                 </label>
@@ -594,21 +1100,29 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
             </div>
           </div>
 
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Сборка</h2>
-            <label className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                checked={config.assemblyRequired}
-                onChange={(e) => handleConfigChange('assemblyRequired', e.target.checked)}
-                className={styles.checkbox}
-              />
-              <span>Требуется профессиональная сборка (+3,000 ₸ за единицу)</span>
-            </label>
-          </div>
+          {!noAssemblyOption.includes(selectedFurniture) && (
+            <div className={styles.section}>
+              <h2 className={styles.sectionTitle}>{t('createOrder.assembly.title')}</h2>
+              {alwaysRequiresAssembly.includes(selectedFurniture) ? (
+                <div style={{ padding: '12px', background: '#edf2f7', borderRadius: '8px', color: '#2d3748' }}>
+                  {t('createOrder.assembly.included')}
+                </div>
+              ) : (
+                <label className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={config.assemblyRequired}
+                    onChange={(e) => handleConfigChange('assemblyRequired', e.target.checked)}
+                    className={styles.checkbox}
+                  />
+                  <span>{t('createOrder.assembly.required')}</span>
+                </label>
+              )}
+            </div>
+          )}
 
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Гарантия</h2>
+            <h2 className={styles.sectionTitle}>{t('createOrder.warranty.title')}</h2>
             <div className={styles.buttonGroup}>
               {warrantyOptions.map((warranty) => (
                 <button
@@ -626,50 +1140,37 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
           </div>
 
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Особые пожелания</h2>
+            <h2 className={styles.sectionTitle}>{t('createOrder.notes.title')}</h2>
             <textarea
               value={config.notes}
               onChange={(e) => handleConfigChange('notes', e.target.value)}
-              placeholder="Укажите любые особые требования к мебели, цвету, упаковке и т.д."
+              placeholder={t('createOrder.notes.placeholder')}
               className={styles.notesTextarea}
               rows={4}
             />
           </div>
 
-          {/* Бюджет и цена */}
+          {/* Расчет стоимости */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>💰 Бюджет</h3>
-            <div className={styles.budgetGrid}>
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Желаемая цена (₸)</label>
-                <input
-                  type="number"
-                  className={styles.priceInput}
-                  value={config.desiredPrice}
-                  onChange={(e) => handleConfigChange('desiredPrice', Number(e.target.value))}
-                  min={0}
-                  step={1000}
-                />
-                <span className={styles.inputHint}>Цена, которую хотели бы заплатить</span>
+            <h3 className={styles.sectionTitle}><MdAttachMoney style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> {t('createOrder.pricing.title')}</h3>
+            <div className={styles.priceBreakdown}>
+              <div className={styles.priceItem}>
+                <span className={styles.priceLabel}>{t('createOrder.pricing.basePrice')}</span>
+                <span className={styles.priceValue}>{config.desiredPrice.toLocaleString()} ₸</span>
               </div>
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Максимальный бюджет (₸)</label>
-                <input
-                  type="number"
-                  className={styles.priceInput}
-                  value={config.maxBudget}
-                  onChange={(e) => handleConfigChange('maxBudget', Number(e.target.value))}
-                  min={config.desiredPrice}
-                  step={1000}
-                />
-                <span className={styles.inputHint}>Максимальная сумма, готовы заплатить</span>
+              <div className={styles.priceItem}>
+                <span className={styles.priceLabel}>{t('createOrder.pricing.maxBudget')}</span>
+                <span className={styles.priceValue}>{config.maxBudget.toLocaleString()} ₸</span>
+              </div>
+              <div className={styles.priceNote}>
+                <MdInfo style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> {t('createOrder.pricing.note')}
               </div>
             </div>
           </div>
 
           {/* Срочность и дедлайн */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>⏱️ Сроки</h3>
+            <h3 className={styles.sectionTitle}><MdAccessTime style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> {t('createOrder.timing.title')}</h3>
             <div className={styles.urgencyGrid}>
               {urgencyOptions.map(option => (
                 <button
@@ -683,7 +1184,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
               ))}
             </div>
             <div className={styles.inputGroup}>
-              <label className={styles.label}>Крайний срок выполнения</label>
+              <label className={styles.label}>{t('createOrder.timing.deadline')}</label>
               <input
                 type="date"
                 className={styles.dateInput}
@@ -696,7 +1197,7 @@ ${config.notes ? `Примечания: ${config.notes}` : ''}
 
           <div className={styles.footer}>
             <button className={styles.submitButton} onClick={handleSubmitOrder}>
-              🎯 Отправить на аукцион
+              <MdTrendingUp style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> {t('createOrder.submit')}
             </button>
           </div>
         </div>

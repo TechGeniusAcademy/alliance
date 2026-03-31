@@ -5,8 +5,13 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: '0.0.0.0', // Разрешает доступ по локальной сети
+    host: '0.0.0.0', // Слушает на всех интерфейсах (localhost + все IP)
     port: 5173,
     strictPort: true,
+    cors: true,
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 5173,
   }
 })

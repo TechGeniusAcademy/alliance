@@ -10,6 +10,10 @@ export const useUnreadChats = () => {
   const fetchUnreadCount = useCallback(async () => {
     try {
       const chats = await chatService.getMyChats();
+      if (!chats || !Array.isArray(chats)) {
+        setUnreadCount(0);
+        return [];
+      }
       const total = chats.reduce((sum, chat) => sum + chat.unread_count, 0);
       setUnreadCount(total);
       return chats;
@@ -39,10 +43,12 @@ export const useUnreadChats = () => {
         console.log('✅ useUnreadChats WebSocket подключен');
         
         // Присоединяемся ко всем чатам пользователя
-        chats.forEach(chat => {
-          socket?.emit('joinChat', chat.id);
-          console.log(`useUnreadChats присоединился к чату ${chat.id}`);
-        });
+        if (chats && Array.isArray(chats)) {
+          chats.forEach(chat => {
+            socket?.emit('joinChat', chat.id);
+            console.log(`useUnreadChats присоединился к чату ${chat.id}`);
+          });
+        }
       });
 
       // Слушаем новые сообщения

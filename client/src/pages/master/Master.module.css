@@ -8,10 +8,10 @@
 }
 
 .pageTitle {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: #2d3748;
-  margin: 0 0 8px 0;
+  margin: 32px 0 8px 0;
 }
 
 .pageSubtitle {
@@ -44,9 +44,9 @@
 }
 
 .statIcon {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -59,7 +59,7 @@
 }
 
 .statValue {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #2d3748;
   line-height: 1;
@@ -111,12 +111,12 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #1D1E24;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 24px;
+  font-size: 20px;
   flex-shrink: 0;
 }
 
@@ -142,6 +142,86 @@
   color: #a0aec0;
 }
 
+/* Графики и диаграммы */
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.chartCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.chartTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 20px 0;
+}
+
+/* Показатели эффективности */
+.metricsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.metricItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metricLabel {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+.metricValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1D1E24;
+}
+
+.progressBar {
+  width: 100%;
+  height: 24px;
+  background: #edf2f7;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #1D1E24 0%, #4A5568 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  transition: width 0.6s ease;
+  min-width: 60px;
+}
+
+.progressText {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+}
+
+@media (max-width: 1200px) {
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .pageTitle {
     font-size: 1.5rem;
@@ -153,5 +233,34 @@
 
   .section {
     padding: 20px;
+  }
+
+  .chartsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .chartCard {
+    padding: 16px;
+  }
+
+  .chartTitle {
+    font-size: 1.5rem;
+  }
+
+  .metricLabel {
+    font-size: 1.25rem;
+  }
+
+  .metricValue {
+    font-size: 1.75rem;
+  }
+
+  .progressBar {
+    height: 24px;
+  }
+
+  .progressText {
+    font-size: 1.25rem;
   }
 }

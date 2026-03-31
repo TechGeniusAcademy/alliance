@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { loadStripe, type Stripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { API_BASE_URL } from '../config/api';
 import styles from './PaymentModal.module.css';
 
 interface PaymentModalProps {
@@ -16,7 +17,7 @@ let stripePromise: Promise<Stripe | null> | null = null;
 
 const getStripe = async () => {
   if (!stripePromise) {
-    const response = await fetch('http://localhost:5000/api/payments/config');
+    const response = await fetch(`${API_BASE_URL}/api/payments/config`);
     const { publishableKey } = await response.json();
     stripePromise = loadStripe(publishableKey);
   }
@@ -55,7 +56,7 @@ const CheckoutForm = ({ orderId, amount, orderTitle, bidId, onSuccess, onClose }
       if (paymentIntent && paymentIntent.status === 'succeeded') {
         // Подтверждаем платеж на бэкенде
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/payments/confirm-payment', {
+        const response = await fetch(`${API_BASE_URL}/api/payments/confirm-payment`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -145,7 +146,7 @@ const PaymentModal = (props: PaymentModalProps) => {
     const createPaymentIntent = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/payments/create-payment-intent', {
+        const response = await fetch(`${API_BASE_URL}/api/payments/create-payment-intent`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

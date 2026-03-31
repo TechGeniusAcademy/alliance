@@ -14,7 +14,7 @@ async function createAdmin() {
       `);
       console.log('✅ Колонка role добавлена или уже существует');
     } catch (error) {
-      console.log('⚠️ Ошибка при добавлении колонки role:', error);
+      console.log(' Ошибка при добавлении колонки role:', error);
     }
 
     // 2. Создаем индекс на email если его нет
@@ -24,7 +24,7 @@ async function createAdmin() {
       `);
       console.log('✅ Индекс на email создан');
     } catch (error) {
-      console.log('⚠️ Ошибка при создании индекса:', error);
+      console.log(' Ошибка при создании индекса:', error);
     }
 
     // 3. Проверяем, существует ли уже админ
@@ -34,7 +34,7 @@ async function createAdmin() {
     );
 
     if (adminExists.rows.length > 0) {
-      console.log('⚠️ Админ уже существует!');
+      console.log(' Админ уже существует!');
       console.log('📧 Email: admin@furniture.com');
       console.log('🔑 Пароль: admin123');
       
@@ -64,7 +64,7 @@ async function createAdmin() {
 
     // 5. Показываем всех пользователей с их ролями
     const allUsers = await pool.query('SELECT id, name, email, role FROM users ORDER BY id');
-    console.log('\n📋 Список всех пользователей:');
+    console.log('\n Список всех пользователей:');
     console.table(allUsers.rows);
 
   } catch (error) {

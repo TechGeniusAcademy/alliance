@@ -28,14 +28,16 @@ const Toast = ({ message, type, onClose, duration = 3000 }: ToastProps) => {
   };
 
   return (
-    <div className={`${styles.toast} ${styles[type]}`}>
-      <div className={styles.iconWrapper}>
-        {icons[type]}
+    <div className={styles.toastContainer}>
+      <div className={`${styles.toast} ${styles[type]}`}>
+        <div className={styles.iconWrapper}>
+          {icons[type]}
+        </div>
+        <p className={styles.message}>{message}</p>
+        <button onClick={onClose} className={styles.closeButton}>
+          <MdClose size={20} />
+        </button>
       </div>
-      <p className={styles.message}>{message}</p>
-      <button onClick={onClose} className={styles.closeButton}>
-        <MdClose size={20} />
-      </button>
     </div>
   );
 };

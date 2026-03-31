@@ -73,7 +73,7 @@ export const changePassword = async (req: Request, res: Response) => {
     }
 
     // Проверяем текущий пароль
-    const isMatch = await bcrypt.compare(currentPassword, user.rows[0].password);
+    const isMatch = await bcrypt.compare(currentPassword, user.rows[0].password_hash);
 
     if (!isMatch) {
       return res.status(400).json({ message: 'Неверный текущий пароль' });
@@ -85,7 +85,7 @@ export const changePassword = async (req: Request, res: Response) => {
 
     // Обновляем пароль
     await pool.query(
-      'UPDATE users SET password = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      'UPDATE users SET password_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
       [hashedPassword, userId]
     );
 

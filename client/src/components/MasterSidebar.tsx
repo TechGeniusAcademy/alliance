@@ -1,5 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   MdDashboard,
   MdShoppingCart,
@@ -8,7 +10,6 @@ import {
   MdStar,
   MdPerson,
   MdLogout,
-  MdConstruction,
   MdGavel,
   MdAssignment,
   MdSchedule,
@@ -23,12 +24,41 @@ import {
   MdGroup
 } from 'react-icons/md';
 import { useUnreadChats } from '../hooks/useUnreadChats';
+import { API_BASE_URL } from '../config/api';
 import styles from './MasterSidebar.module.css';
+
+interface MasterProfile {
+  name: string;
+  lastName?: string;
+  profile_photo?: string;
+}
 
 const MasterSidebar = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { unreadCount } = useUnreadChats();
+  const [profile, setProfile] = useState<MasterProfile | null>(null);
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `${API_BASE_URL}/api/master-profile`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log('Profile data:', response.data);
+      // API возвращает { profile: {...} }
+      setProfile(response.data.profile || response.data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -36,16 +66,38 @@ const MasterSidebar = () => {
     navigate('/');
   };
 
+  const getDisplayName = () => {
+    if (!profile) return 'Мастер';
+    return profile.lastName 
+      ? `${profile.name} ${profile.lastName}` 
+      : profile.name;
+  };
+
+  const getInitials = () => {
+    if (!profile) return 'М';
+    const firstInitial = profile.name?.[0] || '';
+    const lastInitial = profile.lastName?.[0] || '';
+    return (firstInitial + lastInitial).toUpperCase() || 'М';
+  };
+
   return (
     <aside className={styles.sidebar}>
       <div className={styles.sidebarHeader}>
         <div className={styles.logo}>
-          <MdConstruction size={32} className={styles.logoIcon} />
+          <div className={styles.headerAvatar}>
+            {profile?.profile_photo ? (
+              <img src={profile.profile_photo} alt={getDisplayName()} />
+            ) : (
+              <div className={styles.headerAvatarPlaceholder}>{getInitials()}</div>
+            )}
+          </div>
           <div>
             <h2>{t('masterSidebar.title')}</h2>
             <span className={styles.subtitle}>{t('masterSidebar.subtitle')}</span>
           </div>
         </div>
+        
+        {/* Аватар и имя в header */}
       </div>
 
       <nav className={styles.nav}>
@@ -124,7 +176,7 @@ const MasterSidebar = () => {
             }
           >
             <MdAccountBalanceWallet size={22} />
-            <span>Кошелек</span>
+            <span>{t('masterSidebar.wallet')}</span>
           </NavLink>
           <NavLink
             to="/master/earnings"
@@ -142,16 +194,7 @@ const MasterSidebar = () => {
             }
           >
             <MdReceipt size={22} />
-            <span>Комиссии</span>
-          </NavLink>
-          <NavLink
-            to="/master/invoices"
-            className={({ isActive }) =>
-              `${styles.navLink} ${isActive ? styles.active : ''}`
-            }
-          >
-            <MdReceipt size={22} />
-            <span>{t('masterSidebar.invoices')}</span>
+            <span>{t('masterSidebar.commissions')}</span>
           </NavLink>
           <NavLink
             to="/master/statistics"
@@ -263,10 +306,14 @@ const MasterSidebar = () => {
       <div className={styles.sidebarFooter}>
         <div className={styles.userCard}>
           <div className={styles.userAvatar}>
-            <MdConstruction size={24} />
+            {profile?.profile_photo ? (
+              <img src={profile.profile_photo} alt={getDisplayName()} />
+            ) : (
+              <div className={styles.avatarInitials}>{getInitials()}</div>
+            )}
           </div>
           <div className={styles.userInfo}>
-            <div className={styles.userName}>Мастер</div>
+            <div className={styles.userName}>{getDisplayName()}</div>
             <div className={styles.userRole}>{t('masterSidebar.masterRole')}</div>
           </div>
         </div>

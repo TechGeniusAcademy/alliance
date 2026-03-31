@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { MdAttachMoney, MdReceipt, MdInfo, MdCheck, MdPending, MdAccountBalanceWallet } from "react-icons/md";
 import { commissionService, type CommissionBalance, type CommissionTransaction } from "../../services/commissionService";
@@ -6,6 +7,7 @@ import { walletService } from "../../services/walletService";
 import styles from "./Master.module.css";
 
 const MasterCommissions = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [balance, setBalance] = useState<CommissionBalance | null>(null);
   const [transactions, setTransactions] = useState<CommissionTransaction[]>([]);
@@ -35,24 +37,24 @@ const MasterCommissions = () => {
 
   const handlePayFromWallet = async (transactionId: number, amount: number) => {
     if (amount > walletBalance) {
-      if (window.confirm("Недостаточно средств на кошельке. Пополнить кошелек?")) {
+      if (window.confirm(t('masterCommissions.confirmations.insufficientFunds'))) {
         navigate("/master/wallet");
       }
       return;
     }
 
-    if (!window.confirm(`Оплатить комиссию ${formatPrice(amount)} из кошелька?`)) {
+    if (!window.confirm(t('masterCommissions.confirmations.confirmPayment', { amount: formatPrice(amount) }))) {
       return;
     }
 
     try {
       setPayingId(transactionId);
       await walletService.payCommission(transactionId);
-      alert("Комиссия успешно оплачена!");
+      alert(t('masterCommissions.notifications.paymentSuccess'));
       await loadData(); // Обновить данные
     } catch (error) {
       console.error("Error paying commission:", error);
-      alert("Не удалось оплатить комиссию");
+      alert(t('masterCommissions.notifications.paymentError'));
     } finally {
       setPayingId(null);
     }
@@ -74,7 +76,7 @@ const MasterCommissions = () => {
   };
 
   const getCommissionTypeText = (type: string) => {
-    return type === "first_month" ? "Первый месяц" : "Процент от заказа";
+    return type === "first_month" ? t('masterCommissions.types.first_month') : t('masterCommissions.types.percentage');
   };
 
   const getStatusColor = (status: string) => {
@@ -93,11 +95,11 @@ const MasterCommissions = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case "paid":
-        return "Оплачено";
+        return t('masterCommissions.statuses.paid');
       case "pending":
-        return "Ожидает оплаты";
+        return t('masterCommissions.statuses.pending');
       case "cancelled":
-        return "Отменено";
+        return t('masterCommissions.statuses.cancelled');
       default:
         return status;
     }
@@ -116,9 +118,9 @@ const MasterCommissions = () => {
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>
           <MdAttachMoney style={{ verticalAlign: "middle", marginRight: "12px" }} />
-          Комиссии платформы
+          {t('masterCommissions.title')}
         </h1>
-        <p style={{ color: "#718096", marginTop: "8px" }}>Информация о комиссиях за использование платформы</p>
+        <p style={{ color: "#718096", marginTop: "8px" }}>{t('masterCommissions.subtitle')}</p>
       </div>
 
       {/* Информационный блок */}
@@ -133,20 +135,20 @@ const MasterCommissions = () => {
       >
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
           <MdInfo size={28} />
-          <h3 style={{ margin: 0, fontSize: "1.3rem" }}>Условия комиссии</h3>
+          <h3 style={{ margin: 0, fontSize: "1.3rem" }}>{t('masterCommissions.conditions.title')}</h3>
         </div>
         <div style={{ display: "grid", gap: "12px", fontSize: "1rem", lineHeight: "1.6" }}>
           <div style={{ display: "flex", gap: "8px" }}>
             <strong>•</strong>
-            <span>Первый месяц: 5,000₸ за каждый заказ (максимум 3 заказа = 15,000₸)</span>
+            <span>{t('masterCommissions.conditions.firstMonth')}</span>
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
             <strong>•</strong>
-            <span>После первого месяца: 3% от суммы каждого заказа</span>
+            <span>{t('masterCommissions.conditions.afterFirstMonth')}</span>
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
             <strong>•</strong>
-            <span>Клиент платит вам напрямую, мы не участвуем в расчетах</span>
+            <span>{t('masterCommissions.conditions.directPayment')}</span>
           </div>
         </div>
       </div>
@@ -176,7 +178,7 @@ const MasterCommissions = () => {
                 <MdAccountBalanceWallet size={28} color="#667eea" />
               </div>
               <div>
-                <div style={{ fontSize: "0.9rem", color: "#718096" }}>Баланс кошелька</div>
+                <div style={{ fontSize: "0.9rem", color: "#718096" }}>{t('masterCommissions.balance.walletBalance')}</div>
                 <div style={{ fontSize: "1.8rem", fontWeight: "700", color: "#2d3748" }}>{formatPrice(walletBalance)}</div>
               </div>
             </div>
@@ -204,7 +206,7 @@ const MasterCommissions = () => {
                 e.currentTarget.style.boxShadow = "none";
               }}
             >
-              Пополнить кошелек
+              {t('masterCommissions.balance.topUpWallet')}
             </button>
           </div>
           <div className={styles.section} style={{ padding: "24px" }}>
@@ -222,11 +224,11 @@ const MasterCommissions = () => {
                 <MdPending size={28} color="#dc2626" />
               </div>
               <div>
-                <div style={{ fontSize: "0.9rem", color: "#718096" }}>К оплате</div>
+                <div style={{ fontSize: "0.9rem", color: "#718096" }}>{t('masterCommissions.balance.toPay')}</div>
                 <div style={{ fontSize: "1.8rem", fontWeight: "700", color: "#2d3748" }}>{formatPrice(balance.balance)}</div>
               </div>
             </div>
-            <div style={{ fontSize: "0.85rem", color: "#718096", marginTop: "8px" }}>{balance.pendingTransactions} неоплаченных транзакций</div>
+            <div style={{ fontSize: "0.85rem", color: "#718096", marginTop: "8px" }}>{balance.pendingTransactions} {t('masterCommissions.balance.pendingTransactions')}</div>
           </div>
 
           <div className={styles.section} style={{ padding: "24px" }}>
@@ -244,7 +246,7 @@ const MasterCommissions = () => {
                 <MdCheck size={28} color="#059669" />
               </div>
               <div>
-                <div style={{ fontSize: "0.9rem", color: "#718096" }}>Всего оплачено</div>
+                <div style={{ fontSize: "0.9rem", color: "#718096" }}>{t('masterCommissions.balance.totalPaid')}</div>
                 <div style={{ fontSize: "1.8rem", fontWeight: "700", color: "#2d3748" }}>{formatPrice(balance.totalPaid)}</div>
               </div>
             </div>
@@ -269,7 +271,7 @@ const MasterCommissions = () => {
               transition: "all 0.2s",
             }}
           >
-            Все
+            {t('masterCommissions.filters.all')}
           </button>
           <button
             onClick={() => setFilter("pending")}
@@ -285,7 +287,7 @@ const MasterCommissions = () => {
               transition: "all 0.2s",
             }}
           >
-            Ожидает оплаты
+            {t('masterCommissions.filters.pending')}
           </button>
           <button
             onClick={() => setFilter("paid")}
@@ -301,7 +303,7 @@ const MasterCommissions = () => {
               transition: "all 0.2s",
             }}
           >
-            Оплачено
+            {t('masterCommissions.filters.paid')}
           </button>
         </div>
       </div>
@@ -310,11 +312,11 @@ const MasterCommissions = () => {
       <div className={styles.section}>
         <h3 style={{ margin: "0 0 20px 0", display: "flex", alignItems: "center", gap: "8px" }}>
           <MdReceipt size={24} />
-          История комиссий
+          {t('masterCommissions.history.title')}
         </h3>
 
         {transactions.length === 0 ? (
-          <p style={{ textAlign: "center", color: "#718096", padding: "40px" }}>Нет транзакций</p>
+          <p style={{ textAlign: "center", color: "#718096", padding: "40px" }}>{t('masterCommissions.history.empty')}</p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {transactions.map((transaction) => (
@@ -334,18 +336,18 @@ const MasterCommissions = () => {
                   <div style={{ fontSize: "1.05rem", fontWeight: "600", color: "#2d3748", marginBottom: "8px" }}>{transaction.order_title}</div>
                   <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "0.9rem", color: "#718096" }}>
                     <div>
-                      <strong>Тип:</strong> {getCommissionTypeText(transaction.commission_type)}
+                      <strong>{t('masterCommissions.transaction.type')}</strong> {getCommissionTypeText(transaction.commission_type)}
                     </div>
                     {transaction.commission_rate && (
                       <div>
-                        <strong>Ставка:</strong> {transaction.commission_rate}%
+                        <strong>{t('masterCommissions.transaction.rate')}</strong> {transaction.commission_rate}%
                       </div>
                     )}
                     <div>
-                      <strong>Сумма заказа:</strong> {formatPrice(transaction.order_amount)}
+                      <strong>{t('masterCommissions.transaction.orderAmount')}</strong> {formatPrice(transaction.order_amount)}
                     </div>
                     <div>
-                      <strong>Дата:</strong> {formatDate(transaction.created_at)}
+                      <strong>{t('masterCommissions.transaction.date')}</strong> {formatDate(transaction.created_at)}
                     </div>
                   </div>
                 </div>
@@ -394,7 +396,7 @@ const MasterCommissions = () => {
                       }}
                     >
                       <MdAccountBalanceWallet size={18} />
-                      {payingId === transaction.id ? "Оплата..." : "Оплатить из кошелька"}
+                      {payingId === transaction.id ? t('masterCommissions.actions.paying') : t('masterCommissions.actions.payFromWallet')}
                     </button>
                   )}
                 </div>

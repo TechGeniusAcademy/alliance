@@ -14,7 +14,7 @@ async function runMigration() {
     await pool.query(sql);
 
     console.log('✅ Миграция успешно выполнена!');
-    console.log('📋 Созданные таблицы:');
+    console.log(' Созданные таблицы:');
     console.log('  - master_profiles');
     console.log('  - commission_transactions');
     console.log('  - wallet_transactions');
@@ -29,7 +29,7 @@ async function runMigration() {
       ORDER BY table_name
     `);
 
-    console.log('\n📊 Подтверждение созданных таблиц:');
+    console.log('\nПодтверждение созданных таблиц:');
     console.table(tables.rows);
 
     // Создаём профили для существующих мастеров

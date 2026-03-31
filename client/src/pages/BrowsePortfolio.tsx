@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MdSearch, MdFilterList, MdImage, MdClose, MdLocationOn, MdAttachMoney, MdPerson, MdChat, MdStar, MdChevronLeft, MdChevronRight } from 'react-icons/md';
+import { useTranslation } from 'react-i18next';
+import { MdSearch, MdFilterList, MdImage, MdClose, MdLocationOn, MdAttachMoney, MdPerson, MdChat, MdStar, MdChevronLeft, MdChevronRight, MdFavorite, MdFavoriteBorder } from 'react-icons/md';
 import { masterService } from '../services/masterService';
-import type { PortfolioItem } from '../services/masterService';
+import type { PortfolioItem, MasterPublicProfile } from '../services/masterService';
+import { API_BASE_URL } from '../config/api';
 import Toast from '../components/Toast';
 import type { ToastType } from '../components/Toast';
 import MasterProfileModal from '../components/MasterProfileModal';
@@ -16,6 +18,7 @@ interface ToastMessage {
 
 const BrowsePortfolio = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [filteredPortfolio, setFilteredPortfolio] = useState<PortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,6 +28,8 @@ const BrowsePortfolio = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showMasterProfile, setShowMasterProfile] = useState(false);
   const [selectedMasterId, setSelectedMasterId] = useState<number | null>(null);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [masterInfo, setMasterInfo] = useState<MasterPublicProfile | null>(null);
   
   // Фильтры
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -56,7 +61,22 @@ const BrowsePortfolio = () => {
   useEffect(() => {
     // Сбросить индекс изображения при открытии нового элемента
     setCurrentImageIndex(0);
+    
+    // Загрузить информацию о мастере
+    if (selectedItem?.master_id) {
+      loadMasterInfo(selectedItem.master_id);
+    }
   }, [selectedItem]);
+
+  const loadMasterInfo = async (masterId: number) => {
+    try {
+      const info = await masterService.getMasterProfile(masterId);
+      setMasterInfo(info);
+    } catch (error) {
+      console.error('Error loading master info:', error);
+      setMasterInfo(null);
+    }
+  };
 
   const loadAllPortfolio = async () => {
     try {
@@ -70,7 +90,7 @@ const BrowsePortfolio = () => {
           
           try {
             // Проверяем публичные настройки мастера
-            const response = await fetch(`http://localhost:5000/api/settings/master/${item.master_id}/public`);
+            const response = await fetch(`${API_BASE_URL}/api/settings/master/${item.master_id}/public`);
             if (response.ok) {
               const settings = await response.json();
               // Если мастер скрыл портфолио, возвращаем null
@@ -91,11 +111,62 @@ const BrowsePortfolio = () => {
       
       setPortfolio(visiblePortfolio);
       setFilteredPortfolio(visiblePortfolio);
+      
+      // Загружаем состояния избранного для каждой работы
+      await loadFavorites(visiblePortfolio);
     } catch (error) {
       console.error('Error loading portfolio:', error);
-      showToast('Ошибка при загрузке работ', 'error');
+      showToast(t('browsePortfolio.errors.loadFailed'), 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadFavorites = async (items: PortfolioItem[]) => {
+    try {
+      const favoriteStatuses = await Promise.all(
+        items.map(async (item) => {
+          if (!item.id) return null;
+          try {
+            const isFavorite = await masterService.checkPortfolioFavorite(item.id);
+            return isFavorite ? item.id : null;
+          } catch {
+            return null;
+          }
+        })
+      );
+      
+      const favoriteIds = favoriteStatuses.filter(id => id !== null) as number[];
+      setFavorites(new Set(favoriteIds));
+    } catch (error) {
+      console.error('Error loading favorites:', error);
+    }
+  };
+
+  const handleFavoriteToggle = async (portfolioId: number | undefined, event: React.MouseEvent) => {
+    event.stopPropagation(); // Предотвращаем открытие модального окна
+    
+    if (!portfolioId) return;
+    
+    try {
+      const isFavorite = favorites.has(portfolioId);
+      
+      if (isFavorite) {
+        await masterService.removePortfolioFromFavorites(portfolioId);
+        setFavorites(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(portfolioId);
+          return newSet;
+        });
+        showToast(t('browsePortfolio.favorites.removed'), 'success');
+      } else {
+        await masterService.addPortfolioToFavorites(portfolioId);
+        setFavorites(prev => new Set(prev).add(portfolioId));
+        showToast(t('browsePortfolio.favorites.added'), 'success');
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      showToast(t('browsePortfolio.favorites.error'), 'error');
     }
   };
 
@@ -153,23 +224,39 @@ const BrowsePortfolio = () => {
   };
 
   const categories = [
-    'Кухонная мебель',
-    'Шкафы-купе и гардеробные',
-    'Спальная мебель',
-    'Гостиная (стенки, тумбы)',
-    'Офисная мебель',
-    'Детская мебель',
-    'Прихожие',
-    'Столы (обеденные, письменные)',
-    'Стулья и кресла',
-    'Корпусная мебель на заказ',
-    'Мягкая мебель',
-    'Встроенная мебель',
-    'Ванная комната',
+    t('browsePortfolio.categories.kitchen'),
+    t('browsePortfolio.categories.wardrobes'),
+    t('browsePortfolio.categories.bedroom'),
+    t('browsePortfolio.categories.living'),
+    t('browsePortfolio.categories.office'),
+    t('browsePortfolio.categories.children'),
+    t('browsePortfolio.categories.hallway'),
+    t('browsePortfolio.categories.tables'),
+    t('browsePortfolio.categories.chairs'),
+    t('browsePortfolio.categories.custom'),
+    t('browsePortfolio.categories.soft'),
+    t('browsePortfolio.categories.builtin'),
+    t('browsePortfolio.categories.bathroom'),
   ];
 
-  const styles_list = ['Современный', 'Классический', 'Минимализм', 'Лофт', 'Скандинавский', 'Прованс'];
-  const materials_list = ['ЛДСП', 'МДФ', 'Массив', 'Шпон', 'Пластик', 'Стекло', 'Металл'];
+  const styles_list = [
+    t('browsePortfolio.styles.modern'),
+    t('browsePortfolio.styles.classic'),
+    t('browsePortfolio.styles.minimalism'),
+    t('browsePortfolio.styles.loft'),
+    t('browsePortfolio.styles.scandinavian'),
+    t('browsePortfolio.styles.provence')
+  ];
+  
+  const materials_list = [
+    t('browsePortfolio.materials.chipboard'),
+    t('browsePortfolio.materials.mdf'),
+    t('browsePortfolio.materials.solid'),
+    t('browsePortfolio.materials.veneer'),
+    t('browsePortfolio.materials.plastic'),
+    t('browsePortfolio.materials.glass'),
+    t('browsePortfolio.materials.metal')
+  ];
 
   if (loading) {
     return (
@@ -185,10 +272,10 @@ const BrowsePortfolio = () => {
         <div>
           <h1 className={styles.pageTitle}>
             <MdImage className={styles.titleIcon} />
-            Работы мебельщиков
+            {t('browsePortfolio.title')}
           </h1>
           <p className={styles.subtitle}>
-            {filteredPortfolio.length} {filteredPortfolio.length === 1 ? 'работа' : 'работ'}
+            {filteredPortfolio.length} {filteredPortfolio.length === 1 ? t('browsePortfolio.workCount.one') : t('browsePortfolio.workCount.many')}
           </p>
         </div>
       </div>
@@ -199,7 +286,7 @@ const BrowsePortfolio = () => {
           <MdSearch className={styles.searchIcon} size={24} />
           <input
             type="text"
-            placeholder="Поиск по названию, материалам, типу мебели..."
+            placeholder={t('browsePortfolio.search.placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={styles.searchInput}
@@ -219,7 +306,7 @@ const BrowsePortfolio = () => {
           onClick={() => setShowFilters(!showFilters)}
         >
           <MdFilterList size={20} />
-          Фильтры
+          {t('browsePortfolio.search.filters')}
         </button>
       </div>
 
@@ -227,13 +314,13 @@ const BrowsePortfolio = () => {
       {showFilters && (
         <div className={styles.filtersPanel}>
           <div className={styles.filterGroup}>
-            <label>Категория</label>
+            <label>{t('browsePortfolio.filters.category')}</label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className={styles.filterSelect}
             >
-              <option value="">Все категории</option>
+              <option value="">{t('browsePortfolio.filters.allCategories')}</option>
               {categories.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
@@ -241,13 +328,13 @@ const BrowsePortfolio = () => {
           </div>
 
           <div className={styles.filterGroup}>
-            <label>Стиль</label>
+            <label>{t('browsePortfolio.filters.style')}</label>
             <select
               value={selectedStyle}
               onChange={(e) => setSelectedStyle(e.target.value)}
               className={styles.filterSelect}
             >
-              <option value="">Все стили</option>
+              <option value="">{t('browsePortfolio.filters.allStyles')}</option>
               {styles_list.map(style => (
                 <option key={style} value={style}>{style}</option>
               ))}
@@ -255,13 +342,13 @@ const BrowsePortfolio = () => {
           </div>
 
           <div className={styles.filterGroup}>
-            <label>Материал</label>
+            <label>{t('browsePortfolio.filters.material')}</label>
             <select
               value={selectedMaterial}
               onChange={(e) => setSelectedMaterial(e.target.value)}
               className={styles.filterSelect}
             >
-              <option value="">Все материалы</option>
+              <option value="">{t('browsePortfolio.filters.allMaterials')}</option>
               {materials_list.map(material => (
                 <option key={material} value={material}>{material}</option>
               ))}
@@ -269,7 +356,7 @@ const BrowsePortfolio = () => {
           </div>
 
           <div className={styles.filterGroup}>
-            <label>Цена от (₸)</label>
+            <label>{t('browsePortfolio.filters.priceFrom')}</label>
             <input
               type="number"
               value={minPrice}
@@ -280,7 +367,7 @@ const BrowsePortfolio = () => {
           </div>
 
           <div className={styles.filterGroup}>
-            <label>Цена до (₸)</label>
+            <label>{t('browsePortfolio.filters.priceTo')}</label>
             <input
               type="number"
               value={maxPrice}
@@ -291,7 +378,7 @@ const BrowsePortfolio = () => {
           </div>
 
           <button className={styles.clearFiltersButton} onClick={clearFilters}>
-            Сбросить фильтры
+            {t('browsePortfolio.search.clearFilters')}
           </button>
         </div>
       )}
@@ -300,10 +387,10 @@ const BrowsePortfolio = () => {
       {filteredPortfolio.length === 0 ? (
         <div className={styles.emptyState}>
           <MdImage size={80} />
-          <h2>Работы не найдены</h2>
-          <p>Попробуйте изменить параметры поиска или фильтры</p>
+          <h2>{t('browsePortfolio.emptyState.title')}</h2>
+          <p>{t('browsePortfolio.emptyState.description')}</p>
           <button className={styles.clearFiltersButton} onClick={clearFilters}>
-            Сбросить фильтры
+            {t('browsePortfolio.search.clearFilters')}
           </button>
         </div>
       ) : (
@@ -320,7 +407,7 @@ const BrowsePortfolio = () => {
                 ) : (
                   <div className={styles.noImage}>
                     <MdImage size={48} />
-                    <span>Нет фото</span>
+                    <span>{t('browsePortfolio.card.noPhoto')}</span>
                   </div>
                 )}
                 {item.images && item.images.length > 1 && (
@@ -329,6 +416,18 @@ const BrowsePortfolio = () => {
                     {item.images.length}
                   </div>
                 )}
+                {/* Кнопка избранного */}
+                <button
+                  className={styles.favoriteButton}
+                  onClick={(e) => handleFavoriteToggle(item.id, e)}
+                  title={favorites.has(item.id!) ? t('browsePortfolio.favorites.remove') : t('browsePortfolio.favorites.add')}
+                >
+                  {favorites.has(item.id!) ? (
+                    <MdFavorite size={24} color="#ef4444" />
+                  ) : (
+                    <MdFavoriteBorder size={24} color="#fff" />
+                  )}
+                </button>
               </div>
 
               <div className={styles.cardContent}>
@@ -340,21 +439,21 @@ const BrowsePortfolio = () => {
 
                 {item.furniture_type && (
                   <div className={styles.infoRow}>
-                    <span className={styles.infoLabel}>Тип:</span>
+                    <span className={styles.infoLabel}>{t('browsePortfolio.card.type')}</span>
                     <span>{item.furniture_type}</span>
                   </div>
                 )}
 
                 {item.style && (
                   <div className={styles.infoRow}>
-                    <span className={styles.infoLabel}>Стиль:</span>
+                    <span className={styles.infoLabel}>{t('browsePortfolio.card.style')}</span>
                     <span>{item.style}</span>
                   </div>
                 )}
 
                 {item.materials && (
                   <div className={styles.infoRow}>
-                    <span className={styles.infoLabel}>Материалы:</span>
+                    <span className={styles.infoLabel}>{t('browsePortfolio.card.materials')}</span>
                     <span>{item.materials}</span>
                   </div>
                 )}
@@ -441,7 +540,7 @@ const BrowsePortfolio = () => {
                 ) : (
                   <div className={styles.noImageLarge}>
                     <MdImage size={80} />
-                    <span>Нет изображений</span>
+                    <span>{t('browsePortfolio.modal.noImages')}</span>
                   </div>
                 )}
               </div>
@@ -456,7 +555,7 @@ const BrowsePortfolio = () => {
 
                 {selectedItem.description && (
                   <div className={styles.detailSection}>
-                    <h3>Описание</h3>
+                    <h3>{t('browsePortfolio.modal.description')}</h3>
                     <p>{selectedItem.description}</p>
                   </div>
                 )}
@@ -464,56 +563,56 @@ const BrowsePortfolio = () => {
                 <div className={styles.detailsGrid}>
                   {selectedItem.furniture_type && (
                     <div className={styles.detailItem}>
-                      <strong>Тип мебели:</strong>
+                      <strong>{t('browsePortfolio.modal.furnitureType')}</strong>
                       <span>{selectedItem.furniture_type}</span>
                     </div>
                   )}
 
                   {selectedItem.style && (
                     <div className={styles.detailItem}>
-                      <strong>Стиль:</strong>
+                      <strong>{t('browsePortfolio.modal.style')}</strong>
                       <span>{selectedItem.style}</span>
                     </div>
                   )}
 
                   {selectedItem.materials && (
                     <div className={styles.detailItem}>
-                      <strong>Материалы:</strong>
+                      <strong>{t('browsePortfolio.modal.materials')}</strong>
                       <span>{selectedItem.materials}</span>
                     </div>
                   )}
 
                   {selectedItem.color && (
                     <div className={styles.detailItem}>
-                      <strong>Цвет/Отделка:</strong>
+                      <strong>{t('browsePortfolio.modal.color')}</strong>
                       <span>{selectedItem.color}</span>
                     </div>
                   )}
 
                   {selectedItem.dimensions && (
                     <div className={styles.detailItem}>
-                      <strong>Размеры:</strong>
+                      <strong>{t('browsePortfolio.modal.dimensions')}</strong>
                       <span>{selectedItem.dimensions}</span>
                     </div>
                   )}
 
                   {selectedItem.execution_time && (
                     <div className={styles.detailItem}>
-                      <strong>Срок изготовления:</strong>
+                      <strong>{t('browsePortfolio.modal.executionTime')}</strong>
                       <span>{selectedItem.execution_time}</span>
                     </div>
                   )}
 
                   {selectedItem.warranty_period && (
                     <div className={styles.detailItem}>
-                      <strong>Гарантия:</strong>
+                      <strong>{t('browsePortfolio.modal.warranty')}</strong>
                       <span>{selectedItem.warranty_period}</span>
                     </div>
                   )}
 
                   {selectedItem.location && (
                     <div className={styles.detailItem}>
-                      <strong><MdLocationOn size={16} /> Место:</strong>
+                      <strong><MdLocationOn size={16} /> {t('browsePortfolio.modal.location')}</strong>
                       <span>{selectedItem.location}</span>
                     </div>
                   )}
@@ -521,17 +620,17 @@ const BrowsePortfolio = () => {
 
                 <div className={styles.servicesSection}>
                   {selectedItem.assembly_included && (
-                    <div className={styles.serviceBadge}>✓ Сборка включена</div>
+                    <div className={styles.serviceBadge}>✓ {t('browsePortfolio.modal.assemblyIncluded')}</div>
                   )}
                   {selectedItem.delivery_included && (
-                    <div className={styles.serviceBadge}>✓ Доставка включена</div>
+                    <div className={styles.serviceBadge}>✓ {t('browsePortfolio.modal.deliveryIncluded')}</div>
                   )}
                 </div>
 
                 {selectedItem.price && (
                   <div className={styles.priceSection}>
                     <MdAttachMoney size={28} />
-                    <span className={styles.priceLabel}>Стоимость:</span>
+                    <span className={styles.priceLabel}>{t('browsePortfolio.modal.price')}</span>
                     <span className={styles.priceValue}>
                       {selectedItem.price.toLocaleString()} ₸
                     </span>
@@ -544,19 +643,22 @@ const BrowsePortfolio = () => {
             <div className={styles.masterInfoSection}>
               <h3 className={styles.masterInfoTitle}>
                 <MdPerson size={24} />
-                Информация о мастере
+                {t('browsePortfolio.master.title')}
               </h3>
               
               <div className={styles.masterCard}>
                   <div className={styles.masterDetails}>
                     <div className={styles.masterName}>
-                      {selectedItem.master_name || 'Мастер'}
+                      {selectedItem.master_name || t('browsePortfolio.master.defaultName')}
                     </div>
 
                     <div className={styles.masterStats}>
                       <div className={styles.statItem}>
                         <MdStar size={18} />
-                        <span>4.8 (127 отзывов)</span>
+                        <span>
+                          {masterInfo?.rating ? `${Number(masterInfo.rating).toFixed(1)}` : t('browsePortfolio.master.noRating')}
+                          {masterInfo?.completedOrders ? ` (${masterInfo.completedOrders} ${masterInfo.completedOrders === 1 ? t('browsePortfolio.master.orderCount.one') : masterInfo.completedOrders < 5 ? t('browsePortfolio.master.orderCount.few') : t('browsePortfolio.master.orderCount.many')})` : ''}
+                        </span>
                       </div>
                     </div>
                   </div>                <div className={styles.masterActions}>
@@ -568,17 +670,17 @@ const BrowsePortfolio = () => {
                     }}
                   >
                     <MdPerson size={20} />
-                    Профиль мастера
+                    {t('browsePortfolio.master.viewProfile')}
                   </button>
                   
                   <button 
                     className={styles.contactButton}
-                    onClick={() => navigate('/dashboard/messages', { 
+                    onClick={() => navigate('/dashboard/chats', { 
                       state: { masterId: selectedItem.master_id, masterName: selectedItem.master_name } 
                     })}
                   >
                     <MdChat size={20} />
-                    Написать сообщение
+                    {t('browsePortfolio.master.sendMessage')}
                   </button>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import pool from '../config/database';
+import whatsappService from '../services/whatsappService';
 
 // Создать ставку на заказ
 export const createBid = async (req: Request, res: Response) => {
@@ -30,7 +31,10 @@ export const createBid = async (req: Request, res: Response) => {
 
     // Проверяем, что заказ существует и находится в аукционе
     const orderCheck = await pool.query(
-      'SELECT id, status FROM orders WHERE id = $1',
+      `SELECT o.id, o.status, o.title, o.customer_id, u.phone as customer_phone 
+       FROM orders o
+       JOIN users u ON o.customer_id = u.id
+       WHERE o.id = $1`,
       [orderId]
     );
 
@@ -38,15 +42,36 @@ export const createBid = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Заказ не найден' });
     }
 
-    if (orderCheck.rows[0].status !== 'auction') {
+    const order = orderCheck.rows[0];
+
+    if (order.status !== 'auction') {
       return res.status(400).json({ message: 'Заказ не находится в аукционе' });
     }
+
+    // Получаем информацию о мастере
+    const masterInfo = await pool.query(
+      `SELECT 
+        u.name as master_name,
+        u.phone as master_phone,
+        COALESCE(AVG(r.rating), 0) as rating,
+        COUNT(DISTINCT o.id) FILTER (WHERE o.status = 'completed') as completed_projects
+       FROM users u
+       LEFT JOIN reviews r ON r.master_id = u.id
+       LEFT JOIN orders o ON o.master_id = u.id
+       WHERE u.id = $1
+       GROUP BY u.id, u.name, u.phone`,
+      [masterId]
+    );
+
+    const master = masterInfo.rows[0];
 
     // Проверяем, есть ли уже ставка от этого мастера
     const existingBid = await pool.query(
       'SELECT id FROM order_bids WHERE order_id = $1 AND master_id = $2',
       [orderId, masterId]
     );
+
+    let isNewBid = false;
 
     if (existingBid.rows.length > 0) {
       // Обновляем существующую ставку
@@ -59,11 +84,27 @@ export const createBid = async (req: Request, res: Response) => {
         [proposed_price, estimated_days, comment, orderId, masterId]
       );
 
+      // Отправляем уведомление клиенту об обновлении ставки
+      if (order.customer_phone) {
+        whatsappService.sendNewBidNotification(order.customer_phone, {
+          orderId: order.id,
+          orderTitle: order.title,
+          masterName: master.master_name,
+          masterRating: parseFloat(master.rating),
+          proposedPrice: proposed_price,
+          estimatedDays: estimated_days,
+          comment: comment || '',
+          completedProjectsCount: parseInt(master.completed_projects)
+        }).catch((err: any) => console.error('Ошибка отправки WhatsApp уведомления:', err));
+      }
+
       return res.json({
         message: 'Ставка обновлена',
         bid: result.rows[0],
       });
     }
+
+    isNewBid = true;
 
     // Создаем новую ставку
     const result = await pool.query(
@@ -72,6 +113,20 @@ export const createBid = async (req: Request, res: Response) => {
        RETURNING *`,
       [orderId, masterId, proposed_price, estimated_days, comment]
     );
+
+    // Отправляем уведомление клиенту о новой ставке
+    if (order.customer_phone) {
+      whatsappService.sendNewBidNotification(order.customer_phone, {
+        orderId: order.id,
+        orderTitle: order.title,
+        masterName: master.master_name,
+        masterRating: parseFloat(master.rating),
+        proposedPrice: proposed_price,
+        estimatedDays: estimated_days,
+        comment: comment || '',
+        completedProjectsCount: parseInt(master.completed_projects)
+      }).catch((err: any) => console.error('Ошибка отправки WhatsApp уведомления:', err));
+    }
 
     res.status(201).json({
       message: 'Ставка успешно создана',

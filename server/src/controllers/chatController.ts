@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
 import pool from '../config/database';
+import { createNotification } from './notificationsController';
 
 // Получить все чаты пользователя
 export const getMyChats = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
+    console.log('📥 GET MY CHATS - userId:', userId);
 
     const result = await pool.query(
       `SELECT 
@@ -15,19 +17,36 @@ export const getMyChats = async (req: Request, res: Response) => {
         customer.profile_photo as customer_photo,
         master.name as master_name,
         master.profile_photo as master_photo,
+        CASE 
+          WHEN c.customer_id = $1 THEN master.name
+          ELSE customer.name
+        END as other_user_name,
+        CASE 
+          WHEN c.customer_id = $1 THEN 'master'
+          ELSE 'customer'
+        END as other_user_role,
         (SELECT COUNT(*) FROM chat_messages WHERE chat_id = c.id AND is_read = false AND sender_id != $1) as unread_count,
         (SELECT message FROM chat_messages WHERE chat_id = c.id ORDER BY created_at DESC LIMIT 1) as last_message,
-        (SELECT created_at FROM chat_messages WHERE chat_id = c.id ORDER BY created_at DESC LIMIT 1) as last_message_time
+        (SELECT created_at FROM chat_messages WHERE chat_id = c.id ORDER BY created_at DESC LIMIT 1) as last_message_at
        FROM chats c
        JOIN orders o ON c.order_id = o.id
        JOIN users customer ON c.customer_id = customer.id
        JOIN users master ON c.master_id = master.id
        WHERE c.customer_id = $1 OR c.master_id = $1
-       ORDER BY c.updated_at DESC`,
+       ORDER BY 
+         CASE 
+           WHEN o.status IN ('in_progress', 'review') THEN 0
+           WHEN o.status = 'completed' THEN 1
+           ELSE 2
+         END,
+         c.updated_at DESC`,
       [userId]
     );
 
-    res.json({ chats: result.rows });
+    console.log('📥 FOUND CHATS:', result.rows.length, 'chats');
+    console.log('📥 CHAT IDs:', result.rows.map(c => c.id));
+    
+    res.json(result.rows);
   } catch (error) {
     console.error('Get chats error:', error);
     res.status(500).json({ message: 'Ошибка при получении чатов' });
@@ -51,6 +70,11 @@ export const getOrCreateChat = async (req: Request, res: Response) => {
     }
 
     const order = orderResult.rows[0];
+
+    // Проверяем, что мастер назначен
+    if (!order.assigned_master_id) {
+      return res.status(400).json({ message: 'Мастер еще не назначен на этот заказ' });
+    }
 
     // Проверяем права доступа
     if (userId !== order.customer_id && userId !== order.assigned_master_id) {
@@ -149,7 +173,7 @@ export const markMessagesAsRead = async (req: Request, res: Response) => {
 export const sendMessage = async (req: Request, res: Response) => {
   try {
     const { chatId } = req.params;
-    const { message } = req.body;
+    const { message, imageUrl } = req.body;
     const userId = req.userId;
 
     // Проверяем доступ к чату
@@ -162,12 +186,12 @@ export const sendMessage = async (req: Request, res: Response) => {
       return res.status(403).json({ message: 'Нет доступа к этому чату' });
     }
 
-    // Создаем сообщение
+    // Создаем сообщение (с поддержкой изображений)
     const result = await pool.query(
-      `INSERT INTO chat_messages (chat_id, sender_id, message)
-       VALUES ($1, $2, $3)
+      `INSERT INTO chat_messages (chat_id, sender_id, message, image_url)
+       VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [chatId, userId, message]
+      [chatId, userId, message || '', imageUrl || null]
     );
 
     // Обновляем время обновления чата
@@ -184,6 +208,47 @@ export const sendMessage = async (req: Request, res: Response) => {
 };
 
 // Отправить работу на оценку (для мастера)
+// Получить активные заказы между пользователями
+export const getActiveOrdersWithUser = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+    const { otherUserId, role } = req.query;
+
+    let query;
+    let params;
+
+    if (role === 'master') {
+      // Я клиент, ищу активные заказы с мастером
+      query = `
+        SELECT id, title, status, created_at, final_price
+        FROM orders
+        WHERE customer_id = $1 
+          AND assigned_master_id = $2 
+          AND status IN ('in_progress', 'review')
+        ORDER BY created_at DESC
+      `;
+      params = [userId, otherUserId];
+    } else {
+      // Я мастер, ищу активные заказы с клиентом
+      query = `
+        SELECT id, title, status, created_at, final_price
+        FROM orders
+        WHERE assigned_master_id = $1 
+          AND customer_id = $2 
+          AND status IN ('in_progress', 'review')
+        ORDER BY created_at DESC
+      `;
+      params = [userId, otherUserId];
+    }
+
+    const result = await pool.query(query, params);
+    res.json({ orders: result.rows });
+  } catch (error) {
+    console.error('Get active orders error:', error);
+    res.status(500).json({ message: 'Ошибка при получении активных заказов' });
+  }
+};
+
 export const submitForReview = async (req: Request, res: Response) => {
   try {
     const { orderId } = req.params;
@@ -199,10 +264,30 @@ export const submitForReview = async (req: Request, res: Response) => {
       return res.status(403).json({ message: 'Нет доступа к этому заказу или заказ не в работе' });
     }
 
+    const order = orderCheck.rows[0];
+
     // Обновляем статус заказа
     await pool.query(
       'UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
       ['review', orderId]
+    );
+
+    // Уведомляем клиента
+    await createNotification(
+      order.customer_id,
+      'info',
+      '📋 Работа готова к проверке',
+      `Мастер завершил работу над заказом "${order.title}" и отправил на проверку. Пожалуйста, оцените результат.`,
+      `/dashboard/active-orders`
+    );
+
+    // Уведомляем мастера
+    await createNotification(
+      masterId!,
+      'success',
+      '✅ Работа отправлена на проверку',
+      `Ваша работа по заказу "${order.title}" отправлена клиенту на проверку.`,
+      `/master-dashboard/active-orders`
     );
 
     res.json({ message: 'Работа отправлена на оценку' });
@@ -245,7 +330,7 @@ export const acceptWork = async (req: Request, res: Response) => {
         order.assigned_master_id,
         orderId,
         order.final_price,
-        'order_payment',
+        'payment',
         'completed',
         `Оплата за выполнение заказа "${order.title}"`
       ]
@@ -261,11 +346,7 @@ export const acceptWork = async (req: Request, res: Response) => {
     if (rating || review) {
       await pool.query(
         `INSERT INTO reviews (order_id, customer_id, master_id, rating, comment)
-         VALUES ($1, $2, $3, $4, $5)
-         ON CONFLICT (order_id) DO UPDATE SET
-         rating = EXCLUDED.rating,
-         comment = EXCLUDED.comment,
-         updated_at = CURRENT_TIMESTAMP`,
+         VALUES ($1, $2, $3, $4, $5)`,
         [orderId, customerId, order.assigned_master_id, rating, review]
       );
 
@@ -301,6 +382,24 @@ export const acceptWork = async (req: Request, res: Response) => {
        completed_orders = master_profiles.completed_orders + 1,
        updated_at = CURRENT_TIMESTAMP`,
       [order.assigned_master_id]
+    );
+
+    // Уведомляем мастера о принятии работы
+    await createNotification(
+      order.assigned_master_id,
+      'success',
+      '💰 Заказ завершен! Оплата получена',
+      `Клиент принял вашу работу по заказу "${order.title}". На ваш счет зачислено ${order.final_price}₸${rating ? `. Оценка: ${rating}⭐` : ''}`,
+      `/master-dashboard/income`
+    );
+
+    // Уведомляем клиента о завершении заказа
+    await createNotification(
+      customerId!,
+      'success',
+      '✅ Заказ успешно завершен',
+      `Вы приняли работу по заказу "${order.title}". ${rating ? `Ваша оценка: ${rating}⭐` : 'Спасибо за сотрудничество!'}`,
+      `/dashboard/order-history`
     );
 
     res.json({ 

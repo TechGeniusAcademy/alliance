@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import styles from './PrivacyPolicy.module.css';
-import Footer from '../components/Footer';
 
 const PrivacyPolicy = () => {
   const { t } = useTranslation();
@@ -156,7 +155,6 @@ const PrivacyPolicy = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 };

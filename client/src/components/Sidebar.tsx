@@ -22,7 +22,9 @@ import {
   MdLocalOffer,
   MdViewModule
 } from 'react-icons/md';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 import { useUnreadChats } from '../hooks/useUnreadChats';
 import styles from './Sidebar.module.css';
 
@@ -46,6 +48,40 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   const { unreadCount } = useUnreadChats();
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfilePhoto = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${API_BASE_URL}/api/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log('Profile response:', response.data);
+        // API возвращает { user: {...} }
+        const userData = response.data.user || response.data;
+        if (userData?.profile_photo) {
+          setProfilePhoto(userData.profile_photo);
+          console.log('Profile photo set:', userData.profile_photo);
+        }
+      } catch (error) {
+        console.error('Error fetching profile photo:', error);
+      }
+    };
+    
+    fetchProfilePhoto();
+    
+    // Слушаем событие обновления профиля
+    const handleProfileUpdate = () => {
+      fetchProfilePhoto();
+    };
+    
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+    };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -72,7 +108,7 @@ const Sidebar = () => {
       items: [
         { path: '/dashboard', icon: MdDashboard, label: t('sidebar.dashboard') },
         { path: '/dashboard/create-order', icon: MdAddCircleOutline, label: t('sidebar.createOrder'), isNew: true },
-        { path: '/dashboard/browse-portfolio', icon: MdViewModule, label: 'Работы мебельщиков', isNew: true },
+        { path: '/dashboard/browse-portfolio', icon: MdViewModule, label: t('sidebar.browsePortfolio'), isNew: true },
         { path: '/dashboard/ai-designer', icon: MdAutoAwesome, label: t('sidebar.aiDesigner'), isPremium: true },
       ]
     },
@@ -117,7 +153,13 @@ const Sidebar = () => {
     <aside className={styles.sidebar}>
       <div className={styles.sidebarHeader}>
         <div className={styles.logo}>
-          <div className={styles.logoIcon}>🪑</div>
+          <div className={styles.userAvatar}>
+            {profilePhoto ? (
+              <img src={profilePhoto} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+            ) : (
+              JSON.parse(localStorage.getItem('user') || '{}').name?.[0]?.toUpperCase() || 'U'
+            )}
+          </div>
           <div>
             <div className={styles.logoText}>Furniture</div>
             <div className={styles.logoSubtext}>Auction</div>
@@ -178,7 +220,11 @@ const Sidebar = () => {
       <div className={styles.sidebarFooter}>
         <div className={styles.userCard}>
           <div className={styles.userAvatar}>
-            {JSON.parse(localStorage.getItem('user') || '{}').name?.[0]?.toUpperCase() || 'U'}
+            {profilePhoto ? (
+              <img src={profilePhoto} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+            ) : (
+              JSON.parse(localStorage.getItem('user') || '{}').name?.[0]?.toUpperCase() || 'U'
+            )}
           </div>
           <div className={styles.userInfo}>
             <div className={styles.userName}>

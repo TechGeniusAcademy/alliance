@@ -1,4 +1,5 @@
 import type { Order, Favorite, OrderFilters } from '../types/order';
+import { API_BASE_URL } from '../config/api';
 
 // Интерфейс для 3D конфигурации мебели
 export interface FurnitureConfig {
@@ -236,7 +237,7 @@ const transformApiOrder = (apiOrder: any): Order => {
 };
 
 class OrderService {
-  private baseURL = 'http://localhost:5000/api';
+  private baseURL = `${API_BASE_URL}/api`;
   private useMockData = false; // Переключатель для использования моковых данных
 
   // GET all orders
@@ -349,7 +350,8 @@ class OrderService {
       order.status === 'active' || 
       order.status === 'in_progress' || 
       order.status === 'auction' ||
-      order.status === 'pending'
+      order.status === 'pending' ||
+      order.status === 'review'
     );
   }
 
@@ -438,7 +440,9 @@ class OrderService {
       throw new Error('Failed to fetch favorites');
     }
 
-    return response.json();
+    const data = await response.json();
+    // API возвращает { favorites: [...] }
+    return data.favorites || [];
   }
 
   // POST add to favorites
@@ -693,7 +697,7 @@ class OrderService {
   }
 
   // POST accept bid (for customer)
-  async acceptBid(bidId: number): Promise<void> {
+  async acceptBid(bidId: number): Promise<{ chatId?: number; message: string; commissionAmount?: number; commissionPaid?: boolean }> {
     const token = localStorage.getItem('token');
     const response = await fetch(`${this.baseURL}/orders/bids/${bidId}/accept`, {
       method: 'POST',
@@ -711,6 +715,8 @@ class OrderService {
         }
       };
     }
+    
+    return await response.json();
   }
 }
 

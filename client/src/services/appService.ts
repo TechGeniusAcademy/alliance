@@ -8,10 +8,13 @@ import type {
   Notification,
   Review,
   SpecialOffer,
+} from '../types';
+import type {
   UserSettings,
   FAQItem,
   SupportTicket
 } from '../types/app';
+import { API_BASE_URL } from '../config/api';
 
 // Mock Payments
 const mockPayments: Payment[] = [
@@ -421,8 +424,8 @@ const mockFAQs: FAQItem[] = [
 ];
 
 class AppService {
-  private baseURL = 'http://localhost:5000/api';
-  private useMockData = true;
+  private baseURL = `${API_BASE_URL}/api`;
+  private useMockData = false;
 
   // PAYMENTS
   async getPayments(): Promise<Payment[]> {
@@ -568,8 +571,17 @@ class AppService {
 
     const token = localStorage.getItem('token');
     const response = await fetch(`${this.baseURL}/notifications`, {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
     });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch notifications');
+    }
+
+    // API возвращает массив напрямую
     return response.json();
   }
 
@@ -608,9 +620,18 @@ class AppService {
 
     const token = localStorage.getItem('token');
     const response = await fetch(`${this.baseURL}/reviews`, {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
     });
-    return response.json();
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch reviews');
+    }
+
+    const data = await response.json();
+    return data.reviews || [];
   }
 
   async createReview(review: Partial<Review>): Promise<Review> {
@@ -647,18 +668,45 @@ class AppService {
 
   // SPECIAL OFFERS
   async getSpecialOffers(): Promise<SpecialOffer[]> {
+    // Временно используем моковые данные, пока не создан API endpoint
+    return mockSpecialOffers.filter(offer => offer.isActive);
+    
+    /* TODO: Создать API endpoint
     if (this.useMockData) {
       return mockSpecialOffers.filter(offer => offer.isActive);
     }
 
     const response = await fetch(`${this.baseURL}/offers`);
     return response.json();
+    */
   }
 
   // SETTINGS
   async getSettings(): Promise<UserSettings> {
+    // Временно используем моковые данные для клиентов, пока не создан API endpoint
+    // Читаем язык из localStorage (синхронизация с Header)
+    const savedLanguage = localStorage.getItem('language') as 'ru' | 'kk' | 'en' | null;
+    
+    return {
+      notifications: {
+        email: true,
+        push: true,
+        sms: false,
+        orderUpdates: true,
+        promotions: true,
+        messages: true
+      },
+      privacy: {
+        showProfile: true,
+        showOrders: false,
+        showReviews: true
+      },
+      language: savedLanguage || 'ru',
+      theme: 'light'
+    };
+    
+    /* TODO: Создать API endpoint для настроек клиента
     if (this.useMockData) {
-      // Читаем язык из localStorage (синхронизация с Header)
       const savedLanguage = localStorage.getItem('language') as 'ru' | 'kk' | 'en' | null;
       
       return {
@@ -685,11 +733,19 @@ class AppService {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     return response.json();
+    */
   }
 
   async updateSettings(settings: Partial<UserSettings>): Promise<UserSettings> {
+    // Временно используем localStorage, пока не создан API endpoint
+    // Сохраняем язык в localStorage для синхронизации с Header
+    if (settings.language) {
+      localStorage.setItem('language', settings.language);
+    }
+    return { ...await this.getSettings(), ...settings };
+    
+    /* TODO: Создать API endpoint для обновления настроек клиента
     if (this.useMockData) {
-      // Сохраняем язык в localStorage для синхронизации с Header
       if (settings.language) {
         localStorage.setItem('language', settings.language);
       }
@@ -705,6 +761,7 @@ class AppService {
       },
       body: JSON.stringify(settings)
     });
+    */
     return response.json();
   }
 

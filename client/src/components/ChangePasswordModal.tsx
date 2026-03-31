@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MdLock, MdVisibility, MdVisibilityOff } from 'react-icons/md';
+import { API_BASE_URL } from '../config/api';
 import styles from './ChangePasswordModal.module.css';
 import type { ToastType } from './Toast';
 
@@ -37,7 +38,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onShowToast }: ChangePasswordMod
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/profile/change-password', {
+      const response = await fetch(`${API_BASE_URL}/api/profile/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

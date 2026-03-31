@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import pool from '../config/database';
 import { commissionService } from '../services/commissionService';
 import whatsappService from '../services/whatsappService';
+import { createNotification } from './notificationsController';
 
 // Создать новый заказ
 export const createOrder = async (req: Request, res: Response) => {
@@ -34,10 +35,22 @@ export const createOrder = async (req: Request, res: Response) => {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, 'auction')
       RETURNING *`,
       [
-        customerId, title, description, category, furniture_type,
-        style, materials, dimensions, budget_min, budget_max,
-        deadline, delivery_address, delivery_required, assembly_required,
-        photos, furniture_config ? JSON.stringify(furniture_config) : null,
+        customerId, 
+        title, 
+        description, 
+        category, 
+        furniture_type,
+        style, 
+        materials ? JSON.stringify(materials) : null, 
+        dimensions ? JSON.stringify(dimensions) : null, 
+        budget_min, 
+        budget_max,
+        deadline, 
+        delivery_address, 
+        delivery_required, 
+        assembly_required,
+        photos ? JSON.stringify(photos) : null, 
+        furniture_config ? JSON.stringify(furniture_config) : null,
       ]
     );
 
@@ -90,7 +103,7 @@ export const createOrder = async (req: Request, res: Response) => {
       }
     } catch (whatsappError) {
       // Логируем ошибку, но не прерываем создание заказа
-      console.error('⚠️ Ошибка отправки WhatsApp уведомлений:', whatsappError);
+      console.error(' Ошибка отправки WhatsApp уведомлений:', whatsappError);
     }
 
     res.status(201).json({
@@ -120,6 +133,14 @@ export const getCustomerOrders = async (req: Request, res: Response) => {
        ORDER BY o.created_at DESC`,
       [customerId]
     );
+
+    // Отладка: проверяем каждый заказ
+    console.log('🔍 CUSTOMER ORDERS DEBUG:');
+    result.rows.forEach(order => {
+      if (parseInt(order.bids_count) > 0) {
+        console.log(`   Order #${order.id} (${order.title}): bids_count = ${order.bids_count}`);
+      }
+    });
 
     res.json({ orders: result.rows });
   } catch (error) {
@@ -310,6 +331,14 @@ export const getOrderBids = async (req: Request, res: Response) => {
       [orderId]
     );
 
+    console.log('🔍 ORDER BIDS DEBUG:');
+    console.log(`   Order #${orderId}: Found ${result.rows.length} bids`);
+    if (result.rows.length > 0) {
+      result.rows.forEach((bid, index) => {
+        console.log(`   Bid ${index + 1}: master_id=${bid.master_id}, master_name="${bid.master_name}", price=${bid.proposed_price}, status=${bid.status}`);
+      });
+    }
+
     console.log('Bids with master data:', JSON.stringify(result.rows, null, 2));
     res.json({ bids: result.rows });
   } catch (error) {
@@ -407,14 +436,29 @@ export const acceptBid = async (req: Request, res: Response) => {
       ['rejected', bid.order_id, bidId]
     );
 
-    // Создаем чат между клиентом и мастером
-    const chatResult = await client.query(
+    // Создаем чат между клиентом и мастером (или получаем существующий)
+    console.log('🔍 CREATING CHAT - order_id:', bid.order_id, 'customer_id:', bid.customer_id, 'master_id:', bid.master_id);
+    let chatResult = await client.query(
       `INSERT INTO chats (order_id, customer_id, master_id)
        VALUES ($1, $2, $3)
-       ON CONFLICT (order_id) DO NOTHING
+       ON CONFLICT (order_id) DO UPDATE SET order_id = EXCLUDED.order_id
        RETURNING id`,
       [bid.order_id, bid.customer_id, bid.master_id]
     );
+    console.log('🔍 INSERT chatResult.rows:', chatResult.rows);
+    
+    // Если чат не был создан (уже существует), получаем его
+    if (chatResult.rows.length === 0) {
+      console.log('🔍 CHAT NOT RETURNED FROM INSERT, trying SELECT...');
+      chatResult = await client.query(
+        `SELECT id FROM chats WHERE order_id = $1`,
+        [bid.order_id]
+      );
+      console.log('🔍 SELECT chatResult.rows:', chatResult.rows);
+    }
+
+    const chatId = chatResult.rows[0]?.id;
+    console.log(`💬 Чат ${chatId ? 'создан/получен' : 'НЕ НАЙДЕН'} для заказа #${bid.order_id}, chatId: ${chatId}`);
 
     // Создаем транзакцию комиссии
     const commissionResult = await client.query(
@@ -471,17 +515,36 @@ export const acceptBid = async (req: Request, res: Response) => {
 
     await client.query('COMMIT');
 
+    // Создаем уведомления для мастера и клиента
+    await createNotification(
+      bid.master_id,
+      'success',
+      '🎉 Ваша заявка принята!',
+      `Клиент ${bid.customer_name || 'заказчик'} принял вашу заявку на заказ "${bid.order_title}". Сумма: ${bid.bid_price}₸`,
+      `/master-dashboard/active-orders`
+    );
+
+    await createNotification(
+      bid.customer_id,
+      'info',
+      '✅ Заявка принята',
+      `Вы приняли заявку от мастера ${bid.master_name || 'мастера'} на заказ "${bid.order_title}". Сумма: ${bid.bid_price}₸`,
+      `/dashboard/active-orders`
+    );
+
     const responseMessage = hasEnoughBalance 
       ? `Ставка принята! Комиссия ${requiredCommission}₸ списана с вашего кошелька.`
       : `Ставка принята! Комиссия ${requiredCommission}₸ добавлена в долг. Пополните кошелек для оплаты.`;
 
-    res.json({ 
+    const responseData = { 
       message: responseMessage,
-      chatId: chatResult.rows[0]?.id,
+      chatId: chatId,
       commissionAmount: requiredCommission,
       commissionId: commissionId,
       commissionPaid: hasEnoughBalance
-    });
+    };
+    console.log('🔍 SENDING RESPONSE:', responseData);
+    res.json(responseData);
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Accept bid error:', error);
@@ -626,7 +689,7 @@ export const getMasterActiveOrders = async (req: Request, res: Response) => {
        FROM orders o
        LEFT JOIN users u ON o.customer_id = u.id
        WHERE o.assigned_master_id = $1 
-         AND o.status IN ('in_progress', 'shipped')
+         AND o.status IN ('in_progress', 'review', 'shipped')
        ORDER BY o.created_at DESC`,
       [masterId]
     );
@@ -635,5 +698,193 @@ export const getMasterActiveOrders = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error fetching master active orders:', error);
     res.status(500).json({ error: 'Failed to fetch active orders' });
+  }
+};
+
+// GET work stages for order
+export const getOrderWorkStages = async (req: Request, res: Response) => {
+  try {
+    const { orderId } = req.params;
+    const masterId = req.userId;
+
+    // Check if master is assigned to this order
+    const orderCheck = await pool.query(
+      'SELECT id FROM orders WHERE id = $1 AND assigned_master_id = $2',
+      [orderId, masterId]
+    );
+
+    if (orderCheck.rows.length === 0) {
+      return res.status(403).json({ message: 'Доступ запрещен' });
+    }
+
+    // Get work stages
+    const result = await pool.query(
+      `SELECT * FROM order_work_stages 
+       WHERE order_id = $1 
+       ORDER BY stage_order ASC`,
+      [orderId]
+    );
+
+    res.json({ stages: result.rows });
+  } catch (error) {
+    console.error('Error fetching work stages:', error);
+    res.status(500).json({ error: 'Failed to fetch work stages' });
+  }
+};
+
+// UPDATE work stage status
+export const updateWorkStageStatus = async (req: Request, res: Response) => {
+  try {
+    const { orderId, stageId } = req.params;
+    const { completed } = req.body;
+    const masterId = req.userId;
+
+    // Check if master is assigned to this order
+    const orderCheck = await pool.query(
+      `SELECT o.id, o.title, o.customer_id, u.phone, u.name as customer_name, m.name as master_name
+       FROM orders o
+       LEFT JOIN users u ON o.customer_id = u.id
+       LEFT JOIN users m ON o.assigned_master_id = m.id
+       WHERE o.id = $1 AND o.assigned_master_id = $2`,
+      [orderId, masterId]
+    );
+
+    if (orderCheck.rows.length === 0) {
+      return res.status(403).json({ message: 'Доступ запрещен' });
+    }
+
+    const order = orderCheck.rows[0];
+
+    // Update stage status
+    const updateResult = await pool.query(
+      `UPDATE order_work_stages 
+       SET completed = $1, completed_at = CASE WHEN $1 = true THEN CURRENT_TIMESTAMP ELSE NULL END
+       WHERE id = $2 AND order_id = $3
+       RETURNING *`,
+      [completed, stageId, orderId]
+    );
+
+    if (updateResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Этап не найден' });
+    }
+
+    const stage = updateResult.rows[0];
+
+    // Send WhatsApp notification to customer if stage is completed
+    if (completed && order.phone) {
+      try {
+        await whatsappService.sendWorkStageNotification(order.phone, {
+          id: order.id,
+          title: order.title,
+          stage: stage.stage_key,
+          stageName: stage.stage_name,
+          masterName: order.master_name || 'Мастер'
+        });
+      } catch (error) {
+        console.error('WhatsApp notification error:', error);
+      }
+    }
+
+    res.json({ stage: updateResult.rows[0], message: 'Статус этапа обновлен' });
+  } catch (error) {
+    console.error('Error updating work stage:', error);
+    res.status(500).json({ error: 'Failed to update work stage' });
+  }
+};
+
+// Initialize work stages for order
+export const initializeWorkStages = async (req: Request, res: Response) => {
+  try {
+    const { orderId } = req.params;
+    const masterId = req.userId;
+
+    // Check if master is assigned to this order
+    const orderCheck = await pool.query(
+      'SELECT id FROM orders WHERE id = $1 AND assigned_master_id = $2',
+      [orderId, masterId]
+    );
+
+    if (orderCheck.rows.length === 0) {
+      return res.status(403).json({ message: 'Доступ запрещен' });
+    }
+
+    // Check if stages already exist
+    const existingStages = await pool.query(
+      'SELECT id FROM order_work_stages WHERE order_id = $1',
+      [orderId]
+    );
+
+    if (existingStages.rows.length > 0) {
+      return res.status(400).json({ message: 'Этапы уже созданы для этого заказа' });
+    }
+
+    // Create default stages
+    const defaultStages = [
+      { key: 'design', name: 'Проектирование', order: 1 },
+      { key: 'materials', name: 'Закупка материалов', order: 2 },
+      { key: 'production', name: 'Производство', order: 3 },
+      { key: 'assembly', name: 'Сборка', order: 4 },
+      { key: 'quality_check', name: 'Контроль качества', order: 5 },
+      { key: 'packaging', name: 'Упаковка', order: 6 },
+      { key: 'ready_for_delivery', name: 'Готово к отправке', order: 7 }
+    ];
+
+    const insertPromises = defaultStages.map(stage =>
+      pool.query(
+        `INSERT INTO order_work_stages (order_id, stage_key, stage_name, stage_order, completed)
+         VALUES ($1, $2, $3, $4, false)
+         RETURNING *`,
+        [orderId, stage.key, stage.name, stage.order]
+      )
+    );
+
+    const results = await Promise.all(insertPromises);
+    const stages = results.map(r => r.rows[0]);
+
+    res.json({ stages, message: 'Этапы работы инициализированы' });
+  } catch (error) {
+    console.error('Error initializing work stages:', error);
+    res.status(500).json({ error: 'Failed to initialize work stages' });
+  }
+};
+
+// Получить все аукционы для админа
+export const getAllAuctionsForAdmin = async (req: Request, res: Response) => {
+  try {
+    const { status } = req.query;
+
+    let statusFilter = '';
+    if (status && status !== 'all') {
+      statusFilter = `AND o.status = '${status}'`;
+    } else {
+      statusFilter = `AND o.status IN ('auction', 'pending', 'active', 'in_progress', 'completed', 'cancelled')`;
+    }
+
+    const result = await pool.query(
+      `SELECT 
+        o.*,
+        u.name as customer_name,
+        u.email as customer_email,
+        u.phone as customer_phone,
+        u.address as customer_address,
+        m.name as assigned_master_name,
+        m.email as assigned_master_email,
+        m.phone as assigned_master_phone,
+        (SELECT COUNT(*) FROM order_bids WHERE order_id = o.id) as bids_count,
+        (SELECT COUNT(*) FROM order_bids WHERE order_id = o.id AND status = 'pending') as pending_bids_count,
+        (SELECT AVG(proposed_price) FROM order_bids WHERE order_id = o.id) as avg_bid_price,
+        (SELECT MIN(proposed_price) FROM order_bids WHERE order_id = o.id) as min_bid_price,
+        (SELECT MAX(proposed_price) FROM order_bids WHERE order_id = o.id) as max_bid_price
+       FROM orders o
+       JOIN users u ON o.customer_id = u.id
+       LEFT JOIN users m ON o.assigned_master_id = m.id
+       WHERE 1=1 ${statusFilter}
+       ORDER BY o.created_at DESC`
+    );
+
+    res.json({ auctions: result.rows });
+  } catch (error) {
+    console.error('Get all auctions for admin error:', error);
+    res.status(500).json({ message: 'Ошибка при получении аукционов' });
   }
 };

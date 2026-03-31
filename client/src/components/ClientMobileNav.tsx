@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   MdDashboard,
   MdChat,
@@ -9,6 +10,7 @@ import { useUnreadChats } from '../hooks/useUnreadChats';
 import styles from './ClientMobileNav.module.css';
 
 const ClientMobileNav = () => {
+  const { t } = useTranslation();
   const { unreadCount } = useUnreadChats();
   // TODO: Получать реальные значения из контекста/API
   const activeOrders = 0;
@@ -25,7 +27,7 @@ const ClientMobileNav = () => {
         <div className={styles.iconContainer}>
           <MdDashboard size={24} />
         </div>
-        <span>Главная</span>
+        <span>{t('mobileNav.home')}</span>
       </NavLink>
 
       <NavLink
@@ -40,7 +42,7 @@ const ClientMobileNav = () => {
             <span className={styles.badge}>{activeOrders > 9 ? '9+' : activeOrders}</span>
           )}
         </div>
-        <span>Заказы</span>
+        <span>{t('mobileNav.orders')}</span>
       </NavLink>
 
       <NavLink
@@ -55,7 +57,7 @@ const ClientMobileNav = () => {
             <span className={styles.badge}>{unreadCount > 9 ? '9+' : unreadCount}</span>
           )}
         </div>
-        <span>Чаты</span>
+        <span>{t('mobileNav.chats')}</span>
       </NavLink>
 
       <NavLink
@@ -67,7 +69,7 @@ const ClientMobileNav = () => {
         <div className={styles.iconContainer}>
           <MdMoreHoriz size={24} />
         </div>
-        <span>Ещё</span>
+        <span>{t('mobileNav.more')}</span>
       </NavLink>
     </nav>
   );

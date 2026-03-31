@@ -61,7 +61,7 @@ npm run dev
 ```
 🔔 Новый заказ на аукционе!
 
-📋 Заказ #123
+ Заказ #123
 Кухонный гарнитур на заказ
 
 📂 Категория: Кухня
@@ -133,13 +133,13 @@ await whatsappService.sendBulkNotifications(notifications, 2000);
 
 ### Ошибки
 ```
-⚠️ Номер +77001234567 не зарегистрирован в WhatsApp
+ Номер +77001234567 не зарегистрирован в WhatsApp
 ❌ Ошибка отправки сообщения WhatsApp: [детали]
 ```
 
 ### Статистика
 ```
-📊 Результаты массовой рассылки: успешно 15, ошибок 2
+Результаты массовой рассылки: успешно 15, ошибок 2
 ```
 
 ## Отключение WhatsApp бота
@@ -149,7 +149,7 @@ await whatsappService.sendBulkNotifications(notifications, 2000);
 //   console.log('📱 Отправка WhatsApp уведомлений...');
 //   // ... код отправки
 // } catch (whatsappError) {
-//   console.error('⚠️ Ошибка отправки WhatsApp:', whatsappError);
+//   console.error(' Ошибка отправки WhatsApp:', whatsappError);
 // }
 ```
 

@@ -1,0 +1,841 @@
+.page {
+  width: 100%;
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+/* Hero Section */
+.hero {
+  width: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 100px 0 0;
+  position: relative;
+}
+
+.heroContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.breadcrumbLink {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breadcrumbLink:hover {
+  color: #fff;
+}
+
+.breadcrumbSeparator {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.breadcrumbCurrent {
+  color: #f39c12;
+  font-size: 0.9rem;
+}
+
+/* Profile Card */
+.profileCard {
+  background: white;
+  border-radius: 24px;
+  padding: 40px;
+  margin-bottom: -100px;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.profileHeader {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+.avatarSection {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.avatar {
+  width: 180px;
+  height: 180px;
+  border-radius: 24px;
+  object-fit: cover;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.onlineStatus {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  background: #27ae60;
+  border: 4px solid white;
+  border-radius: 50%;
+}
+
+.profileInfo {
+  flex: 1;
+}
+
+.profileName {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.verifiedBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #e8f4fd;
+  color: #3498db;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.verifiedBadge svg {
+  font-size: 1rem;
+}
+
+.profileSpecialty {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.profileRating {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+  color: #f39c12;
+  font-size: 1.2rem;
+}
+
+.ratingValue {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.reviewsCount {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.profileLocation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+}
+
+.profileLocation svg {
+  color: #f39c12;
+}
+
+.profileTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profileTag {
+  padding: 8px 16px;
+  background: #f5f5f5;
+  color: #666;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.profileActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.contactButton {
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.contactButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4);
+}
+
+.secondaryButton {
+  padding: 14px 24px;
+  background: white;
+  color: #333;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.secondaryButton:hover {
+  border-color: #f39c12;
+  color: #f39c12;
+}
+
+/* Stats Row */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  padding-top: 32px;
+  border-top: 1px solid #eee;
+}
+
+.statItem {
+  text-align: center;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  display: block;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  color: #999;
+}
+
+/* Main Content */
+.main {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 140px 20px 60px;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 32px;
+}
+
+/* Left Column */
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Section Card */
+.section {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.sectionTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sectionTitle svg {
+  color: #f39c12;
+}
+
+/* About Section */
+.aboutText {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+
+.highlights {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.highlightItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 12px;
+}
+
+.highlightIcon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+}
+
+.highlightText {
+  flex: 1;
+}
+
+.highlightValue {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  display: block;
+}
+
+.highlightLabel {
+  font-size: 0.85rem;
+  color: #999;
+}
+
+/* Portfolio Section */
+.portfolioGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.portfolioItem {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  cursor: pointer;
+  group: true;
+}
+
+.portfolioImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.portfolioItem:hover .portfolioImage {
+  transform: scale(1.1);
+}
+
+.portfolioOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 50%);
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.portfolioItem:hover .portfolioOverlay {
+  opacity: 1;
+}
+
+.portfolioTitle {
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.viewAllPortfolio {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  color: #f39c12;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.viewAllPortfolio:hover {
+  text-decoration: underline;
+}
+
+/* Reviews Section */
+.reviewsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.reviewsFilter {
+  display: flex;
+  gap: 8px;
+}
+
+.reviewsFilterButton {
+  padding: 8px 16px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reviewsFilterButton:hover {
+  background: #eee;
+}
+
+.reviewsFilterButtonActive {
+  background: #f39c12;
+  color: white;
+}
+
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reviewCard {
+  padding: 24px;
+  background: #f9f9f9;
+  border-radius: 16px;
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.reviewAuthor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reviewAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.reviewName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.reviewDate {
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.reviewRating {
+  display: flex;
+  color: #f39c12;
+  font-size: 0.9rem;
+}
+
+.reviewText {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.reviewProject {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #666;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.reviewProject svg {
+  color: #f39c12;
+}
+
+.loadMoreButton {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+}
+
+.loadMoreButton:hover {
+  border-color: #f39c12;
+  color: #f39c12;
+}
+
+/* Right Column */
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Price Card */
+.priceCard {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.priceTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.priceList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.priceItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.priceItem:last-child {
+  border-bottom: none;
+}
+
+.priceService {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.priceValue {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.priceNote {
+  font-size: 0.85rem;
+  color: #999;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Contact Card */
+.contactCard {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 20px;
+  padding: 24px;
+  color: white;
+}
+
+.contactTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.contactList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.contactItem svg {
+  color: #f39c12;
+  font-size: 1.1rem;
+}
+
+.contactNote {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contactNote svg {
+  color: #27ae60;
+}
+
+/* Guarantee Card */
+.guaranteeCard {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.guaranteeTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.guaranteeTitle svg {
+  color: #27ae60;
+}
+
+.guaranteeList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guaranteeItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.guaranteeItem svg {
+  color: #27ae60;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* Similar Masters */
+.similarMasters {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.similarTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.similarList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.similarItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  padding: 12px;
+  border-radius: 12px;
+  transition: background 0.3s ease;
+}
+
+.similarItem:hover {
+  background: #f9f9f9;
+}
+
+.similarAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.similarInfo {
+  flex: 1;
+}
+
+.similarName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.similarSpecialty {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.similarRating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.similarRating svg {
+  color: #f39c12;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .rightColumn {
+    order: -1;
+  }
+
+  .profileHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profileInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profileRating {
+    justify-content: center;
+  }
+
+  .profileTags {
+    justify-content: center;
+  }
+
+  .profileActions {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 80px 0 0;
+  }
+
+  .profileCard {
+    padding: 24px;
+    margin-bottom: -60px;
+  }
+
+  .avatar {
+    width: 120px;
+    height: 120px;
+  }
+
+  .profileName {
+    font-size: 1.6rem;
+    flex-direction: column;
+  }
+
+  .statsRow {
+    gap: 16px;
+  }
+
+  .statValue {
+    font-size: 1.5rem;
+  }
+
+  .main {
+    padding: 100px 20px 40px;
+  }
+
+  .section {
+    padding: 24px;
+  }
+
+  .portfolioGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .highlights {
+    grid-template-columns: 1fr;
+  }
+}

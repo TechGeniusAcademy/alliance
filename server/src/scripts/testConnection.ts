@@ -16,7 +16,7 @@ const testConnection = async () => {
       WHERE table_schema = 'public'
     `);
 
-    console.log('\n📋 Существующие таблицы:');
+    console.log('\n Существующие таблицы:');
     tablesResult.rows.forEach((row) => {
       console.log(`  - ${row.table_name}`);
     });

@@ -1,15 +1,25 @@
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Header from './components/Header';
-import Home from './pages/Home';
-import About from './pages/About';
-import Services from './pages/Services';
-import Contact from './pages/Contact';
-import Portfolio from './pages/Portfolio';
-import Masters from './pages/Masters';
-import HowItWorks from './pages/HowItWorks';
-import Pricing from './pages/Pricing';
+import { HomePage } from './pages/Home/Home';
+import { AboutPage } from './pages/About/About';
+import { ContactPage } from './pages/Contact/Contact';
+import { MastersPage } from './pages/Masters/Masters';
+import { ProjectsPage } from './pages/Projects/Projects';
+import { BlogPage } from './pages/Blog/Blog';
+import { BlogArticlePage } from './pages/BlogArticle/BlogArticle';
+import { CategoriesPage } from './pages/Categories/Categories';
+import { CategoryDetailPage } from './pages/CategoryDetail/CategoryDetail';
+import { ProjectDetailPage } from './pages/ProjectDetail/ProjectDetail';
+import { MasterProfilePage } from './pages/MasterProfile/MasterProfile';
+import { PricingPage } from './pages/Pricing/Pricing';
+import { FAQPage } from './pages/FAQ/FAQ';
+import { TermsPage } from './pages/Terms/Terms';
+import { PrivacyPage } from './pages/Privacy/Privacy';
+import { HowItWorksPage } from './pages/HowItWorks/HowItWorks';
+import { NotFoundPage } from './pages/NotFound/NotFound';
+import { Footer } from './components/Footer/Footer';
 import DashboardLayout from './layouts/DashboardLayout';
 import MasterDashboardLayout from './layouts/MasterDashboardLayout';
 import Dashboard from './pages/Dashboard';
@@ -52,6 +62,7 @@ import SpecialOffers from './pages/SpecialOffers';
 import Settings from './pages/Settings';
 import Help from './pages/Help';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import AIDesigner from './pages/AIDesigner';
 import './App.css';
 
 function App() {
@@ -69,61 +80,145 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          {/* Публичные маршруты с Header */}
+          {/* Публичные страницы */}
           <Route path="/" element={
             <>
               <Header />
-              <Home />
+              <HomePage />
             </>
           } />
+          
           <Route path="/about" element={
             <>
               <Header />
-              <About />
+              <AboutPage />
+              <Footer />
             </>
           } />
-          <Route path="/services" element={
-            <>
-              <Header />
-              <Services />
-            </>
-          } />
+          
           <Route path="/contact" element={
             <>
               <Header />
-              <Contact />
+              <ContactPage />
+              <Footer />
             </>
           } />
-          <Route path="/portfolio" element={
-            <>
-              <Header />
-              <Portfolio />
-            </>
-          } />
+          
           <Route path="/masters" element={
             <>
               <Header />
-              <Masters />
+              <MastersPage />
+              <Footer />
             </>
           } />
-          <Route path="/how-it-works" element={
+          
+          <Route path="/masters/:id" element={
             <>
               <Header />
-              <HowItWorks />
+              <MasterProfilePage />
+              <Footer />
             </>
           } />
+          
+          <Route path="/projects" element={
+            <>
+              <Header />
+              <ProjectsPage />
+              <Footer />
+            </>
+          } />
+          
+          <Route path="/projects/:id" element={
+            <>
+              <Header />
+              <ProjectDetailPage />
+              <Footer />
+            </>
+          } />
+          
+          <Route path="/blog" element={
+            <>
+              <Header />
+              <BlogPage />
+              <Footer />
+            </>
+          } />
+          
+          <Route path="/blog/:id" element={
+            <>
+              <Header />
+              <BlogArticlePage />
+              <Footer />
+            </>
+          } />
+          
+          <Route path="/categories" element={
+            <>
+              <Header />
+              <CategoriesPage />
+              <Footer />
+            </>
+          } />
+          
+          <Route path="/categories/:id" element={
+            <>
+              <Header />
+              <CategoryDetailPage />
+              <Footer />
+            </>
+          } />
+          
           <Route path="/pricing" element={
             <>
               <Header />
-              <Pricing />
+              <PricingPage />
+              <Footer />
             </>
           } />
+          
+          <Route path="/faq" element={
+            <>
+              <Header />
+              <FAQPage />
+              <Footer />
+            </>
+          } />
+          
+          <Route path="/terms" element={
+            <>
+              <Header />
+              <TermsPage />
+              <Footer />
+            </>
+          } />
+          
+          <Route path="/privacy" element={
+            <>
+              <Header />
+              <PrivacyPage />
+              <Footer />
+            </>
+          } />
+          
           <Route path="/privacy-policy" element={
             <>
               <Header />
               <PrivacyPolicy />
+              <Footer />
             </>
           } />
+          
+          <Route path="/how-it-works" element={
+            <>
+              <Header />
+              <HowItWorksPage />
+              <Footer />
+            </>
+          } />
+
+          {/* Редиректы для старых путей */}
+          <Route path="/createOrder" element={<Navigate to="/dashboard/create-order" replace />} />
+          <Route path="/findMaster" element={<Navigate to="/masters" replace />} />
 
           {/* Маршруты Dashboard с Sidebar */}
           <Route path="/dashboard" element={
@@ -142,7 +237,7 @@ function App() {
             {/* Main section */}
             <Route path="create-order" element={<CreateOrder />} />
             <Route path="browse-portfolio" element={<BrowsePortfolio />} />
-            <Route path="ai-designer" element={<Placeholder title="AI Дизайнер" icon="✨" description="Создайте уникальный дизайн мебели с помощью искусственного интеллекта" />} />
+            <Route path="ai-designer" element={<AIDesigner />} />
             
             {/* Financial section */}
             <Route path="payments" element={<Payments />} />
@@ -218,6 +313,15 @@ function App() {
             {/* Старые маршруты для обратной совместимости */}
             <Route path="auction-history" element={<AuctionHistory />} />
           </Route>
+          
+          {/* 404 страница */}
+          <Route path="*" element={
+            <>
+              <Header />
+              <NotFoundPage />
+              <Footer />
+            </>
+          } />
         </Routes>
       </div>
     </Router>

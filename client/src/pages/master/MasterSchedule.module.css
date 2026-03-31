@@ -16,10 +16,7 @@
 .header h1 {
   margin: 0;
   font-size: 2rem;
-  background: linear-gradient(135deg, #e94560 0%, #f9ca24 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #1D1E24;
 }
 
 .header p {
@@ -32,19 +29,19 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, #e94560 0%, #f9ca24 100%);
+  background: #1D1E24;
   color: white;
   border: none;
   border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+  box-shadow: 0 4px 15px rgba(29, 30, 36, 0.3);
 }
 
 .addButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
+  box-shadow: 0 6px 20px rgba(29, 30, 36, 0.4);
 }
 
 .filters {
@@ -119,7 +116,7 @@
 
 .scheduleItem.overdue {
   border-color: #e94560;
-  background: linear-gradient(to right, rgba(233, 69, 96, 0.05), white);
+  background: rgba(233, 69, 96, 0.05);
 }
 
 .itemCheckbox {
@@ -337,10 +334,7 @@
 .modalHeader h2 {
   margin: 0;
   font-size: 1.5rem;
-  background: linear-gradient(135deg, #e94560 0%, #f9ca24 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #1D1E24;
 }
 
 .closeButton {
@@ -430,14 +424,14 @@
 }
 
 .submitButton {
-  background: linear-gradient(135deg, #e94560 0%, #f9ca24 100%);
+  background: #1D1E24;
   color: white;
-  box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+  box-shadow: 0 4px 15px rgba(29, 30, 36, 0.3);
 }
 
 .submitButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
+  box-shadow: 0 6px 20px rgba(29, 30, 36, 0.4);
 }
 
 @media (max-width: 768px) {

@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef, memo, useMemo, useCallback, useLayoutEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { MdChat, MdSearch, MdSend, MdAttachFile, MdShoppingCart, MdCheckCircle, MdStar } from 'react-icons/md';
 import { io, Socket } from 'socket.io-client';
 import chatService, { type Chat, type Message } from '../services/chatService';
 import Toast, { type ToastType } from '../components/Toast';
 import ChatRulesModal from '../components/ChatRulesModal';
+import SelectOrderModal from '../components/SelectOrderModal';
 import chatStyles from './Chats.module.css';
 import { WS_URL } from '../config/api';
 
@@ -43,6 +46,13 @@ const ChatMessage = memo(({ msg, isMyMessage }: { msg: Message; isMyMessage: boo
           <span className={chatStyles.messageSender}>{msg.sender_name}</span>
         )}
         <div className={chatStyles.messageBubble}>
+          {msg.image_url && (
+            <img 
+              src={msg.image_url} 
+              alt="Shared image" 
+              style={{ maxWidth: '300px', borderRadius: '8px', marginBottom: '8px', display: 'block' }}
+            />
+          )}
           <p>{msg.message}</p>
         </div>
         <span className={chatStyles.messageTime}>
@@ -56,6 +66,8 @@ const ChatMessage = memo(({ msg, isMyMessage }: { msg: Message; isMyMessage: boo
 ChatMessage.displayName = 'ChatMessage';
 
 const Chats = () => {
+  const { t } = useTranslation();
+  const location = useLocation();
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -70,6 +82,9 @@ const Chats = () => {
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   const [showChatWindow, setShowChatWindow] = useState(false); // Для мобильной версии
   const [showRulesModal, setShowRulesModal] = useState(false);
+  const [showSelectOrderModal, setShowSelectOrderModal] = useState(false);
+  const [activeOrders, setActiveOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
   const currentUserId = (() => {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -90,6 +105,7 @@ const Chats = () => {
   const lastUpdateTimeRef = useRef(0);
   const pendingUpdateRef = useRef(false);
   const socketRef = useRef<Socket | null>(null);
+  const processedStateRef = useRef<any>(null); // Для отслеживания обработанного location.state
 
   // Подключение WebSocket
   useEffect(() => {
@@ -181,13 +197,114 @@ const Chats = () => {
     };
   }, [selectedChat?.id, currentUserId]);
 
-  // Загружаем список чатов только один раз при монтировании
+  // Загружаем список чатов при монтировании и при возврате на страницу
   useEffect(() => {
     loadChats(true);
     // Сбрасываем состояние мобильного окна при возврате на страницу
     setShowChatWindow(false);
     // НЕТ POLLING - список чатов обновится через WebSocket события
-  }, []);
+  }, [location.pathname]);
+
+  // Обработка навигации с параметрами (открытие чата с мастером или конкретного чата)
+  useEffect(() => {
+    const state = location.state as { masterId?: number; masterName?: string; chatId?: number; forceReload?: boolean } | null;
+    
+    // Проверяем, не обрабатывали ли мы уже этот state
+    if (state && processedStateRef.current === state) {
+      return; // Уже обработали этот state, пропускаем
+    }
+    
+    // Если есть chatId с forceReload - перезагружаем чаты и затем открываем нужный
+    if (state?.chatId && state?.forceReload) {
+      const targetChatId = state.chatId; // Сохраняем ID до очистки state
+      
+      // Отмечаем state как обработанный
+      processedStateRef.current = state;
+      
+      // ВАЖНО: Очищаем state СРАЗУ, чтобы избежать повторного срабатывания useEffect
+      window.history.replaceState({}, document.title);
+      
+      const loadAndSelectChat = async () => {
+        try {
+          const data = await chatService.getMyChats();
+          setChats(data);
+          
+          // Ищем нужный чат после загрузки
+          const chatToOpen = data.find((chat: any) => chat.id === targetChatId);
+          if (chatToOpen) {
+            setSelectedChat(chatToOpen);
+            setShowChatWindow(true);
+          } else {
+            // Если не нашли - выбираем первый (активный)
+            if (data.length > 0) {
+              setSelectedChat(data[0]);
+            }
+          }
+        } catch (error) {
+          console.error('Ошибка загрузки чатов:', error);
+        }
+      };
+      
+      loadAndSelectChat();
+      return;
+    }
+    
+    // Если есть chatId без forceReload - открываем из существующего списка
+    if (state?.chatId && chats.length > 0) {
+      processedStateRef.current = state;
+      const chatToOpen = chats.find(chat => chat.id === state.chatId);
+      if (chatToOpen) {
+        setSelectedChat(chatToOpen);
+        setShowChatWindow(true);
+      }
+      // Очищаем state после обработки
+      window.history.replaceState({}, document.title);
+      return;
+    }
+    
+    if (state?.masterId && chats.length > 0) {
+      processedStateRef.current = state;
+      // Ищем существующий чат с этим мастером
+      const existingChat = chats.find(chat => chat.master_id === state.masterId);
+      
+      if (existingChat) {
+        // Открываем существующий чат
+        setSelectedChat(existingChat);
+        setShowChatWindow(true);
+      } else {
+        // Создаем новый чат с мастером
+        createChatWithMaster(state.masterId, state.masterName);
+      }
+      
+      // Очищаем state после обработки
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, chats]); // Убрали зависимость от chats - используем только location.state
+
+  const createChatWithMaster = async (masterId: number, masterName?: string) => {
+    try {
+      // Создаем новый чат через API
+      const newChat = await chatService.createOrGetChatWithMaster(masterId);
+      
+      // Добавляем в список чатов
+      setChats(prev => {
+        // Проверяем, нет ли уже такого чата
+        if (prev.some(c => c.id === newChat.id)) {
+          return prev;
+        }
+        return [newChat, ...prev];
+      });
+      
+      // Открываем новый чат
+      setSelectedChat(newChat);
+      setShowChatWindow(true);
+      
+      showToast(t('chats.notifications.chatOpened'), 'success');
+    } catch (error) {
+      console.error('Error creating chat:', error);
+      showToast(t('chats.notifications.chatOpenError'), 'error');
+    }
+  };
 
   useEffect(() => {
     if (selectedChat) {
@@ -208,7 +325,7 @@ const Chats = () => {
         socketRef.current?.emit('leaveChat', selectedChat.id);
       };
     }
-  }, [selectedChat]);
+  }, [selectedChat?.id]); // Зависимость только от ID чата, а не от всего объекта
 
   // Синхронная прокрутка ДО отрисовки (useLayoutEffect вместо useEffect)
   useLayoutEffect(() => {
@@ -254,8 +371,23 @@ const Chats = () => {
       if (showLoader) setLoading(true);
       const data = await chatService.getMyChats();
       setChats(data);
-      if (data.length > 0 && !selectedChat) {
-        setSelectedChat(data[0]);
+      
+      if (data.length > 0) {
+        // Если нет выбранного чата - выбираем первый
+        if (!selectedChat) {
+          setSelectedChat(data[0]);
+        } else {
+          // Если текущий чат завершен, а есть активные - переключаемся на первый активный
+          const currentChatStillExists = data.find(c => c.id === selectedChat.id);
+          
+          if (currentChatStillExists) {
+            // Обновляем данные текущего чата (статус мог измениться)
+            setSelectedChat(currentChatStillExists);
+          } else {
+            // Если текущего чата нет в списке - выбираем первый
+            setSelectedChat(data[0]);
+          }
+        }
       }
     } catch (error) {
       console.error('Failed to load chats:', error);
@@ -362,10 +494,10 @@ const Chats = () => {
       setSelectedChat(prev => prev ? { ...prev, ...updatedChat } : null);
       
       setShowRulesModal(false);
-      setToast({ message: 'Правила приняты. Можете начать общение!', type: 'success' });
+      setToast({ message: t('chats.notifications.rulesAccepted'), type: 'success' });
     } catch (error) {
       console.error('Failed to accept rules:', error);
-      setToast({ message: 'Ошибка при принятии правил', type: 'error' });
+      setToast({ message: t('chats.notifications.rulesAcceptError'), type: 'error' });
     }
   };
 
@@ -410,11 +542,60 @@ const Chats = () => {
       });
     } catch (error) {
       console.error('Failed to send message:', error);
-      setToast({ message: 'Ошибка при отправке сообщения', type: 'error' });
+      setToast({ message: t('chats.notifications.sendMessageError'), type: 'error' });
     }
   }, [newMessage, selectedChat]);
 
   const handleAcceptWork = async () => {
+    if (!selectedChat) return;
+
+    try {
+      // Определяем ID мастера
+      const masterId = selectedChat.customer_id === currentUserId 
+        ? selectedChat.master_id 
+        : selectedChat.customer_id;
+      
+      // Проверяем активные заказы с этим мастером
+      setLoadingOrders(true);
+      const orders = await chatService.getActiveOrdersWithUser(masterId, 'master');
+      setLoadingOrders(false);
+      
+      if (orders.length > 1) {
+        // Несколько заказов - показываем модальное окно
+        setActiveOrders(orders);
+        setShowSelectOrderModal(true);
+        return;
+      }
+      
+      // Один заказ - показываем модальное окно принятия работы
+      setShowAcceptModal(true);
+    } catch (error) {
+      console.error('Failed to load active orders:', error);
+      setLoadingOrders(false);
+      // Если ошибка - показываем обычное модальное окно
+      setShowAcceptModal(true);
+    }
+  };
+
+  const handleSelectOrder = async (orderId: number) => {
+    setShowSelectOrderModal(false);
+    
+    // Обновляем selectedChat с выбранным заказом
+    const order = activeOrders.find(o => o.id === orderId);
+    if (order && selectedChat) {
+      const updatedChat = { ...selectedChat, order_id: orderId };
+      setSelectedChat(updatedChat);
+      
+      // Небольшая задержка для обновления состояния
+      setTimeout(() => {
+        setShowAcceptModal(true);
+      }, 100);
+    } else {
+      setShowAcceptModal(true);
+    }
+  };
+
+  const handleActualAcceptWork = async () => {
     if (!selectedChat) return;
 
     try {
@@ -427,7 +608,7 @@ const Chats = () => {
         orderStatus: 'completed'
       });
       
-      setToast({ message: 'Работа принята! Средства зачислены мастеру.', type: 'success' });
+      setToast({ message: t('chats.notifications.workAccepted'), type: 'success' });
       setShowAcceptModal(false);
       setRating(5);
       setReview('');
@@ -438,7 +619,7 @@ const Chats = () => {
       loadMessages(selectedChat.id, false);
     } catch (error) {
       console.error('Failed to accept work:', error);
-      setToast({ message: 'Ошибка при принятии работы', type: 'error' });
+      setToast({ message: t('chats.notifications.workAcceptError'), type: 'error' });
     } finally {
       setAccepting(false);
     }
@@ -465,7 +646,7 @@ const Chats = () => {
       {/* Sidebar with chat list */}
       <div className={`${chatStyles.chatsSidebar} ${showChatWindow ? chatStyles.hiddenOnMobile : ''}`}>
         <div className={chatStyles.chatsHeader}>
-          <h2>Сообщения</h2>
+          <h2>{t('chats.title')}</h2>
           {unreadCount > 0 && (
             <span className={chatStyles.unreadBadge}>{unreadCount}</span>
           )}
@@ -475,7 +656,7 @@ const Chats = () => {
           <MdSearch className={chatStyles.searchIcon} />
           <input
             type="text"
-            placeholder="Поиск чатов..."
+            placeholder={t('chats.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -485,7 +666,7 @@ const Chats = () => {
           {filteredChats.length === 0 ? (
             <div className={chatStyles.emptyChats}>
               <MdChat size={48} />
-              <p>Нет чатов</p>
+              <p>{t('chats.noChats')}</p>
             </div>
           ) : (
             filteredChats.map((chat) => {
@@ -534,7 +715,7 @@ const Chats = () => {
                       )}
                     </div>
                     <div className={chatStyles.chatBottom}>
-                      <span className={chatStyles.lastMessage}>{chat.last_message || 'Нет сообщений'}</span>
+                      <span className={chatStyles.lastMessage}>{chat.last_message || t('chats.noMessages')}</span>
                       {chat.unread_count > 0 && (
                         <span className={chatStyles.chatUnread}>{chat.unread_count}</span>
                       )}
@@ -562,7 +743,7 @@ const Chats = () => {
               <button 
                 className={chatStyles.backButton}
                 onClick={() => setShowChatWindow(false)}
-                aria-label="Вернуться к списку чатов"
+                aria-label={t('chats.backToList')}
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                   <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -591,34 +772,9 @@ const Chats = () => {
               <div className={chatStyles.chatWindowInfo}>
                 <h3>{getParticipantName(selectedChat)}</h3>
                 {selectedChat.order_title && (
-                  <p>Заказ: {selectedChat.order_title}</p>
+                  <p>{t('chats.order')} {selectedChat.order_title}</p>
                 )}
               </div>
-              {selectedChat.order_status === 'review' && selectedChat.customer_id === currentUserId && (
-                <button
-                  onClick={() => setShowAcceptModal(true)}
-                  className={chatStyles.actionButton}
-                >
-                  <MdCheckCircle size={20} />
-                  <span className={chatStyles.actionButtonText}>Принять работу</span>
-                </button>
-              )}
-              {selectedChat.order_status === 'in_progress' && (
-                <div className={chatStyles.statusBadge} style={{
-                  background: '#dbeafe',
-                  color: '#1e40af'
-                }}>
-                  В работе
-                </div>
-              )}
-              {selectedChat.order_status === 'completed' && (
-                <div className={chatStyles.statusBadge} style={{
-                  background: '#d1fae5',
-                  color: '#065f46'
-                }}>
-                  ✓ Работа принята
-                </div>
-              )}
             </div>
 
             <div className={chatStyles.messagesContainer} ref={messagesContainerRef} onScroll={handleScroll}>
@@ -629,7 +785,7 @@ const Chats = () => {
               ) : messages.length === 0 ? (
                 <div className={chatStyles.messagesPlaceholder}>
                   <MdChat size={64} />
-                  <p>Нет сообщений. Начните общение!</p>
+                  <p>{t('chats.noMessagesStart')}</p>
                 </div>
               ) : (
                 <>
@@ -653,7 +809,7 @@ const Chats = () => {
               </button>
               <input
                 type="text"
-                placeholder={selectedChat.order_status === 'completed' ? 'Заказ завершен' : 'Написать сообщение...'}
+                placeholder={selectedChat.order_status === 'completed' ? t('chats.orderCompleted') : t('chats.writeMessage')}
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && selectedChat.order_status !== 'completed' && handleSendMessage()}
@@ -671,8 +827,8 @@ const Chats = () => {
         ) : (
           <div className={chatStyles.noChatSelected}>
             <MdChat size={80} />
-            <h3>Выберите чат</h3>
-            <p>Начните общение с мастерами</p>
+            <h3>{t('chats.selectChat')}</h3>
+            <p>{t('chats.startChatting')}</p>
           </div>
         )}
       </div>
@@ -681,14 +837,14 @@ const Chats = () => {
       {showAcceptModal && selectedChat && (
         <div className={chatStyles.modalOverlay} onClick={() => setShowAcceptModal(false)}>
           <div className={chatStyles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <h2>Принять работу</h2>
+            <h2>{t('chats.acceptModal.title')}</h2>
             <p style={{ marginBottom: '20px', color: '#666' }}>
-              Вы подтверждаете, что работа выполнена качественно? Средства будут зачислены мастеру.
+              {t('chats.acceptModal.description')}
             </p>
 
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
-                Оценка (1-5 звезд)
+                {t('chats.acceptModal.rating')}
               </label>
               <div style={{ display: 'flex', gap: '8px' }}>
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -705,12 +861,12 @@ const Chats = () => {
 
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
-                Отзыв (необязательно)
+                {t('chats.acceptModal.review')}
               </label>
               <textarea
                 value={review}
                 onChange={(e) => setReview(e.target.value)}
-                placeholder="Напишите отзыв о работе мастера..."
+                placeholder={t('chats.acceptModal.reviewPlaceholder')}
                 style={{
                   width: '100%',
                   minHeight: '100px',
@@ -737,10 +893,10 @@ const Chats = () => {
                   fontWeight: '600'
                 }}
               >
-                Отмена
+                {t('chats.acceptModal.cancel')}
               </button>
               <button
-                onClick={handleAcceptWork}
+                onClick={handleActualAcceptWork}
                 disabled={accepting}
                 style={{
                   flex: 1,
@@ -753,7 +909,7 @@ const Chats = () => {
                   fontWeight: '600'
                 }}
               >
-                {accepting ? 'Обработка...' : 'Подтвердить'}
+                {accepting ? t('chats.acceptModal.processing') : t('chats.acceptModal.confirm')}
               </button>
             </div>
           </div>
@@ -772,6 +928,17 @@ const Chats = () => {
         <ChatRulesModal
           onAccept={handleAcceptRules}
           userType="client"
+        />
+      )}
+
+      {showSelectOrderModal && (
+        <SelectOrderModal
+          orders={activeOrders}
+          onSelect={handleSelectOrder}
+          onClose={() => setShowSelectOrderModal(false)}
+          title={t('selectOrder.title')}
+          subtitle={t('selectOrder.forAccept')}
+          loading={loadingOrders}
         />
       )}
     </div>

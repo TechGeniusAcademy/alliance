@@ -12,6 +12,10 @@ import {
   confirmDelivery,
   getOrderDelivery,
   getMasterActiveOrders,
+  getOrderWorkStages,
+  updateWorkStageStatus,
+  initializeWorkStages,
+  getAllAuctionsForAdmin,
 } from '../controllers/orderController';
 import { authMiddleware } from '../middleware/authMiddleware';
 
@@ -29,8 +33,16 @@ router.get('/my-orders', getCustomerOrders);
 // Получить заказы в аукционе (для мастеров)
 router.get('/auction', getAuctionOrders);
 
+// Получить все аукционы для админа
+router.get('/admin/auctions', getAllAuctionsForAdmin);
+
 // Получить активные заказы мастера (где он назначен)
 router.get('/master/active', getMasterActiveOrders);
+
+// Work stages routes
+router.get('/:orderId/work-stages', getOrderWorkStages);
+router.post('/:orderId/work-stages/initialize', initializeWorkStages);
+router.patch('/:orderId/work-stages/:stageId', updateWorkStageStatus);
 
 // Получить детали заказа
 router.get('/:orderId', getOrderById);

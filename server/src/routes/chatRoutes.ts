@@ -10,7 +10,8 @@ import {
   getWorkAct,
   getMasterReviews,
   markMessagesAsRead,
-  acceptChatRules
+  acceptChatRules,
+  getActiveOrdersWithUser
 } from '../controllers/chatController';
 
 const router = express.Router();
@@ -35,6 +36,9 @@ router.post('/accept-rules', acceptChatRules);
 
 // Отправить сообщение
 router.post('/:chatId/messages', sendMessage);
+
+// Получить активные заказы с пользователем
+router.get('/active-orders', getActiveOrdersWithUser);
 
 // Отправить работу на оценку (мастер)
 router.post('/order/:orderId/submit', submitForReview);

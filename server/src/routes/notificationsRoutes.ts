@@ -18,10 +18,10 @@ router.get('/', authMiddleware, getNotifications);
 router.get('/unread-count', authMiddleware, getUnreadCount);
 
 // Отметить уведомление как прочитанное
-router.patch('/:id/read', authMiddleware, markAsRead);
+router.put('/:id/read', authMiddleware, markAsRead);
 
 // Отметить все как прочитанные
-router.patch('/read-all', authMiddleware, markAllAsRead);
+router.put('/read-all', authMiddleware, markAllAsRead);
 
 // Удалить уведомление
 router.delete('/:id', authMiddleware, deleteNotification);

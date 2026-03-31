@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { API_BASE_URL } from '../../config/api';
 import { 
   MdSettings, 
   MdSave, 
@@ -129,7 +130,7 @@ const MasterSettings = () => {
       const token = localStorage.getItem('token');
       console.log('Token:', token ? 'существует' : 'отсутствует');
       
-      const url = 'http://localhost:5000/api/settings/master';
+      const url = `${API_BASE_URL}/api/settings/master`;
       console.log('Отправка GET запроса на:', url);
       
       const response = await fetch(url, {
@@ -167,7 +168,7 @@ const MasterSettings = () => {
       console.log('=== НАСТРОЙКИ ЗАГРУЖЕНЫ ===');
     } catch (error) {
       console.error('!!! ОШИБКА ПРИ ЗАГРУЗКЕ:', error);
-      showToast('Ошибка загрузки настроек', 'error');
+      showToast(t('settings.loadError'), 'error');
     } finally {
       setLoading(false);
     }
@@ -190,7 +191,7 @@ const MasterSettings = () => {
       const token = localStorage.getItem('token');
       console.log('Token:', token ? 'существует' : 'отсутствует');
       
-      const url = 'http://localhost:5000/api/settings/master';
+      const url = `${API_BASE_URL}/api/settings/master`;
       console.log('Отправка PUT запроса на:', url);
       
       const response = await fetch(url, {
@@ -214,10 +215,10 @@ const MasterSettings = () => {
       console.log('Результат сохранения:', result);
       console.log('=== НАСТРОЙКИ УСПЕШНО СОХРАНЕНЫ ===');
       
-      showToast('Настройки успешно сохранены', 'success');
+      showToast(t('settings.saveSuccess'), 'success');
     } catch (error) {
       console.error('!!! ОШИБКА ПРИ СОХРАНЕНИИ:', error);
-      showToast('Ошибка сохранения настроек', 'error');
+      showToast(t('settings.saveError'), 'error');
     } finally {
       setSaving(false);
     }
@@ -279,13 +280,13 @@ const MasterSettings = () => {
   }
 
   const weekDays = [
-    { id: 'monday', label: 'Пн' },
-    { id: 'tuesday', label: 'Вт' },
-    { id: 'wednesday', label: 'Ср' },
-    { id: 'thursday', label: 'Чт' },
-    { id: 'friday', label: 'Пт' },
-    { id: 'saturday', label: 'Сб' },
-    { id: 'sunday', label: 'Вс' },
+    { id: 'monday', label: t('settings.weekDays.monday') },
+    { id: 'tuesday', label: t('settings.weekDays.tuesday') },
+    { id: 'wednesday', label: t('settings.weekDays.wednesday') },
+    { id: 'thursday', label: t('settings.weekDays.thursday') },
+    { id: 'friday', label: t('settings.weekDays.friday') },
+    { id: 'saturday', label: t('settings.weekDays.saturday') },
+    { id: 'sunday', label: t('settings.weekDays.sunday') },
   ];
 
   return (
@@ -299,10 +300,10 @@ const MasterSettings = () => {
           <button 
             className={styles.resetButton}
             onClick={async () => {
-              if (window.confirm('Сбросить все настройки к значениям по умолчанию?')) {
+              if (window.confirm(t('settings.resetConfirm'))) {
                 try {
                   const token = localStorage.getItem('token');
-                  const response = await fetch('http://localhost:5000/api/settings/master/reset', {
+                  const response = await fetch(`${API_BASE_URL}/api/settings/master/reset`, {
                     method: 'POST',
                     headers: { 
                       'Authorization': `Bearer ${token}`,
@@ -312,14 +313,14 @@ const MasterSettings = () => {
                   if (!response.ok) throw new Error('Failed to reset');
                   const data = await response.json();
                   setSettings(data.settings);
-                  showToast('Настройки сброшены', 'success');
+                  showToast(t('settings.resetSuccess'), 'success');
                 } catch (error) {
-                  showToast('Ошибка сброса настроек', 'error');
+                  showToast(t('settings.resetError'), 'error');
                 }
               }
             }}
           >
-            Сбросить
+            {t('settings.resetButton')}
           </button>
           <button 
             className={styles.saveButton}
@@ -337,13 +338,13 @@ const MasterSettings = () => {
         <div className={styles.settingsSection}>
           <h2>
             <MdWork style={{ verticalAlign: 'middle', marginRight: '8px' }} />
-            Рабочие настройки
+            {t('settings.workSettings')}
           </h2>
           <div className={styles.settingsList}>
             <div className={styles.settingItem}>
               <div>
-                <strong>Автопринятие аукционов</strong>
-                <p>Автоматически принимать участие в новых аукционах</p>
+                <strong>{t('settings.autoAcceptAuctions')}</strong>
+                <p>{t('settings.autoAcceptAuctionsDesc')}</p>
               </div>
               <label className={styles.switch}>
                 <input
@@ -357,8 +358,8 @@ const MasterSettings = () => {
 
             <div className={styles.settingItem}>
               <div>
-                <strong>Максимум активных заказов</strong>
-                <p>Максимальное количество заказов в работе одновременно</p>
+                <strong>{t('settings.maxActiveOrders')}</strong>
+                <p>{t('settings.maxActiveOrdersDesc')}</p>
               </div>
               <input
                 type="number"
@@ -372,8 +373,8 @@ const MasterSettings = () => {
 
             <div className={styles.settingItem}>
               <div>
-                <strong>Минимальная сумма заказа</strong>
-                <p>Не показывать заказы дешевле указанной суммы</p>
+                <strong>{t('settings.minOrderAmount')}</strong>
+                <p>{t('settings.minOrderAmountDesc')}</p>
               </div>
               <input
                 type="number"
@@ -386,7 +387,7 @@ const MasterSettings = () => {
             </div>
 
             <div className={styles.settingItemFull}>
-              <strong>Рабочие дни</strong>
+              <strong>{t('settings.workingDays')}</strong>
               <div className={styles.weekDays}>
                 {weekDays.map(day => (
                   <button
@@ -401,10 +402,10 @@ const MasterSettings = () => {
             </div>
 
             <div className={styles.settingItemFull}>
-              <strong>Рабочие часы</strong>
+              <strong>{t('settings.workingHours')}</strong>
               <div className={styles.timeRange}>
                 <div>
-                  <label>С</label>
+                  <label>{t('settings.from')}</label>
                   <input
                     type="time"
                     value={settings.work.workingHoursStart}
@@ -414,7 +415,7 @@ const MasterSettings = () => {
                 </div>
                 <span>—</span>
                 <div>
-                  <label>До</label>
+                  <label>{t('settings.to')}</label>
                   <input
                     type="time"
                     value={settings.work.workingHoursEnd}
@@ -431,29 +432,29 @@ const MasterSettings = () => {
         <div className={styles.settingsSection}>
           <h2>
             <MdAttachMoney style={{ verticalAlign: 'middle', marginRight: '8px' }} />
-            Финансовые настройки
+            {t('settings.financeSettings')}
           </h2>
           <div className={styles.settingsList}>
             <div className={styles.settingItem}>
               <div>
-                <strong>Валюта</strong>
-                <p>Основная валюта для расчетов</p>
+                <strong>{t('settings.currency')}</strong>
+                <p>{t('settings.currencyDesc')}</p>
               </div>
               <select 
                 value={settings.finance.currency} 
                 onChange={(e) => setSettings({ ...settings, finance: { ...settings.finance, currency: e.target.value as 'KZT' | 'USD' | 'RUB' } })}
                 className={styles.select}
               >
-                <option value="KZT">₸ Тенге (KZT)</option>
-                <option value="RUB">₸ Рубль (RUB)</option>
-                <option value="USD">$ Доллар (USD)</option>
+                <option value="KZT">{t('settings.currencyKZT')}</option>
+                <option value="RUB">{t('settings.currencyRUB')}</option>
+                <option value="USD">{t('settings.currencyUSD')}</option>
               </select>
             </div>
 
             <div className={styles.settingItem}>
               <div>
-                <strong>Налоговая ставка (%)</strong>
-                <p>Процент налога для расчета чистой прибыли</p>
+                <strong>{t('settings.taxRate')}</strong>
+                <p>{t('settings.taxRateDesc')}</p>
               </div>
               <input
                 type="number"
@@ -507,8 +508,8 @@ const MasterSettings = () => {
 
             <div className={styles.settingItem}>
               <div>
-                <strong>Новые аукционы</strong>
-                <p>Уведомления о новых аукционах в вашей категории</p>
+                <strong>{t('settings.newAuctions')}</strong>
+                <p>{t('settings.newAuctionsDesc')}</p>
               </div>
               <label className={styles.switch}>
                 <input
@@ -522,8 +523,8 @@ const MasterSettings = () => {
 
             <div className={styles.settingItem}>
               <div>
-                <strong>Принятие ставки</strong>
-                <p>Уведомления когда клиент принимает вашу ставку</p>
+                <strong>{t('settings.bidAccepted')}</strong>
+                <p>{t('settings.bidAcceptedDesc')}</p>
               </div>
               <label className={styles.switch}>
                 <input
@@ -538,7 +539,7 @@ const MasterSettings = () => {
             <div className={styles.settingItem}>
               <div>
                 <strong>{t('settings.orderUpdates')}</strong>
-                <p>Изменения статуса заказов</p>
+                <p>{t('settings.orderUpdatesDesc')}</p>
               </div>
               <label className={styles.switch}>
                 <input
@@ -567,8 +568,8 @@ const MasterSettings = () => {
 
             <div className={styles.settingItem}>
               <div>
-                <strong>Новые отзывы</strong>
-                <p>Уведомления о новых отзывах от клиентов</p>
+                <strong>{t('settings.reviews')}</strong>
+                <p>{t('settings.reviewsDesc')}</p>
               </div>
               <label className={styles.switch}>
                 <input
@@ -582,8 +583,8 @@ const MasterSettings = () => {
 
             <div className={styles.settingItem}>
               <div>
-                <strong>Платежи</strong>
-                <p>Уведомления о поступлении платежей</p>
+                <strong>{t('settings.payments')}</strong>
+                <p>{t('settings.paymentsDesc')}</p>
               </div>
               <label className={styles.switch}>
                 <input
@@ -601,27 +602,27 @@ const MasterSettings = () => {
         <div className={styles.settingsSection}>
           <h2>
             <MdLock style={{ verticalAlign: 'middle', marginRight: '8px' }} />
-            Безопасность
+            {t('settings.securityTitle')}
           </h2>
           <div className={styles.settingsList}>
             <div className={styles.settingItemFull}>
-              <strong>Изменить пароль</strong>
+              <strong>{t('settings.changePassword')}</strong>
               <div className={styles.passwordForm}>
                 <input
                   type="password"
-                  placeholder="Текущий пароль"
+                  placeholder={t('settings.currentPassword')}
                   id="currentPassword"
                   className={styles.passwordInput}
                 />
                 <input
                   type="password"
-                  placeholder="Новый пароль (минимум 6 символов)"
+                  placeholder={t('settings.newPassword')}
                   id="newPassword"
                   className={styles.passwordInput}
                 />
                 <input
                   type="password"
-                  placeholder="Подтвердите новый пароль"
+                  placeholder={t('settings.confirmPassword')}
                   id="confirmPassword"
                   className={styles.passwordInput}
                 />
@@ -633,23 +634,23 @@ const MasterSettings = () => {
                     const confirm = (document.getElementById('confirmPassword') as HTMLInputElement).value;
 
                     if (!current || !newPass || !confirm) {
-                      showToast('Заполните все поля', 'error');
+                      showToast(t('settings.fillAllFields'), 'error');
                       return;
                     }
 
                     if (newPass !== confirm) {
-                      showToast('Пароли не совпадают', 'error');
+                      showToast(t('settings.passwordsMismatch'), 'error');
                       return;
                     }
 
                     if (newPass.length < 6) {
-                      showToast('Пароль должен быть не менее 6 символов', 'error');
+                      showToast(t('settings.passwordTooShort'), 'error');
                       return;
                     }
 
                     try {
                       const token = localStorage.getItem('token');
-                      const response = await fetch('http://localhost:5000/api/settings/change-password', {
+                      const response = await fetch(`${API_BASE_URL}/api/settings/change-password`, {
                         method: 'POST',
                         headers: {
                           'Authorization': `Bearer ${token}`,
@@ -661,19 +662,19 @@ const MasterSettings = () => {
                       const data = await response.json();
 
                       if (!response.ok) {
-                        throw new Error(data.error || 'Ошибка изменения пароля');
+                        throw new Error(data.error || t('settings.passwordChangeError'));
                       }
 
-                      showToast('Пароль успешно изменён', 'success');
+                      showToast(t('settings.passwordChanged'), 'success');
                       (document.getElementById('currentPassword') as HTMLInputElement).value = '';
                       (document.getElementById('newPassword') as HTMLInputElement).value = '';
                       (document.getElementById('confirmPassword') as HTMLInputElement).value = '';
                     } catch (error: any) {
-                      showToast(error.message || 'Ошибка изменения пароля', 'error');
+                      showToast(error.message || t('settings.passwordChangeError'), 'error');
                     }
                   }}
                 >
-                  Изменить пароль
+                  {t('settings.changePasswordButton')}
                 </button>
               </div>
             </div>
@@ -690,7 +691,7 @@ const MasterSettings = () => {
             <div className={styles.settingItem}>
               <div>
                 <strong>{t('settings.showProfile')}</strong>
-                <p>Ваш профиль будет виден клиентам</p>
+                <p>{t('settings.showProfileDesc')}</p>
               </div>
               <label className={styles.switch}>
                 <input
@@ -704,8 +705,8 @@ const MasterSettings = () => {
 
             <div className={styles.settingItem}>
               <div>
-                <strong>Показывать портфолио</strong>
-                <p>Ваши работы будут видны в публичном профиле</p>
+                <strong>{t('settings.showPortfolio')}</strong>
+                <p>{t('settings.showPortfolioDesc')}</p>
               </div>
               <label className={styles.switch}>
                 <input
@@ -719,8 +720,8 @@ const MasterSettings = () => {
 
             <div className={styles.settingItem}>
               <div>
-                <strong>Показывать рейтинг</strong>
-                <p>Ваш рейтинг будет виден всем</p>
+                <strong>{t('settings.showRating')}</strong>
+                <p>{t('settings.showRatingDesc')}</p>
               </div>
               <label className={styles.switch}>
                 <input
@@ -734,8 +735,8 @@ const MasterSettings = () => {
 
             <div className={styles.settingItem}>
               <div>
-                <strong>Показывать выполненные заказы</strong>
-                <p>Количество выполненных заказов в профиле</p>
+                <strong>{t('settings.showCompletedOrders')}</strong>
+                <p>{t('settings.showCompletedOrdersDesc')}</p>
               </div>
               <label className={styles.switch}>
                 <input
@@ -749,8 +750,8 @@ const MasterSettings = () => {
 
             <div className={styles.settingItem}>
               <div>
-                <strong>Разрешить прямые сообщения</strong>
-                <p>Клиенты смогут писать вам напрямую</p>
+                <strong>{t('settings.allowDirectMessages')}</strong>
+                <p>{t('settings.allowDirectMessagesDesc')}</p>
               </div>
               <label className={styles.switch}>
                 <input

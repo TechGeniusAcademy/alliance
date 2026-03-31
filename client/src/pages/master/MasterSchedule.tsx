@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   MdAdd, 
   MdEdit, 
@@ -14,6 +15,7 @@ import Toast, { type ToastType } from '../../components/Toast';
 import styles from './MasterSchedule.module.css';
 
 const MasterSchedule = () => {
+  const { t } = useTranslation();
   const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ScheduleItem | null>(null);
@@ -42,7 +44,7 @@ const MasterSchedule = () => {
       setScheduleItems(items);
     } catch (error) {
       console.error('Ошибка загрузки расписания:', error);
-      setToast({ message: 'Не удалось загрузить расписание', type: 'error' });
+      setToast({ message: t('masterSchedule.notifications.loadError'), type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -56,17 +58,17 @@ const MasterSchedule = () => {
       
       if (editingItem) {
         await scheduleService.updateScheduleItem(editingItem.id, formData);
-        setToast({ message: 'Событие обновлено', type: 'success' });
+        setToast({ message: t('masterSchedule.notifications.updateSuccess'), type: 'success' });
       } else {
         await scheduleService.createScheduleItem(formData);
-        setToast({ message: 'Событие добавлено', type: 'success' });
+        setToast({ message: t('masterSchedule.notifications.createSuccess'), type: 'success' });
       }
 
       await loadSchedule();
       resetForm();
     } catch (error) {
       console.error('Ошибка сохранения:', error);
-      setToast({ message: 'Не удалось сохранить событие', type: 'error' });
+      setToast({ message: t('masterSchedule.notifications.saveError'), type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -101,16 +103,16 @@ const MasterSchedule = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Удалить это событие?')) return;
+    if (!confirm(t('masterSchedule.confirmDelete'))) return;
     
     try {
       setLoading(true);
       await scheduleService.deleteScheduleItem(id);
-      setToast({ message: 'Событие удалено', type: 'success' });
+      setToast({ message: t('masterSchedule.notifications.deleteSuccess'), type: 'success' });
       await loadSchedule();
     } catch (error) {
       console.error('Ошибка удаления:', error);
-      setToast({ message: 'Не удалось удалить событие', type: 'error' });
+      setToast({ message: t('masterSchedule.notifications.deleteError'), type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -129,16 +131,16 @@ const MasterSchedule = () => {
       );
     } catch (error) {
       console.error('Ошибка изменения статуса:', error);
-      setToast({ message: 'Не удалось изменить статус', type: 'error' });
+      setToast({ message: t('masterSchedule.notifications.statusError'), type: 'error' });
     }
   };
 
   const getTypeLabel = (type: string) => {
     const labels: { [key: string]: string } = {
-      deadline: 'Дедлайн',
-      reminder: 'Напоминание',
-      meeting: 'Встреча',
-      other: 'Другое'
+      deadline: t('masterSchedule.types.deadline'),
+      reminder: t('masterSchedule.types.reminder'),
+      meeting: t('masterSchedule.types.meeting'),
+      other: t('masterSchedule.types.other')
     };
     return labels[type] || type;
   };
@@ -187,8 +189,8 @@ const MasterSchedule = () => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    if (date.toDateString() === today.toDateString()) return 'Сегодня';
-    if (date.toDateString() === tomorrow.toDateString()) return 'Завтра';
+    if (date.toDateString() === today.toDateString()) return t('masterSchedule.time.today');
+    if (date.toDateString() === tomorrow.toDateString()) return t('masterSchedule.time.tomorrow');
     
     return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
   };
@@ -197,34 +199,34 @@ const MasterSchedule = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h1>Расписание</h1>
-          <p>Управляйте своим временем и дедлайнами</p>
+          <h1>{t('masterSchedule.title')}</h1>
+          <p>{t('masterSchedule.subtitle')}</p>
         </div>
         <button className={styles.addButton} onClick={() => setShowModal(true)}>
           <MdAdd size={20} />
-          Добавить событие
+          {t('masterSchedule.addEvent')}
         </button>
       </div>
 
       <div className={styles.filters}>
         <div className={styles.filterGroup}>
-          <label>Тип:</label>
+          <label>{t('masterSchedule.filters.type')}</label>
           <select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
-            <option value="all">Все</option>
-            <option value="deadline">Дедлайны</option>
-            <option value="reminder">Напоминания</option>
-            <option value="meeting">Встречи</option>
-            <option value="other">Другое</option>
+            <option value="all">{t('masterSchedule.types.all')}</option>
+            <option value="deadline">{t('masterSchedule.types.deadlines')}</option>
+            <option value="reminder">{t('masterSchedule.types.reminders')}</option>
+            <option value="meeting">{t('masterSchedule.types.meetings')}</option>
+            <option value="other">{t('masterSchedule.types.other')}</option>
           </select>
         </div>
 
         <div className={styles.filterGroup}>
-          <label>Статус:</label>
+          <label>{t('masterSchedule.filters.status')}</label>
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-            <option value="all">Все</option>
-            <option value="pending">Предстоящие</option>
-            <option value="completed">Выполненные</option>
-            <option value="overdue">Просроченные</option>
+            <option value="all">{t('masterSchedule.statuses.all')}</option>
+            <option value="pending">{t('masterSchedule.statuses.pending')}</option>
+            <option value="completed">{t('masterSchedule.statuses.completed')}</option>
+            <option value="overdue">{t('masterSchedule.statuses.overdue')}</option>
           </select>
         </div>
       </div>
@@ -233,8 +235,8 @@ const MasterSchedule = () => {
         {filteredItems.length === 0 ? (
           <div className={styles.emptyState}>
             <MdCalendarToday size={64} />
-            <p>Нет событий</p>
-            <span>Добавьте событие, чтобы следить за дедлайнами</span>
+            <p>{t('masterSchedule.noEvents')}</p>
+            <span>{t('masterSchedule.noEventsHint')}</span>
           </div>
         ) : (
           filteredItems.map(item => (
@@ -276,7 +278,7 @@ const MasterSchedule = () => {
 
                 {item.order_title && (
                   <div className={styles.orderInfo}>
-                    <MdWork size={16} /> Заказ: {item.order_title} #{item.order_id}
+                    <MdWork size={16} /> {t('masterSchedule.order')} {item.order_title} #{item.order_id}
                   </div>
                 )}
 
@@ -291,7 +293,7 @@ const MasterSchedule = () => {
                   {isOverdue(item) && (
                     <div className={styles.overdueWarning}>
                       <MdWarning size={16} />
-                      Просрочено
+                      {t('masterSchedule.overdue')}
                     </div>
                   )}
                 </div>
@@ -314,37 +316,37 @@ const MasterSchedule = () => {
         <div className={styles.modal} onClick={resetForm}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2>{editingItem ? 'Редактировать событие' : 'Новое событие'}</h2>
+              <h2>{editingItem ? t('masterSchedule.modal.editTitle') : t('masterSchedule.modal.newTitle')}</h2>
               <button onClick={resetForm} className={styles.closeButton}>×</button>
             </div>
 
             <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.formGroup}>
-                <label>Название *</label>
+                <label>{t('masterSchedule.form.title')}</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   required
-                  placeholder="Название события"
+                  placeholder={t('masterSchedule.form.titlePlaceholder')}
                   disabled={loading}
                 />
               </div>
 
               <div className={styles.formGroup}>
-                <label>Описание</label>
+                <label>{t('masterSchedule.form.description')}</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
-                  placeholder="Дополнительная информация"
+                  placeholder={t('masterSchedule.form.descriptionPlaceholder')}
                   disabled={loading}
                 />
               </div>
 
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label>Дата *</label>
+                  <label>{t('masterSchedule.form.date')}</label>
                   <input
                     type="date"
                     value={formData.date}
@@ -355,7 +357,7 @@ const MasterSchedule = () => {
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Время *</label>
+                  <label>{t('masterSchedule.form.time')}</label>
                   <input
                     type="time"
                     value={formData.time}
@@ -368,41 +370,41 @@ const MasterSchedule = () => {
 
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label>Тип *</label>
+                  <label>{t('masterSchedule.form.type')}</label>
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
                     required
                     disabled={loading}
                   >
-                    <option value="reminder">Напоминание</option>
-                    <option value="deadline">Дедлайн</option>
-                    <option value="meeting">Встреча</option>
-                    <option value="other">Другое</option>
+                    <option value="reminder">{t('masterSchedule.types.reminder')}</option>
+                    <option value="deadline">{t('masterSchedule.types.deadline')}</option>
+                    <option value="meeting">{t('masterSchedule.types.meeting')}</option>
+                    <option value="other">{t('masterSchedule.types.other')}</option>
                   </select>
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Приоритет *</label>
+                  <label>{t('masterSchedule.form.priority')}</label>
                   <select
                     value={formData.priority}
                     onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
                     required
                     disabled={loading}
                   >
-                    <option value="low">Низкий</option>
-                    <option value="medium">Средний</option>
-                    <option value="high">Высокий</option>
+                    <option value="low">{t('masterSchedule.priorities.low')}</option>
+                    <option value="medium">{t('masterSchedule.priorities.medium')}</option>
+                    <option value="high">{t('masterSchedule.priorities.high')}</option>
                   </select>
                 </div>
               </div>
 
               <div className={styles.formActions}>
                 <button type="button" onClick={resetForm} className={styles.cancelButton} disabled={loading}>
-                  Отмена
+                  {t('masterSchedule.form.cancel')}
                 </button>
                 <button type="submit" className={styles.submitButton} disabled={loading}>
-                  {loading ? 'Сохранение...' : (editingItem ? 'Сохранить' : 'Добавить')}
+                  {loading ? t('masterSchedule.form.saving') : (editingItem ? t('masterSchedule.form.save') : t('masterSchedule.form.add'))}
                 </button>
               </div>
             </form>

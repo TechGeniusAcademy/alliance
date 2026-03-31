@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { walletService } from '../../services/walletService';
 import type { WalletStats, WalletTransaction } from '../../services/walletService';
 import WalletPaymentModal from '../../components/WalletPaymentModal';
 import styles from './MasterWallet.module.css';
 
 const MasterWallet: React.FC = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<WalletStats | null>(null);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +34,7 @@ const MasterWallet: React.FC = () => {
       setTransactions(transactionsData);
     } catch (err) {
       console.error('Error loading wallet data:', err);
-      setError('Не удалось загрузить данные кошелька');
+      setError(t('masterWallet.errors.loadError'));
     } finally {
       setLoading(false);
     }
@@ -47,12 +49,12 @@ const MasterWallet: React.FC = () => {
     
     const amount = parseFloat(depositAmount);
     if (isNaN(amount) || amount <= 0) {
-      setError('Введите корректную сумму');
+      setError(t('masterWallet.errors.invalidAmount'));
       return;
     }
 
     if (amount < 100) {
-      setError('Минимальная сумма пополнения: 100 ₸');
+      setError(t('masterWallet.errors.minAmount'));
       return;
     }
 
@@ -64,7 +66,7 @@ const MasterWallet: React.FC = () => {
     setShowPaymentModal(false);
     setDepositAmount('');
     await loadWalletData();
-    alert('Кошелек успешно пополнен!');
+    alert(t('masterWallet.deposit.success'));
   };
 
   const handlePaymentClose = () => {
@@ -85,9 +87,9 @@ const MasterWallet: React.FC = () => {
   const getTransactionTypeLabel = (type: string) => {
     switch (type) {
       case 'deposit':
-        return 'Пополнение';
+        return t('masterWallet.types.deposit');
       case 'commission_payment':
-        return 'Оплата комиссии';
+        return t('masterWallet.types.commission_payment');
       default:
         return type;
     }
@@ -96,27 +98,27 @@ const MasterWallet: React.FC = () => {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'Завершено';
+        return t('masterWallet.statuses.completed');
       case 'pending':
-        return 'В обработке';
+        return t('masterWallet.statuses.pending');
       case 'failed':
-        return 'Ошибка';
+        return t('masterWallet.statuses.failed');
       case 'cancelled':
-        return 'Отменено';
+        return t('masterWallet.statuses.cancelled');
       default:
         return status;
     }
   };
 
   if (loading && !stats) {
-    return <div className={styles.loading}>Загрузка...</div>;
+    return <div className={styles.loading}>{t('masterWallet.loading')}</div>;
   }
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Кошелек</h1>
-        <p className={styles.subtitle}>Управление балансом и оплата комиссий</p>
+        <h1 className={styles.title}>{t('masterWallet.title')}</h1>
+        <p className={styles.subtitle}>{t('masterWallet.subtitle')}</p>
       </div>
 
       {error && <div className={styles.error}>{error}</div>}
@@ -124,44 +126,44 @@ const MasterWallet: React.FC = () => {
       {stats && (
         <div className={styles.statsGrid}>
           <div className={`${styles.statCard} ${styles.balance}`}>
-            <div className={styles.statLabel}>Текущий баланс</div>
+            <div className={styles.statLabel}>{t('masterWallet.stats.currentBalance')}</div>
             <div className={styles.statValue}>{parseFloat(String(stats.balance)).toFixed(2)} ₸</div>
-            <div className={styles.statDescription}>Доступно для оплаты комиссий</div>
+            <div className={styles.statDescription}>{t('masterWallet.stats.balanceHint')}</div>
           </div>
 
           <div className={styles.statCard}>
-            <div className={styles.statLabel}>Всего пополнено</div>
+            <div className={styles.statLabel}>{t('masterWallet.stats.totalDeposits')}</div>
             <div className={styles.statValue}>{parseFloat(String(stats.totalDeposits)).toFixed(2)} ₸</div>
-            <div className={styles.statDescription}>За все время</div>
+            <div className={styles.statDescription}>{t('masterWallet.stats.allTime')}</div>
           </div>
 
           <div className={styles.statCard}>
-            <div className={styles.statLabel}>Оплачено комиссий</div>
+            <div className={styles.statLabel}>{t('masterWallet.stats.commissionsPaid')}</div>
             <div className={styles.statValue}>{parseFloat(String(stats.totalCommissionsPaid)).toFixed(2)} ₸</div>
-            <div className={styles.statDescription}>За все время</div>
+            <div className={styles.statDescription}>{t('masterWallet.stats.allTime')}</div>
           </div>
 
           <div className={styles.statCard}>
-            <div className={styles.statLabel}>Ожидают оплаты</div>
+            <div className={styles.statLabel}>{t('masterWallet.stats.pendingCommissions')}</div>
             <div className={styles.statValue}>{parseFloat(String(stats.pendingCommissions)).toFixed(2)} ₸</div>
-            <div className={styles.statDescription}>Неоплаченные комиссии</div>
+            <div className={styles.statDescription}>{t('masterWallet.stats.pendingHint')}</div>
           </div>
         </div>
       )}
 
       <div className={styles.contentGrid}>
         <div className={styles.depositSection}>
-          <h2 className={styles.sectionTitle}>Пополнить кошелек</h2>
+          <h2 className={styles.sectionTitle}>{t('masterWallet.deposit.title')}</h2>
           
           <form onSubmit={handleDeposit} className={styles.depositForm}>
             <div className={styles.formGroup}>
-              <label className={styles.label}>Сумма (₸)</label>
+              <label className={styles.label}>{t('masterWallet.deposit.amountLabel')}</label>
               <input
                 type="number"
                 className={styles.input}
                 value={depositAmount}
                 onChange={(e) => setDepositAmount(e.target.value)}
-                placeholder="Введите сумму"
+                placeholder={t('masterWallet.deposit.amountPlaceholder')}
                 min="1"
                 step="0.01"
                 required
@@ -172,49 +174,46 @@ const MasterWallet: React.FC = () => {
               type="submit"
               className={styles.depositButton}
             >
-              Пополнить через Stripe
+              {t('masterWallet.deposit.button')}
             </button>
           </form>
 
           <div className={styles.infoBox}>
-            <div className={styles.infoTitle}>💡 Информация</div>
+            <div className={styles.infoTitle}>{t('masterWallet.info.title')}</div>
             <div className={styles.infoText}>
-              Оплата производится через безопасный сервис Stripe. 
-              Пополненные средства будут доступны для оплаты комиссий. 
-              Комиссия составляет 5000₸ за каждый из первых 3 заказов, 
-              затем 3% от суммы заказа. Минимальная сумма пополнения: 100₸.
+              {t('masterWallet.info.text')}
             </div>
           </div>
         </div>
 
         <div className={styles.transactionsSection}>
-          <h2 className={styles.sectionTitle}>История транзакций</h2>
+          <h2 className={styles.sectionTitle}>{t('masterWallet.transactions.title')}</h2>
 
           <div className={styles.filterTabs}>
             <button
               className={`${styles.filterTab} ${filterType === 'all' ? styles.active : ''}`}
               onClick={() => setFilterType('all')}
             >
-              Все
+              {t('masterWallet.filters.all')}
             </button>
             <button
               className={`${styles.filterTab} ${filterType === 'deposit' ? styles.active : ''}`}
               onClick={() => setFilterType('deposit')}
             >
-              Пополнения
+              {t('masterWallet.filters.deposits')}
             </button>
             <button
               className={`${styles.filterTab} ${filterType === 'commission_payment' ? styles.active : ''}`}
               onClick={() => setFilterType('commission_payment')}
             >
-              Комиссии
+              {t('masterWallet.filters.commissions')}
             </button>
           </div>
 
           {transactions.length === 0 ? (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>📭</div>
-              <div className={styles.emptyText}>Транзакций пока нет</div>
+              <div className={styles.emptyText}>{t('masterWallet.transactions.empty')}</div>
             </div>
           ) : (
             <div className={styles.transactionsList}>
@@ -231,7 +230,7 @@ const MasterWallet: React.FC = () => {
                     )}
                     {transaction.order_title && (
                       <div className={styles.transactionDescription}>
-                        Заказ: {transaction.order_title}
+                        {t('masterWallet.transactions.order')} {transaction.order_title}
                       </div>
                     )}
                     <div className={styles.transactionDate}>

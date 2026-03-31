@@ -10,15 +10,18 @@ import {
   MdMenu,
   MdClose,
   MdLogout,
-  MdAdd
+  MdAdd,
+  MdViewInAr,
+  MdFeedback
 } from 'react-icons/md';
 import styles from './Admin.module.css';
 import adminService from '../services/adminService';
-import type { User } from '../services/adminService';
+import type { User, Auction } from '../services/adminService';
 import Toast from '../components/Toast';
 import type { ToastType } from '../components/Toast';
+import Admin3DModels from '../components/Admin3DModels';
 
-type AdminSection = 'users' | 'auctions' | 'ratings' | 'statistics' | 'notifications';
+type AdminSection = 'users' | 'auctions' | 'ratings' | 'statistics' | 'notifications' | 'models3d' | 'feedback';
 
 interface ToastMessage {
   id: number;
@@ -50,6 +53,20 @@ const Admin = () => {
     role: 'customer' 
   });
 
+  // Auctions state
+  const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [loadingAuctions, setLoadingAuctions] = useState(false);
+  const [auctionFilter, setAuctionFilter] = useState<string>('all');
+  const [selectedAuction, setSelectedAuction] = useState<Auction | null>(null);
+  const [showAuctionModal, setShowAuctionModal] = useState(false);
+
+  // Feedback state
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [loadingFeedback, setLoadingFeedback] = useState(false);
+  const [feedbackFilter, setFeedbackFilter] = useState<string>('all');
+  const [selectedFeedback, setSelectedFeedback] = useState<any | null>(null);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+
   // Add toast notification
   const showToast = (message: string, type: ToastType) => {
     const id = Date.now();
@@ -63,7 +80,9 @@ const Admin = () => {
 
   useEffect(() => {
     if (activeSection === 'users') fetchUsers();
-  }, [activeSection]);
+    if (activeSection === 'auctions') fetchAuctions();
+    if (activeSection === 'feedback') fetchFeedback();
+  }, [activeSection, auctionFilter, feedbackFilter]);
 
   async function fetchUsers() {
     setLoading(true);
@@ -75,6 +94,91 @@ const Admin = () => {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function fetchAuctions() {
+    setLoadingAuctions(true);
+    try {
+      const data = await adminService.getAuctions(auctionFilter);
+      setAuctions(data);
+    } catch (err) {
+      console.error('Failed to fetch auctions', err);
+      showToast('Ошибка загрузки аукционов', 'error');
+    } finally {
+      setLoadingAuctions(false);
+    }
+  }
+
+  async function fetchFeedback() {
+    setLoadingFeedback(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/feedback?status=${feedbackFilter}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      setFeedbacks(data.feedback || []);
+    } catch (err) {
+      console.error('Failed to fetch feedback', err);
+      showToast('Ошибка загрузки обратной связи', 'error');
+    } finally {
+      setLoadingFeedback(false);
+    }
+  }
+
+  async function updateFeedbackStatus(id: number, status: string) {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/feedback/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      });
+      showToast('Статус обновлен', 'success');
+      fetchFeedback();
+    } catch (err) {
+      console.error('Failed to update feedback status', err);
+      showToast('Ошибка при обновлении статуса', 'error');
+    }
+  }
+
+  function handleViewFeedbackDetails(feedback: any) {
+    setSelectedFeedback(feedback);
+    setShowFeedbackModal(true);
+  }
+
+  function handleViewAuctionDetails(auction: Auction) {
+    setSelectedAuction(auction);
+    setShowAuctionModal(true);
+  }
+
+  function formatPrice(price: number) {
+    return new Intl.NumberFormat('ru-RU').format(price) + ' ₸';
+  }
+
+  function formatDate(dateString: string) {
+    return new Date(dateString).toLocaleDateString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
+
+  function getStatusBadge(status: string) {
+    const statusMap: Record<string, { label: string; className: string }> = {
+      auction: { label: t('admin.active'), className: styles.statusActive },
+      pending: { label: t('admin.pending'), className: styles.statusPending },
+      active: { label: t('admin.active'), className: styles.statusActive },
+      in_progress: { label: 'В работе', className: styles.statusInProgress },
+      completed: { label: 'Завершён', className: styles.statusCompleted },
+      cancelled: { label: 'Отменён', className: styles.statusCancelled }
+    };
+    return statusMap[status] || { label: status, className: '' };
   }
 
   
@@ -191,6 +295,8 @@ const Admin = () => {
   const menuItems = [
     { id: 'users' as AdminSection, name: t('admin.users'), icon: MdPeople },
     { id: 'auctions' as AdminSection, name: t('admin.auctions'), icon: MdGavel },
+    { id: 'feedback' as AdminSection, name: 'Обратная связь', icon: MdFeedback },
+    { id: 'models3d' as AdminSection, name: t('admin.models3d'), icon: MdViewInAr },
     { id: 'ratings' as AdminSection, name: t('admin.ratings'), icon: MdStars },
     { id: 'statistics' as AdminSection, name: t('admin.statistics'), icon: MdBarChart },
     { id: 'notifications' as AdminSection, name: t('admin.notifications'), icon: MdNotifications },
@@ -280,52 +386,83 @@ const Admin = () => {
             <h1 className={styles.pageTitle}>{t('admin.auctions')}</h1>
             <div className={styles.stats}>
               <div className={styles.statCard}>
-                <div className={styles.statValue}>45</div>
+                <div className={styles.statValue}>{auctions.filter(a => a.status === 'auction').length}</div>
                 <div className={styles.statLabel}>{t('admin.activeAuctions')}</div>
               </div>
               <div className={styles.statCard}>
-                <div className={styles.statValue}>320</div>
+                <div className={styles.statValue}>{auctions.filter(a => a.status === 'completed').length}</div>
                 <div className={styles.statLabel}>{t('admin.completedAuctions')}</div>
               </div>
               <div className={styles.statCard}>
-                <div className={styles.statValue}>12</div>
+                <div className={styles.statValue}>{auctions.filter(a => a.status === 'pending').length}</div>
                 <div className={styles.statLabel}>{t('admin.pending')}</div>
               </div>
-            </div>
-            <div className={styles.auctionGrid}>
-              <div className={styles.auctionCard}>
-                <div className={styles.auctionHeader}>
-                  <h3>Кровать из дуба</h3>
-                  <span className={`${styles.auctionStatus} ${styles.statusActive}`}>{t('admin.active')}</span>
-                </div>
-                <div className={styles.auctionDetails}>
-                  <p><strong>{t('admin.client')}:</strong> Иван Иванов</p>
-                  <p><strong>Бюджет:</strong> 50,000 - 100,000 ₸</p>
-                  <p><strong>{t('admin.bidsCount')}:</strong> 8</p>
-                  <p><strong>Срок:</strong> до 20.11.2024</p>
-                </div>
-                <div className={styles.auctionActions}>
-                  <button className={styles.btnSmall}>{t('admin.viewDetails')}</button>
-                  <button className={`${styles.btnSmall} ${styles.btnDanger}`}>Отклонить</button>
-                </div>
-              </div>
-              <div className={styles.auctionCard}>
-                <div className={styles.auctionHeader}>
-                  <h3>Диван 3-местный</h3>
-                  <span className={`${styles.auctionStatus} ${styles.statusPending}`}>{t('admin.pending')}</span>
-                </div>
-                <div className={styles.auctionDetails}>
-                  <p><strong>{t('admin.client')}:</strong> Мария Сидорова</p>
-                  <p><strong>Бюджет:</strong> 80,000 - 150,000 ₸</p>
-                  <p><strong>{t('admin.bidsCount')}:</strong> 0</p>
-                  <p><strong>Срок:</strong> до 25.11.2024</p>
-                </div>
-                <div className={styles.auctionActions}>
-                  <button className={styles.btnSmall}>Одобрить</button>
-                  <button className={`${styles.btnSmall} ${styles.btnDanger}`}>Отклонить</button>
-                </div>
+              <div className={styles.statCard}>
+                <div className={styles.statValue}>{auctions.length}</div>
+                <div className={styles.statLabel}>Всего заказов</div>
               </div>
             </div>
+
+            <div className={styles.tableActions}>
+              <select 
+                className={styles.filterSelect} 
+                value={auctionFilter} 
+                onChange={(e) => setAuctionFilter(e.target.value)}
+              >
+                <option value="all">Все статусы</option>
+                <option value="auction">Аукцион</option>
+                <option value="pending">На модерации</option>
+                <option value="active">Активные</option>
+                <option value="in_progress">В работе</option>
+                <option value="completed">Завершённые</option>
+                <option value="cancelled">Отменённые</option>
+              </select>
+            </div>
+
+            {loadingAuctions ? (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <div className={styles.loader}></div>
+                <p style={{ color: '#718096', marginTop: '16px' }}>Загрузка аукционов...</p>
+              </div>
+            ) : auctions.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', background: 'white', borderRadius: '16px' }}>
+                <p style={{ color: '#718096', fontSize: '1.1rem' }}>Аукционы не найдены</p>
+              </div>
+            ) : (
+              <div className={styles.auctionGrid}>
+                {auctions.map((auction) => {
+                  const statusInfo = getStatusBadge(auction.status);
+                  return (
+                    <div key={auction.id} className={styles.auctionCard}>
+                      <div className={styles.auctionHeader}>
+                        <h3>{auction.title}</h3>
+                        <span className={`${styles.auctionStatus} ${statusInfo.className}`}>
+                          {statusInfo.label}
+                        </span>
+                      </div>
+                      <div className={styles.auctionDetails}>
+                        <p><strong>{t('admin.client')}:</strong> {auction.customer_name}</p>
+                        <p><strong>Бюджет:</strong> {formatPrice(auction.budget_min)}{auction.budget_max ? ` - ${formatPrice(auction.budget_max)}` : '+'}</p>
+                        <p><strong>{t('admin.bidsCount')}:</strong> {auction.bids_count} ({auction.pending_bids_count} активных)</p>
+                        <p><strong>Срок:</strong> до {formatDate(auction.deadline)}</p>
+                        <p><strong>Создан:</strong> {formatDate(auction.created_at)}</p>
+                        {auction.assigned_master_name && (
+                          <p><strong>Исполнитель:</strong> {auction.assigned_master_name}</p>
+                        )}
+                      </div>
+                      <div className={styles.auctionActions}>
+                        <button 
+                          className={styles.btnSmall}
+                          onClick={() => handleViewAuctionDetails(auction)}
+                        >
+                          {t('admin.viewDetails')}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
 
@@ -424,6 +561,79 @@ const Admin = () => {
           </div>
         );
 
+      case 'feedback':
+        return (
+          <div className={styles.content}>
+            <h1 className={styles.pageTitle}>Обратная связь</h1>
+            
+            <div className={styles.filtersBar}>
+              <select 
+                value={feedbackFilter} 
+                onChange={(e) => setFeedbackFilter(e.target.value)}
+                className={styles.select}
+              >
+                <option value="all">Все сообщения</option>
+                <option value="new">Новые</option>
+                <option value="in_progress">В обработке</option>
+                <option value="resolved">Решено</option>
+                <option value="closed">Закрыто</option>
+              </select>
+            </div>
+
+            {loadingFeedback ? (
+              <div className={styles.loading}>Загрузка...</div>
+            ) : feedbacks.length === 0 ? (
+              <div className={styles.emptyState}>
+                <MdFeedback />
+                <p>Нет сообщений обратной связи</p>
+              </div>
+            ) : (
+              <div className={styles.tableContainer}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Имя</th>
+                      <th>Email</th>
+                      <th>Тема</th>
+                      <th>Дата</th>
+                      <th>Статус</th>
+                      <th>Действия</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {feedbacks.map((feedback) => (
+                      <tr key={feedback.id}>
+                        <td>#{feedback.id}</td>
+                        <td>{feedback.name}</td>
+                        <td>{feedback.email}</td>
+                        <td>{feedback.subject}</td>
+                        <td>{formatDate(feedback.created_at)}</td>
+                        <td>
+                          <span className={`${styles.statusBadge} ${styles['status' + feedback.status.charAt(0).toUpperCase() + feedback.status.slice(1).replace('_', '')]}`}>
+                            {feedback.status === 'new' && 'Новое'}
+                            {feedback.status === 'in_progress' && 'В обработке'}
+                            {feedback.status === 'resolved' && 'Решено'}
+                            {feedback.status === 'closed' && 'Закрыто'}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            onClick={() => handleViewFeedbackDetails(feedback)}
+                            className={styles.actionButton}
+                          >
+                            Просмотр
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+
       case 'notifications':
         return (
           <div className={styles.content}>
@@ -456,6 +666,9 @@ const Admin = () => {
             </div>
           </div>
         );
+
+      case 'models3d':
+        return <Admin3DModels onShowToast={showToast} />;
 
       default:
         return null;
@@ -626,6 +839,321 @@ const Admin = () => {
               </button>
               <button className={`${styles.btnPrimary} ${styles.btnDanger}`} onClick={confirmDelete}>
                 Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Auction Details Modal */}
+      {showAuctionModal && selectedAuction && (
+        <div className={styles.modalOverlay} onClick={() => setShowAuctionModal(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '800px' }}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Детали аукциона #{selectedAuction.id}</h2>
+              <button className={styles.modalCloseBtn} onClick={() => setShowAuctionModal(false)}>
+                <MdClose />
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.detailSection}>
+                <h3 style={{ marginBottom: '16px', color: '#667eea' }}>Информация о заказе</h3>
+                <div className={styles.detailGrid}>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Название:</span>
+                    <span className={styles.detailValue}>{selectedAuction.title}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Статус:</span>
+                    <span className={`${styles.statusBadge} ${getStatusBadge(selectedAuction.status).className}`}>
+                      {getStatusBadge(selectedAuction.status).label}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Категория:</span>
+                    <span className={styles.detailValue}>{selectedAuction.category}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Тип мебели:</span>
+                    <span className={styles.detailValue}>{selectedAuction.furniture_type || '—'}</span>
+                  </div>
+                  <div className={styles.detailItem} style={{ gridColumn: '1 / -1' }}>
+                    <span className={styles.detailLabel}>Описание:</span>
+                    <span className={styles.detailValue}>{selectedAuction.description}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.detailSection}>
+                <h3 style={{ marginBottom: '16px', color: '#667eea' }}>Финансовая информация</h3>
+                <div className={styles.detailGrid}>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Бюджет:</span>
+                    <span className={styles.detailValue}>
+                      {formatPrice(selectedAuction.budget_min)}
+                      {selectedAuction.budget_max ? ` - ${formatPrice(selectedAuction.budget_max)}` : '+'}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Количество ставок:</span>
+                    <span className={styles.detailValue}>{selectedAuction.bids_count}</span>
+                  </div>
+                  {selectedAuction.avg_bid_price && (
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Средняя ставка:</span>
+                      <span className={styles.detailValue}>{formatPrice(parseFloat(selectedAuction.avg_bid_price.toString()))}</span>
+                    </div>
+                  )}
+                  {selectedAuction.min_bid_price && (
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Мин. ставка:</span>
+                      <span className={styles.detailValue}>{formatPrice(parseFloat(selectedAuction.min_bid_price.toString()))}</span>
+                    </div>
+                  )}
+                  {selectedAuction.max_bid_price && (
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Макс. ставка:</span>
+                      <span className={styles.detailValue}>{formatPrice(parseFloat(selectedAuction.max_bid_price.toString()))}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className={styles.detailSection}>
+                <h3 style={{ marginBottom: '16px', color: '#667eea' }}>Информация о клиенте</h3>
+                <div className={styles.detailGrid}>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Имя:</span>
+                    <span className={styles.detailValue}>{selectedAuction.customer_name}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Email:</span>
+                    <span className={styles.detailValue}>{selectedAuction.customer_email}</span>
+                  </div>
+                  {selectedAuction.customer_phone && (
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Телефон:</span>
+                      <span className={styles.detailValue}>{selectedAuction.customer_phone}</span>
+                    </div>
+                  )}
+                  {selectedAuction.customer_address && (
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Адрес:</span>
+                      <span className={styles.detailValue}>{selectedAuction.customer_address}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {selectedAuction.assigned_master_name && (
+                <div className={styles.detailSection}>
+                  <h3 style={{ marginBottom: '16px', color: '#667eea' }}>Информация об исполнителе</h3>
+                  <div className={styles.detailGrid}>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Имя:</span>
+                      <span className={styles.detailValue}>{selectedAuction.assigned_master_name}</span>
+                    </div>
+                    {selectedAuction.assigned_master_email && (
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Email:</span>
+                        <span className={styles.detailValue}>{selectedAuction.assigned_master_email}</span>
+                      </div>
+                    )}
+                    {selectedAuction.assigned_master_phone && (
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Телефон:</span>
+                        <span className={styles.detailValue}>{selectedAuction.assigned_master_phone}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className={styles.detailSection}>
+                <h3 style={{ marginBottom: '16px', color: '#667eea' }}>Дополнительная информация</h3>
+                <div className={styles.detailGrid}>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Дата создания:</span>
+                    <span className={styles.detailValue}>{formatDate(selectedAuction.created_at)}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Дедлайн:</span>
+                    <span className={styles.detailValue}>{formatDate(selectedAuction.deadline)}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Доставка требуется:</span>
+                    <span className={styles.detailValue}>{selectedAuction.delivery_required ? 'Да' : 'Нет'}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Сборка требуется:</span>
+                    <span className={styles.detailValue}>{selectedAuction.assembly_required ? 'Да' : 'Нет'}</span>
+                  </div>
+                  {selectedAuction.delivery_address && (
+                    <div className={styles.detailItem} style={{ gridColumn: '1 / -1' }}>
+                      <span className={styles.detailLabel}>Адрес доставки:</span>
+                      <span className={styles.detailValue}>{selectedAuction.delivery_address}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.btnSecondary} onClick={() => setShowAuctionModal(false)}>
+                Закрыть
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Feedback Details Modal */}
+      {showFeedbackModal && selectedFeedback && (
+        <div className={styles.modalOverlay} onClick={() => setShowFeedbackModal(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px' }}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Обратная связь #{selectedFeedback.id}</h2>
+              <button className={styles.modalCloseBtn} onClick={() => setShowFeedbackModal(false)}>
+                <MdClose />
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.detailSection}>
+                <h3 style={{ marginBottom: '16px', color: '#667eea' }}>Информация об отправителе</h3>
+                <div className={styles.detailGrid}>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Имя:</span>
+                    <span className={styles.detailValue}>{selectedFeedback.name}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Email:</span>
+                    <span className={styles.detailValue}>
+                      <a href={`mailto:${selectedFeedback.email}`}>{selectedFeedback.email}</a>
+                    </span>
+                  </div>
+                  {selectedFeedback.phone && (
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Телефон:</span>
+                      <span className={styles.detailValue}>
+                        <a href={`tel:${selectedFeedback.phone}`}>{selectedFeedback.phone}</a>
+                      </span>
+                    </div>
+                  )}
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Тема:</span>
+                    <span className={styles.detailValue}>{selectedFeedback.subject}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Дата отправки:</span>
+                    <span className={styles.detailValue}>{formatDate(selectedFeedback.created_at)}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Текущий статус:</span>
+                    <span className={`${styles.statusBadge} ${styles['status' + selectedFeedback.status.charAt(0).toUpperCase() + selectedFeedback.status.slice(1).replace('_', '')]}`}>
+                      {selectedFeedback.status === 'new' && 'Новое'}
+                      {selectedFeedback.status === 'in_progress' && 'В обработке'}
+                      {selectedFeedback.status === 'resolved' && 'Решено'}
+                      {selectedFeedback.status === 'closed' && 'Закрыто'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.detailSection}>
+                <h3 style={{ marginBottom: '16px', color: '#667eea' }}>Сообщение</h3>
+                <div className={styles.messageBox}>
+                  {selectedFeedback.message}
+                </div>
+              </div>
+
+              {selectedFeedback.attachments && selectedFeedback.attachments.length > 0 && (
+                <div className={styles.detailSection}>
+                  <h3 style={{ marginBottom: '16px', color: '#667eea' }}>Прикрепленные файлы</h3>
+                  <div className={styles.attachmentsList}>
+                    {selectedFeedback.attachments.map((attachment: any, index: number) => (
+                      <div key={index} className={styles.attachmentItem}>
+                        <span className={styles.attachmentName}>
+                          📎 {attachment.originalname}
+                        </span>
+                        <span className={styles.attachmentSize}>
+                          ({(attachment.size / 1024).toFixed(1)} KB)
+                        </span>
+                        <a
+                          href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/feedback/${selectedFeedback.id}/download/${attachment.filename}`}
+                          download
+                          className={styles.downloadBtn}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const token = localStorage.getItem('token');
+                            fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/feedback/${selectedFeedback.id}/download/${attachment.filename}`, {
+                              headers: { 'Authorization': `Bearer ${token}` }
+                            })
+                            .then(res => res.blob())
+                            .then(blob => {
+                              const url = window.URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = attachment.originalname;
+                              document.body.appendChild(a);
+                              a.click();
+                              window.URL.revokeObjectURL(url);
+                              document.body.removeChild(a);
+                            })
+                            .catch(err => console.error('Download error:', err));
+                          }}
+                        >
+                          Скачать
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedFeedback.admin_notes && (
+                <div className={styles.detailSection}>
+                  <h3 style={{ marginBottom: '16px', color: '#667eea' }}>Заметки администратора</h3>
+                  <div className={styles.messageBox}>
+                    {selectedFeedback.admin_notes}
+                  </div>
+                </div>
+              )}
+
+              <div className={styles.detailSection}>
+                <h3 style={{ marginBottom: '16px', color: '#667eea' }}>Изменить статус</h3>
+                <div className={styles.statusActions}>
+                  <button 
+                    className={styles.statusButton}
+                    onClick={() => {
+                      updateFeedbackStatus(selectedFeedback.id, 'in_progress');
+                      setShowFeedbackModal(false);
+                    }}
+                  >
+                    В обработке
+                  </button>
+                  <button 
+                    className={styles.statusButton}
+                    onClick={() => {
+                      updateFeedbackStatus(selectedFeedback.id, 'resolved');
+                      setShowFeedbackModal(false);
+                    }}
+                  >
+                    Решено
+                  </button>
+                  <button 
+                    className={styles.statusButton}
+                    onClick={() => {
+                      updateFeedbackStatus(selectedFeedback.id, 'closed');
+                      setShowFeedbackModal(false);
+                    }}
+                  >
+                    Закрыть
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.btnSecondary} onClick={() => setShowFeedbackModal(false)}>
+                Закрыть
               </button>
             </div>
           </div>

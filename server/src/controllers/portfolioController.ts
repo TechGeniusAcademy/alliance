@@ -223,7 +223,7 @@ export const getAllPublicPortfolio = async (req: Request, res: Response) => {
               p.execution_time, p.materials, p.dimensions, p.furniture_type, p.style, 
               p.color, p.location, p.price, p.warranty_period, p.assembly_included, 
               p.delivery_included, p.created_at,
-              u.name as master_name, u.phone as master_phone
+              u.name as master_name, u.phone as master_phone, u.profile_photo as profile_picture
        FROM portfolio p
        JOIN users u ON p.master_id = u.id
        WHERE p.is_public = true AND u.active = true AND u.role = 'master'

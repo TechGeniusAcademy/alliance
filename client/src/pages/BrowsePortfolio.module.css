@@ -1,35 +1,35 @@
 .pageContainer {
-  padding: 32px;
+  padding: 1.5rem;
   max-width: 1600px;
   margin: 0 auto;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #f5f7fa;
 }
 
 .pageHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
 }
 
 .pageTitle {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #2d3748;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0.75rem;
   margin: 0;
 }
 
 .titleIcon {
-  font-size: 2.2rem;
+  font-size: 1.75rem;
   color: #667eea;
 }
 
 .subtitle {
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: #718096;
   margin: 8px 0 0 0;
 }
@@ -37,8 +37,8 @@
 /* Поиск и фильтры */
 .searchSection {
   display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
 
@@ -51,7 +51,7 @@
 
 .searchIcon {
   position: absolute;
-  left: 16px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: #718096;
@@ -59,10 +59,10 @@
 
 .searchInput {
   width: 100%;
-  padding: 14px 50px 14px 50px;
+  padding: 0.75rem 3rem 0.75rem 2.5rem;
   border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 1.4375rem;
+  border-radius: 8px;
+  font-size: 0.9375rem;
   background: white;
   transition: all 0.2s ease;
 }
@@ -98,12 +98,12 @@
 .filterToggleButton {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 14px 24px;
+  gap: 6px;
+  padding: 0.75rem 1.25rem;
   background: white;
   border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #4a5568;
   cursor: pointer;
@@ -119,32 +119,32 @@
 .filtersPanel {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  padding: 24px;
+  gap: 12px;
+  padding: 1.25rem;
   background: white;
-  border-radius: 16px;
-  margin-bottom: 24px;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 .filterGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .filterGroup label {
-  font-size: 0.9rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: #2d3748;
 }
 
 .filterSelect,
 .filterInput {
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 0.95rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
   background: white;
   color: #2d3748;
   transition: all 0.2s ease;
@@ -158,12 +158,12 @@
 
 .clearFiltersButton {
   grid-column: 1 / -1;
-  padding: 12px 24px;
+  padding: 0.75rem 1.25rem;
   border: 2px solid #e2e8f0;
-  border-radius: 10px;
+  border-radius: 8px;
   background: white;
   color: #4a5568;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -177,13 +177,13 @@
 /* Сетка портфолио */
 .portfolioGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
 }
 
 .portfolioCard {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
@@ -198,7 +198,7 @@
 .cardImage {
   position: relative;
   width: 100%;
-  height: 240px;
+  height: 200px;
   background: #edf2f7;
   overflow: hidden;
 }
@@ -212,6 +212,29 @@
 
 .portfolioCard:hover .cardImage img {
   transform: scale(1.05);
+}
+
+.favoriteButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.favoriteButton:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: scale(1.1);
 }
 
 .noImage {
@@ -240,33 +263,33 @@
 }
 
 .cardContent {
-  padding: 20px;
+  padding: 1rem;
 }
 
 .cardContent h3 {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #2d3748;
-  margin: 0 0 12px 0;
+  margin: 0 0 0.75rem 0;
   line-height: 1.4;
 }
 
 .categoryBadge {
   display: inline-block;
-  padding: 6px 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 4px 10px;
+  background: #667eea;
   color: white;
-  border-radius: 8px;
-  font-size: 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
 }
 
 .infoRow {
   display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 0.8125rem;
   color: #4a5568;
 }
 
@@ -276,8 +299,8 @@
 }
 
 .cardFooter {
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
   border-top: 2px solid #edf2f7;
 }
 
@@ -288,13 +311,13 @@
 }
 
 .price {
-  font-size: 1.1rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: #2d3748;
 }
 
 .executionTime {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #718096;
 }
 
@@ -346,9 +369,9 @@
 .modal {
   background: white;
   border-radius: 20px;
-  max-width: 1000px;
+  max-width: 1400px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 95vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   animation: slideUp 0.3s ease;
@@ -391,9 +414,9 @@
 
 .modalContent {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  padding: 32px;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
 }
 
 /* Image Slider */
@@ -407,7 +430,7 @@
 
 .mainImage {
   width: 100%;
-  height: 500px;
+  height: 700px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -415,9 +438,9 @@
 }
 
 .mainImage img {
-  max-width: 100%;
-  max-height: 500px;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sliderButton {
@@ -601,7 +624,7 @@
   align-items: center;
   gap: 12px;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #1a1a1a;
   color: white;
   border-radius: 12px;
   margin: 24px 0;
@@ -636,7 +659,7 @@
 }
 
 .masterCard {
-  background: linear-gradient(135deg, #f6f9fc 0%, #edf2f7 100%);
+  background: #f6f9fc;
   padding: 24px;
   border-radius: 16px;
   border: 1px solid #e2e8f0;
@@ -709,25 +732,27 @@
 }
 
 .viewProfileButton {
-  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  background: #1a1a1a;
   color: white;
-  box-shadow: 0 4px 15px rgba(66, 153, 225, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .viewProfileButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.5);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  background: #000;
 }
 
 .contactButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #1a1a1a;
   color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .contactButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  background: #000;
 }
 
 .loader {

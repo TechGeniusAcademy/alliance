@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MdStar, MdStarBorder, MdPerson } from 'react-icons/md';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 import styles from './Master.module.css';
 
 interface Review {
@@ -40,7 +41,7 @@ const MasterRatings = () => {
   const loadReviews = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/chats/reviews/my', {
+      const response = await axios.get(`${API_BASE_URL}/api/chats/reviews/my`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStats(response.data.stats);
@@ -94,7 +95,7 @@ const MasterRatings = () => {
 
       {stats && (
         <div className={styles.section}>
-          <h2>Общая статистика</h2>
+          <h2>{t('masterRatings.overallStats')}</h2>
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: '1fr 2fr', 
@@ -114,7 +115,7 @@ const MasterRatings = () => {
                 {renderStars(Math.round(parseFloat(stats.average_rating)))}
               </div>
               <div style={{ marginTop: '10px', color: '#6b7280', fontSize: '14px' }}>
-                {stats.total_reviews} {stats.total_reviews === 1 ? 'отзыв' : 'отзывов'}
+                {stats.total_reviews} {stats.total_reviews === 1 ? t('masterRatings.reviews.one') : stats.total_reviews < 5 ? t('masterRatings.reviews.few') : t('masterRatings.reviews.many')}
               </div>
             </div>
 
@@ -160,7 +161,7 @@ const MasterRatings = () => {
 
       {/* Список отзывов */}
       <div className={styles.section}>
-        <h2>Все отзывы</h2>
+        <h2>{t('masterRatings.allReviews')}</h2>
         {reviews.length === 0 ? (
           <div style={{ 
             padding: '40px', 
@@ -171,9 +172,9 @@ const MasterRatings = () => {
             marginTop: '20px'
           }}>
             <MdStar size={48} style={{ opacity: 0.3, marginBottom: '16px' }} />
-            <p>У вас пока нет отзывов</p>
+            <p>{t('masterRatings.noReviews')}</p>
             <p style={{ fontSize: '14px', marginTop: '8px' }}>
-              Завершите первый заказ, чтобы получить отзыв от клиента
+              {t('masterRatings.noReviewsHint')}
             </p>
           </div>
         ) : (
@@ -242,13 +243,13 @@ const MasterRatings = () => {
                   fontSize: '14px',
                   color: '#6b7280'
                 }}>
-                  <span><strong>Заказ:</strong> {review.order_title}</span>
+                  <span><strong>{t('masterRatings.order')}</strong> {review.order_title}</span>
                   <span>•</span>
-                  <span><strong>Категория:</strong> {review.order_category}</span>
+                  <span><strong>{t('masterRatings.category')}</strong> {review.order_category}</span>
                   {review.order_price && (
                     <>
                       <span>•</span>
-                      <span><strong>Сумма:</strong> {review.order_price} ₸</span>
+                      <span><strong>{t('masterRatings.amount')}</strong> {review.order_price} ₸</span>
                     </>
                   )}
                 </div>

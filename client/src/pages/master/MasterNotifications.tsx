@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   MdNotifications,
   MdCheckCircle,
@@ -27,6 +28,7 @@ interface Notification {
 }
 
 const MasterNotifications = () => {
+  const { t } = useTranslation();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
@@ -46,7 +48,7 @@ const MasterNotifications = () => {
       setNotifications(response.data.notifications || []);
     } catch (error) {
       console.error('Ошибка загрузки уведомлений:', error);
-      setToast({ message: 'Не удалось загрузить уведомления', type: 'error' });
+      setToast({ message: t('masterNotifications.notifications.loadError'), type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -66,7 +68,7 @@ const MasterNotifications = () => {
       ));
     } catch (error) {
       console.error('Ошибка отметки уведомления:', error);
-      setToast({ message: 'Не удалось отметить уведомление', type: 'error' });
+      setToast({ message: t('masterNotifications.notifications.markError'), type: 'error' });
     }
   };
 
@@ -80,15 +82,15 @@ const MasterNotifications = () => {
       );
       
       setNotifications(notifications.map(n => ({ ...n, is_read: true })));
-      setToast({ message: 'Все уведомления отмечены как прочитанные', type: 'success' });
+      setToast({ message: t('masterNotifications.notifications.markAllSuccess'), type: 'success' });
     } catch (error) {
       console.error('Ошибка отметки всех уведомлений:', error);
-      setToast({ message: 'Не удалось отметить все уведомления', type: 'error' });
+      setToast({ message: t('masterNotifications.notifications.markAllError'), type: 'error' });
     }
   };
 
   const deleteNotification = async (id: number) => {
-    if (!confirm('Удалить это уведомление?')) return;
+    if (!confirm(t('masterNotifications.confirmations.deleteOne'))) return;
     
     try {
       const token = localStorage.getItem('token');
@@ -97,15 +99,15 @@ const MasterNotifications = () => {
       });
       
       setNotifications(notifications.filter(n => n.id !== id));
-      setToast({ message: 'Уведомление удалено', type: 'success' });
+      setToast({ message: t('masterNotifications.notifications.deleteSuccess'), type: 'success' });
     } catch (error) {
       console.error('Ошибка удаления уведомления:', error);
-      setToast({ message: 'Не удалось удалить уведомление', type: 'error' });
+      setToast({ message: t('masterNotifications.notifications.deleteError'), type: 'error' });
     }
   };
 
   const deleteAllRead = async () => {
-    if (!confirm('Удалить все прочитанные уведомления?')) return;
+    if (!confirm(t('masterNotifications.confirmations.deleteAllRead'))) return;
     
     try {
       const token = localStorage.getItem('token');
@@ -114,10 +116,10 @@ const MasterNotifications = () => {
       });
       
       setNotifications(notifications.filter(n => !n.is_read));
-      setToast({ message: 'Прочитанные уведомления удалены', type: 'success' });
+      setToast({ message: t('masterNotifications.notifications.deleteAllSuccess'), type: 'success' });
     } catch (error) {
       console.error('Ошибка удаления уведомлений:', error);
-      setToast({ message: 'Не удалось удалить уведомления', type: 'error' });
+      setToast({ message: t('masterNotifications.notifications.deleteAllError'), type: 'error' });
     }
   };
 
@@ -147,10 +149,10 @@ const MasterNotifications = () => {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'Только что';
-    if (minutes < 60) return `${minutes} мин. назад`;
-    if (hours < 24) return `${hours} ч. назад`;
-    if (days < 7) return `${days} дн. назад`;
+    if (minutes < 1) return t('masterNotifications.timeAgo.justNow');
+    if (minutes < 60) return t('masterNotifications.timeAgo.minutesAgo', { count: minutes });
+    if (hours < 24) return t('masterNotifications.timeAgo.hoursAgo', { count: hours });
+    if (days < 7) return t('masterNotifications.timeAgo.daysAgo', { count: days });
     
     return date.toLocaleDateString('ru-RU', { 
       day: 'numeric', 
@@ -171,28 +173,28 @@ const MasterNotifications = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h1>Уведомления</h1>
+          <h1>{t('masterNotifications.title')}</h1>
           <p>
             {unreadCount > 0 
-              ? `${unreadCount} непрочитанных уведомлений` 
-              : 'Все уведомления прочитаны'}
+              ? t('masterNotifications.unreadCount', { count: unreadCount })
+              : t('masterNotifications.allRead')}
           </p>
         </div>
         <div className={styles.headerActions}>
           <button onClick={loadNotifications} className={styles.refreshButton} disabled={loading}>
             <MdRefresh size={20} />
-            Обновить
+            {t('masterNotifications.refresh')}
           </button>
           {unreadCount > 0 && (
             <button onClick={markAllAsRead} className={styles.markAllButton}>
               <MdDoneAll size={20} />
-              Прочитать все
+              {t('masterNotifications.markAllRead')}
             </button>
           )}
           {notifications.some(n => n.is_read) && (
             <button onClick={deleteAllRead} className={styles.deleteAllButton}>
               <MdDelete size={20} />
-              Удалить прочитанные
+              {t('masterNotifications.deleteAllRead')}
             </button>
           )}
         </div>
@@ -204,37 +206,37 @@ const MasterNotifications = () => {
           onClick={() => setFilter('all')}
         >
           <MdFilterList size={18} />
-          Все ({notifications.length})
+          {t('masterNotifications.filters.all')} ({notifications.length})
         </button>
         <button 
           className={`${styles.filterButton} ${filter === 'unread' ? styles.active : ''}`}
           onClick={() => setFilter('unread')}
         >
           <MdNotifications size={18} />
-          Непрочитанные ({unreadCount})
+          {t('masterNotifications.filters.unread')} ({unreadCount})
         </button>
         <button 
           className={`${styles.filterButton} ${filter === 'read' ? styles.active : ''}`}
           onClick={() => setFilter('read')}
         >
           <MdCheckCircle size={18} />
-          Прочитанные ({notifications.length - unreadCount})
+          {t('masterNotifications.filters.read')} ({notifications.length - unreadCount})
         </button>
       </div>
 
       <div className={styles.notificationsList}>
         {loading ? (
-          <div className={styles.loading}>Загрузка...</div>
+          <div className={styles.loading}>{t('masterNotifications.loading')}</div>
         ) : filteredNotifications.length === 0 ? (
           <div className={styles.emptyState}>
             <MdNotifications size={64} />
-            <p>Нет уведомлений</p>
+            <p>{t('masterNotifications.empty.title')}</p>
             <span>
               {filter === 'unread' 
-                ? 'Все уведомления прочитаны' 
+                ? t('masterNotifications.empty.allRead')
                 : filter === 'read'
-                ? 'Нет прочитанных уведомлений'
-                : 'У вас пока нет уведомлений'}
+                ? t('masterNotifications.empty.noRead')
+                : t('masterNotifications.empty.noNotifications')}
             </span>
           </div>
         ) : (
@@ -256,14 +258,21 @@ const MasterNotifications = () => {
                   <h3>{notification.title}</h3>
                   {!notification.is_read && <span className={styles.unreadDot} />}
                 </div>
-                <p>{notification.message}</p>
-                {notification.link && (
-                  <a href={notification.link} className={styles.notificationLink}>
-                    Перейти →
-                  </a>
-                )}
-                <div className={styles.notificationTime}>
-                  {formatDate(notification.created_at)}
+                <p className={styles.notificationMessage}>{notification.message}</p>
+                <div className={styles.notificationFooter}>
+                  <div className={styles.notificationTime}>
+                    {getTypeIcon(notification.type)}
+                    <span>{formatDate(notification.created_at)}</span>
+                  </div>
+                  {notification.link && (
+                    <a 
+                      href={notification.link} 
+                      className={styles.notificationLink}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {t('masterNotifications.goToLink')} →
+                    </a>
+                  )}
                 </div>
               </div>
 

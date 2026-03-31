@@ -1,0 +1,414 @@
+/* ==========================================
+   How It Works Page Styles
+   ========================================== */
+
+/* Hero Section */
+.hero {
+  position: relative;
+  padding: var(--spacing-20) 0;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-white);
+}
+
+.heroContainer {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
+  text-align: center;
+}
+
+.breadcrumbs {
+  margin-top: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-8);
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.breadcrumbs a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.breadcrumbs a:hover {
+  color: var(--color-white);
+}
+
+.breadcrumbSeparator {
+  font-size: var(--text-xs);
+}
+
+.heroTitle {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  color: white;
+  margin-bottom: var(--spacing-6);
+}
+
+.heroSubtitle {
+  font-size: var(--text-xl);
+  line-height: var(--leading-relaxed);
+  max-width: 600px;
+  margin: 0 auto var(--spacing-10);
+  opacity: 0.9;
+  color: white;
+}
+
+/* Tabs */
+.tabs {
+  display: inline-flex;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  padding: var(--spacing-1);
+}
+
+.tab {
+  padding: var(--spacing-3) var(--spacing-8);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tab:hover {
+  color: var(--color-white);
+}
+
+.tab.active {
+  color: var(--color-primary);
+  background-color: var(--color-white);
+}
+
+/* Steps Section */
+.steps {
+  padding: var(--spacing-20) 0;
+  background-color: var(--color-white);
+}
+
+.stepsContainer {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
+}
+
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-16);
+  align-items: center;
+}
+
+.step:nth-child(even) {
+  direction: rtl;
+}
+
+.step:nth-child(even) > * {
+  direction: ltr;
+}
+
+.stepContent {
+  max-width: 500px;
+}
+
+.stepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--spacing-4);
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-white);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  border-radius: var(--radius-lg);
+}
+
+.stepTitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-4);
+}
+
+.stepDescription {
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-4);
+}
+
+.stepTip {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background-color: var(--color-accent-light);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  color: var(--color-secondary-dark);
+}
+
+.stepTip svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.stepImage {
+  position: relative;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+}
+
+.stepImage img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+/* Security Section */
+.security {
+  padding: var(--spacing-20) 0;
+  background-color: var(--color-gray-50);
+}
+
+.securityContainer {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
+}
+
+.sectionHeader {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto var(--spacing-16);
+}
+
+.sectionTitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-4);
+}
+
+.sectionSubtitle {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+.securityGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-8);
+}
+
+.securityCard {
+  padding: var(--spacing-8);
+  background-color: var(--color-white);
+  border-radius: var(--radius-xl);
+  text-align: center;
+  transition: all var(--transition-normal);
+}
+
+.securityCard:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl);
+}
+
+.securityIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--spacing-6);
+  background: linear-gradient(135deg, var(--color-success) 0%, #2F855A 100%);
+  border-radius: var(--radius-full);
+  font-size: 36px;
+  color: var(--color-white);
+}
+
+.securityTitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-3);
+}
+
+.securityText {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+/* FAQ Section */
+.faq {
+  padding: var(--spacing-20) 0;
+  background-color: var(--color-white);
+}
+
+.faqContainer {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.faqItem {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.faqQuestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--spacing-5) var(--spacing-6);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: left;
+  background-color: var(--color-white);
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.faqQuestion:hover {
+  background-color: var(--color-gray-50);
+}
+
+.faqQuestion svg {
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+
+.faqItem.open .faqQuestion svg {
+  transform: rotate(180deg);
+}
+
+.faqAnswer {
+  padding: 0 var(--spacing-6) var(--spacing-5);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+.faqMore {
+  text-align: center;
+  margin-top: var(--spacing-8);
+}
+
+/* CTA Section */
+.cta {
+  padding: var(--spacing-20) 0;
+  background: linear-gradient(135deg, var(--color-gray-50) 0%, var(--color-white) 100%);
+}
+
+.ctaContainer {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
+}
+
+.ctaGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-8);
+}
+
+.ctaCard {
+  padding: var(--spacing-12);
+  border-radius: var(--radius-2xl);
+  text-align: center;
+}
+
+.ctaCard.customer {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-white);
+}
+
+.ctaCard.master {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+  color: var(--color-white);
+}
+
+.ctaCardTitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-4);
+  color: white;
+}
+
+.ctaCardText {
+  font-size: var(--text-lg);
+  margin-bottom: var(--spacing-8);
+  opacity: 0.9;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .securityGrid {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .step,
+  .step:nth-child(even) {
+    grid-template-columns: 1fr;
+    direction: ltr;
+  }
+
+  .step:nth-child(even) > * {
+    direction: ltr;
+  }
+
+  .stepContent {
+    max-width: 100%;
+  }
+
+  .ctaGrid {
+    grid-template-columns: 1fr;
+  }
+}

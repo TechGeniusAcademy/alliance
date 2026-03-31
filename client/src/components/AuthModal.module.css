@@ -23,12 +23,12 @@
 
 .modalContent {
   background: white;
-  padding: 2.5rem;
-  border-radius: 12px;
+  padding: 2rem;
+  border-radius: var(--radius-xl);
   width: 90%;
-  max-width: 420px;
+  max-width: 400px;
   position: relative;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-xl);
   animation: slideUp 0.3s ease-out;
 }
 
@@ -45,122 +45,127 @@
 
 .closeButton {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: 0.75rem;
+  right: 0.75rem;
   background: none;
   border: none;
-  font-size: 2rem;
-  color: #999;
+  font-size: 1.5rem;
+  color: var(--color-text-muted);
   cursor: pointer;
   line-height: 1;
   padding: 0;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s ease;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
 }
 
 .closeButton:hover {
-  color: #333;
+  color: var(--color-text);
+  background-color: var(--color-gray-100);
 }
 
 .modalTitle {
   margin: 0 0 1.5rem 0;
-  font-size: 3.2rem;
-  color: #333;
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-text);
   text-align: center;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--spacing-4);
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
 }
 
 .label {
   font-weight: 600;
-  color: #555;
-  font-size: 1.4rem;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
 }
 
 .input {
-  padding: 1.2rem;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 1.5rem;
-  transition: all 0.3s ease;
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  transition: all var(--transition-fast);
   outline: none;
 }
 
 .input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 .submitButton {
-  padding: 1.3rem;
-  background-color: #007bff;
-  color: white;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-primary);
+  color: var(--color-white);
   border: none;
-  border-radius: 8px;
-  font-size: 1.5rem;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-base);
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 0.5rem;
+  transition: all var(--transition-fast);
+  margin-top: var(--spacing-2);
 }
 
 .submitButton:hover {
-  background-color: #0056b3;
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 54, 93, 0.2);
 }
 
 .checkboxGroup {
   display: flex;
   align-items: flex-start;
-  gap: 0.8rem;
-  margin: 0.5rem 0;
+  gap: var(--spacing-2);
+  margin: var(--spacing-2) 0;
 }
 
 .checkbox {
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
-  margin-top: 0.3rem;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  margin-top: 0.2rem;
   cursor: pointer;
-  accent-color: #007bff;
+  accent-color: var(--color-primary);
 }
 
 .checkboxLabel {
-  font-size: 1.2rem;
-  color: #555;
-  line-height: 1.6;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
   cursor: pointer;
 }
 
 .footer {
   text-align: center;
-  margin-top: 1rem;
-  color: #666;
-  font-size: 1.3rem;
+  margin-top: var(--spacing-4);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
 }
 
 .link {
-  color: #007bff;
+  color: var(--color-primary);
   text-decoration: none;
   font-weight: 600;
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
 }
 
 .link:hover {
-  color: #0056b3;
+  color: var(--color-primary-dark);
   text-decoration: underline;
 }
 
@@ -177,10 +182,17 @@
 /* Адаптивность */
 @media (max-width: 480px) {
   .modalContent {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem;
+    max-width: 95%;
   }
 
   .modalTitle {
-    font-size: 1.5rem;
+    font-size: var(--text-xl);
+    margin-bottom: var(--spacing-4);
+  }
+  
+  .closeButton {
+    top: 0.5rem;
+    right: 0.5rem;
   }
 }

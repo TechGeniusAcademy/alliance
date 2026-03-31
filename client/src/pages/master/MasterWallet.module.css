@@ -9,14 +9,14 @@
 }
 
 .title {
-  font-size: 2.5rem;
+  font-size: 1.5rem;
   color: #2c3e50;
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
 
 .subtitle {
-  font-size: 1.3rem;
+  font-size: 0.9rem;
   color: #7f8c8d;
 }
 
@@ -41,7 +41,7 @@
 }
 
 .statLabel {
-  font-size: 1.2rem;
+  font-size: 0.875rem;
   margin-bottom: 0.5rem;
   opacity: 0.9;
 }
@@ -52,7 +52,7 @@
 }
 
 .statValue {
-  font-size: 2.8rem;
+  font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 0.3rem;
 }
@@ -62,7 +62,7 @@
 }
 
 .statDescription {
-  font-size: 1.1rem;
+  font-size: 0.8rem;
   opacity: 0.7;
 }
 
@@ -94,7 +94,7 @@
 }
 
 .sectionTitle {
-  font-size: 1.8rem;
+  font-size: 1.125rem;
   color: #2c3e50;
   margin-bottom: 1.5rem;
   font-weight: 600;
@@ -113,14 +113,14 @@
 }
 
 .label {
-  font-size: 1.2rem;
+  font-size: 0.875rem;
   color: #2c3e50;
   font-weight: 500;
 }
 
 .input {
   padding: 1rem 1.2rem;
-  font-size: 1.2rem;
+  font-size: 0.875rem;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   transition: all 0.3s;
@@ -134,7 +134,7 @@
 
 .select {
   padding: 1rem 1.2rem;
-  font-size: 1.2rem;
+  font-size: 0.875rem;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   background: white;
@@ -153,7 +153,7 @@
   color: white;
   border: none;
   padding: 1.2rem 2rem;
-  font-size: 1.3rem;
+  font-size: 0.875rem;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
@@ -180,14 +180,14 @@
 }
 
 .infoTitle {
-  font-size: 1.2rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #2c3e50;
   margin-bottom: 0.5rem;
 }
 
 .infoText {
-  font-size: 1.1rem;
+  font-size: 0.8rem;
   color: #7f8c8d;
   line-height: 1.6;
 }
@@ -209,7 +209,7 @@
 
 .filterTab {
   padding: 1rem 1.5rem;
-  font-size: 1.2rem;
+  font-size: 0.875rem;
   background: none;
   border: none;
   color: #7f8c8d;
@@ -257,18 +257,18 @@
 }
 
 .transactionType {
-  font-size: 1.3rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #2c3e50;
 }
 
 .transactionDescription {
-  font-size: 1.1rem;
+  font-size: 0.8rem;
   color: #7f8c8d;
 }
 
 .transactionDate {
-  font-size: 1rem;
+  font-size: 0.75rem;
   color: #95a5a6;
 }
 
@@ -280,7 +280,7 @@
 }
 
 .transactionAmount {
-  font-size: 1.8rem;
+  font-size: 1.125rem;
   font-weight: 700;
 }
 
@@ -295,7 +295,7 @@
 .transactionStatus {
   padding: 0.4rem 1rem;
   border-radius: 20px;
-  font-size: 1rem;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
@@ -321,18 +321,18 @@
 }
 
 .emptyIcon {
-  font-size: 4rem;
+  font-size: 2.5rem;
   margin-bottom: 1rem;
 }
 
 .emptyText {
-  font-size: 1.3rem;
+  font-size: 0.9rem;
 }
 
 .loading {
   text-align: center;
   padding: 3rem;
-  font-size: 1.3rem;
+  font-size: 0.9rem;
   color: #7f8c8d;
 }
 
@@ -341,7 +341,7 @@
   color: #721c24;
   padding: 1.2rem;
   border-radius: 8px;
-  font-size: 1.2rem;
+  font-size: 0.875rem;
   border: 1px solid #f5c6cb;
   margin-bottom: 1.5rem;
 }

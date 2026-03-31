@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = `${API_BASE_URL}/api`;
 
 export interface MasterPublicProfile {
   id: number;
@@ -103,6 +104,40 @@ class MasterService {
   async getMasterProfile(masterId: number): Promise<MasterPublicProfile> {
     const response = await axios.get(`${API_URL}/masters/public/${masterId}`);
     return response.data;
+  }
+
+  // Избранное портфолио
+  async addPortfolioToFavorites(portfolioId: number): Promise<void> {
+    const token = localStorage.getItem('token');
+    await fetch(`${API_URL}/portfolio-favorites`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ portfolioId })
+    });
+  }
+
+  async removePortfolioFromFavorites(portfolioId: number): Promise<void> {
+    const token = localStorage.getItem('token');
+    await fetch(`${API_URL}/portfolio-favorites/${portfolioId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  }
+
+  async checkPortfolioFavorite(portfolioId: number): Promise<boolean> {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/portfolio-favorites/check/${portfolioId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await response.json();
+    return data.isFavorite;
   }
 }
 

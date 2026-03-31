@@ -24,7 +24,7 @@ client.connect()
     return client.query('SELECT version()');
   })
   .then((result) => {
-    console.log('📊 Информация о PostgreSQL:');
+    console.log('Информация о PostgreSQL:');
     console.log(result.rows[0].version);
     console.log('\n✨ Всё готово! Можете запускать сервер: npm run dev\n');
     return client.end();
@@ -33,14 +33,14 @@ client.connect()
     console.error('❌ Ошибка подключения к PostgreSQL:\n');
     
     if (err.code === 'ECONNREFUSED') {
-      console.error('⚠️  PostgreSQL не запущен или недоступен на порту', process.env.DB_PORT || '5432');
+      console.error('  PostgreSQL не запущен или недоступен на порту', process.env.DB_PORT || '5432');
       console.error('\n📖 Решения:');
       console.error('   1. Убедитесь, что PostgreSQL установлен');
       console.error('   2. Запустите службу PostgreSQL');
       console.error('   3. Проверьте, что PostgreSQL слушает порт 5432');
       console.error('\n📚 Подробная инструкция в файле: POSTGRES_SETUP_HELP.md\n');
     } else if (err.code === '28P01') {
-      console.error('⚠️  Неверный пароль');
+      console.error('  Неверный пароль');
       console.error('\n📖 Решение:');
       console.error('   Проверьте пароль в файле .env (DB_PASSWORD)\n');
     } else {

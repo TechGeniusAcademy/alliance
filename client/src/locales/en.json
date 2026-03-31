@@ -1,0 +1,2440 @@
+{
+  "nav": {
+    "home": "Home",
+    "categories": "Categories",
+    "masters": "Masters",
+    "projects": "Projects",
+    "howItWorks": "How It Works",
+    "pricing": "Pricing"
+  },
+  "sidebar": {
+    "main": "Main",
+    "orders": "Orders",
+    "financial": "Financial",
+    "communication": "Communication",
+    "account": "Account",
+    "dashboard": "Dashboard",
+    "createOrder": "Create Order",
+    "browsePortfolio": "Furniture Makers Works",
+    "aiDesigner": "AI Designer",
+    "myOrders": "My Orders",
+    "activeOrders": "Active Orders",
+    "orderHistory": "Order History",
+    "favorites": "Favorites",
+    "payments": "Payments",
+    "invoices": "Invoices",
+    "delivery": "Delivery",
+    "promocodes": "Promo Codes",
+    "chats": "Chats",
+    "notifications": "Notifications",
+    "reviews": "Reviews",
+    "specialOffers": "Special Offers",
+    "profile": "Profile",
+    "settings": "Settings",
+    "help": "Help"
+  },
+  "masterSidebar": {
+    "title": "Master Panel",
+    "subtitle": "Work Management",
+    "mainSection": "Main",
+    "ordersSection": "Orders",
+    "financeSection": "Finance",
+    "communicationSection": "Communication",
+    "reputationSection": "Reputation",
+    "settingsSection": "Settings",
+    "dashboard": "Dashboard",
+    "auctions": "Auctions",
+    "activeOrders": "Active Orders",
+    "allOrders": "All Orders",
+    "history": "History",
+    "schedule": "Schedule",
+    "wallet": "Wallet",
+    "earnings": "Earnings",
+    "commissions": "Commissions",
+    "statistics": "Statistics",
+    "chats": "Chats",
+    "notifications": "Notifications",
+    "ratings": "Ratings",
+    "portfolio": "Portfolio",
+    "clients": "Clients",
+    "profile": "Profile",
+    "settings": "Settings",
+    "help": "Help",
+    "logout": "Logout",
+    "masterRole": "Master"
+  },
+  "mobileNav": {
+    "home": "Home",
+    "orders": "Orders",
+    "chats": "Chats",
+    "more": "More"
+  },
+  "home": {
+    "hero": {
+      "title": "Custom Furniture",
+      "titleHighlight": "from the Best Masters",
+      "subtitle": "A platform connecting clients with professional furniture makers. Post your order and receive offers from verified masters.",
+      "createOrder": "Post an Order",
+      "login": "Sign In",
+      "feature1": "Free Posting",
+      "feature2": "No Middlemen",
+      "feature3": "Quality Guarantee"
+    },
+    "stats": {
+      "projects": "Completed Projects",
+      "masters": "Masters",
+      "satisfaction": "Satisfied Clients",
+      "years": "Years in Business"
+    },
+    "features": {
+      "title": "Why Choose Us",
+      "subtitle": "A reliable platform for ordering furniture with quality guarantee",
+      "verified": {
+        "title": "Verified Masters",
+        "description": "Every master undergoes thorough verification and quality checks"
+      },
+      "guarantee": {
+        "title": "Transaction Guarantee",
+        "description": "Secure payments and money-back guarantee if quality doesn't meet expectations"
+      },
+      "pricing": {
+        "title": "Transparent Pricing",
+        "description": "Auction system allows you to get the best price from competing masters"
+      }
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Simple process from request to finished furniture",
+      "step1": {
+        "title": "Create an Order",
+        "description": "Describe the desired furniture, specify dimensions, materials, and budget"
+      },
+      "step2": {
+        "title": "Receive Offers",
+        "description": "Masters will see your order and propose their terms and prices"
+      },
+      "step3": {
+        "title": "Choose a Master",
+        "description": "Compare offers, review feedback, and select the best"
+      },
+      "step4": {
+        "title": "Get Your Furniture",
+        "description": "Master will craft and deliver furniture with quality guarantee"
+      }
+    },
+    "cta": {
+      "title": "Ready to Order Furniture?",
+      "subtitle": "Join the platform and get access to the best masters in your region",
+      "register": "Sign Up",
+      "becomeMaster": "Become a Master"
+    },
+    "footer": {
+      "tagline": "Platform for ordering furniture from verified masters",
+      "forCustomers": "For Customers",
+      "forMasters": "For Masters",
+      "information": "Information",
+      "createOrder": "Post an Order",
+      "login": "Sign In",
+      "becomeMaster": "Become a Master",
+      "masterLogin": "Master Login",
+      "privacyPolicy": "Privacy Policy",
+      "copyright": "All rights reserved"
+    }
+  },
+  "hero": {
+    "title": "Find the Perfect Master for ",
+    "titleAccent": "Your Project",
+    "subtitle": "Connecting clients with professional masters. Post an order and get the best offers.",
+    "searchPlaceholder": "Search for masters or projects...",
+    "searchButton": "Search",
+    "feature1": "Verified Specialists",
+    "feature2": "Secure Payments",
+    "feature3": "Quality Guarantee",
+    "findMaster": "Find a Master",
+    "postOrder": "Post an Order",
+    "mastersCount": "Professional Masters",
+    "projectsCount": "Successful Projects"
+  },
+  "advantages": {
+    "title": "Our Advantages",
+    "subtitle": "Why thousands of clients choose our platform",
+    "security": {
+      "title": "Security",
+      "description": "Protected payments and money-back guarantee"
+    },
+    "verified": {
+      "title": "Verified Masters",
+      "description": "All specialists undergo verification"
+    },
+    "fast": {
+      "title": "Fast Matching",
+      "description": "Find a master in just a few minutes"
+    },
+    "price": {
+      "title": "Competitive Prices",
+      "description": "Competitive offers from different masters"
+    },
+    "support": {
+      "title": "24/7 Support",
+      "description": "Always ready to help with any question"
+    },
+    "quality": {
+      "title": "Quality Guarantee",
+      "description": "Quality control of completed work"
+    }
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "Simple process from order to result",
+    "step1": {
+      "title": "Describe the Project",
+      "description": "Create an order with description and requirements"
+    },
+    "step2": {
+      "title": "Receive Offers",
+      "description": "Masters send their proposals"
+    },
+    "step3": {
+      "title": "Choose a Master",
+      "description": "Compare and select the best offer"
+    },
+    "step4": {
+      "title": "Get the Result",
+      "description": "Master completes the work with quality and on time"
+    },
+    "createOrder": "Create Order",
+    "learnMore": "Learn More"
+  },
+  "cta": {
+    "title": "Ready to Start?",
+    "subtitle": "Join our platform today",
+    "customer": {
+      "title": "For Customers",
+      "description": "Find a professional master for your project",
+      "button": "Post an Order"
+    },
+    "master": {
+      "title": "For Masters",
+      "description": "Get new orders and grow your business",
+      "button": "Become a Master"
+    }
+  },
+  "statistics": {
+    "title": "Our Achievements",
+    "subtitle": "Numbers that speak for themselves",
+    "masters": "Professional Masters",
+    "projects": "Successful Projects",
+    "orders": "Completed Orders",
+    "satisfaction": "Satisfaction Rate"
+  },
+  "categories": {
+    "title": "Popular Categories",
+    "subtitle": "Choose a category for your project",
+    "viewAll": "View All",
+    "kitchen": "Kitchens",
+    "bedroom": "Bedrooms",
+    "living": "Living Rooms",
+    "office": "Office Furniture",
+    "bathroom": "Bathrooms",
+    "other": "Other"
+  },
+  "testimonials": {
+    "title": "Customer Reviews",
+    "subtitle": "What our users say about us",
+    "customer": "Customer",
+    "master": "Master",
+    "review1": "Excellent platform! Found a kitchen master in one day. Work quality exceeded expectations. Highly recommend!",
+    "review2": "Very convenient service. Posted an order, got several offers, chose the best. Everything is transparent and fair.",
+    "review3": "As a master, I get regular orders through the platform. Convenient work system and timely payments."
+  },
+  "topMasters": {
+    "title": "Top Masters",
+    "subtitle": "Verified specialists with high ratings",
+    "viewAll": "All Masters",
+    "projects": "projects"
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "subtitle": "Get inspired by the best projects from our masters",
+    "viewAll": "All Projects",
+    "viewProject": "View Project",
+    "project1": "Modern Kitchen",
+    "project2": "Modern Style Bedroom",
+    "project3": "Office Cabinet",
+    "project4": "Living Room",
+    "project5": "Children's Room",
+    "project6": "Bathroom"
+  },
+  "blog": {
+    "title": "Blog & Articles",
+    "subtitle": "Useful tips and news from the furniture world",
+    "viewAll": "All Articles",
+    "minRead": "min read",
+    "guides": "Guides",
+    "materials": "Materials",
+    "article1": {
+      "title": "Kitchen Furniture Trends 2024",
+      "excerpt": "Discover the most relevant trends in kitchen furniture design for 2024"
+    },
+    "article2": {
+      "title": "How to Choose a Master for Furniture Making",
+      "excerpt": "A comprehensive guide to choosing a reliable master for your project"
+    },
+    "article3": {
+      "title": "Furniture Materials Guide",
+      "excerpt": "Everything you need to know about materials: from chipboard to solid wood"
+    }
+  },
+  "mastersPage": {
+    "heroTitle": "Find Your Master",
+    "heroSubtitle": "Verified specialists to create the furniture of your dreams",
+    "searchPlaceholder": "Search by name, specialization or city...",
+    "searchButton": "Search",
+    "allSpecializations": "All Specializations",
+    "kitchens": "Kitchens",
+    "wardrobes": "Wardrobes & Closets",
+    "softFurniture": "Soft Furniture",
+    "ratingFilter": "Rating 4.5+",
+    "verifiedFilter": "Verified",
+    "resetFilters": "Reset Filters",
+    "found": "Found",
+    "mastersCount": "masters",
+    "sortByRating": "By Rating",
+    "sortByOrders": "By Orders",
+    "sortByReviews": "By Reviews",
+    "sortByDate": "By Registration Date",
+    "ordersCount": "orders",
+    "writeMessage": "Message",
+    "viewProfile": "Profile",
+    "ctaTitle": "Didn't find the right master?",
+    "ctaText": "Post an order and masters will offer their services",
+    "ctaButton": "Create Order",
+    "specializations": {
+      "kitchen": "Kitchens",
+      "cabinet": "Cabinets & Shelves",
+      "office": "Office Furniture",
+      "soft": "Soft Furniture",
+      "children": "Children's Furniture",
+      "wardrobe": "Wardrobes"
+    },
+    "masters": {
+      "master1": "Aslanbek Omarov",
+      "master2": "Dmitry Kozlov",
+      "master3": "Yerlan Zhumabekov",
+      "master4": "Alexander Petrov",
+      "master5": "Marat Serikov",
+      "master6": "Nurlan Akhmetov"
+    },
+    "cities": {
+      "almaty": "Almaty",
+      "astana": "Astana",
+      "shymkent": "Shymkent",
+      "karaganda": "Karaganda"
+    }
+  },
+  "footer": {
+    "description": "Platform connecting clients with professional furniture makers",
+    "address": "Almaty, Kazakhstan",
+    "companyTitle": "Company",
+    "servicesTitle": "Services",
+    "supportTitle": "Support",
+    "socialTitle": "Follow Us",
+    "about": "About Us",
+    "howItWorks": "How It Works",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "contact": "Contact",
+    "categories": "Categories",
+    "findMasters": "Find Masters",
+    "portfolio": "Portfolio",
+    "placeOrder": "Place Order",
+    "faq": "FAQ",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "rights": "All rights reserved"
+  },
+  "categoriesPage": {
+    "heroTitle": "Service Catalog",
+    "heroSubtitle": "Find a master for any furniture task",
+    "searchPlaceholder": "Search for category or service...",
+    "productionTitle": "Furniture Production",
+    "productionSubtitle": "Custom furniture for any space",
+    "designTitle": "Design & Planning",
+    "designSubtitle": "Professional furniture project development",
+    "repairTitle": "Repair & Maintenance",
+    "repairSubtitle": "Furniture restoration and repair",
+    "popularTitle": "Popular Requests",
+    "popularSubtitle": "Most frequently ordered services",
+    "mastersCount": "masters",
+    "ctaTitle": "Can't find the right category?",
+    "ctaText": "Describe your task in an order, and masters will offer their services",
+    "ctaButton": "Create Order",
+    "mainCategories": {
+      "kitchen": "Kitchens",
+      "kitchenDesc": "Custom kitchen sets",
+      "bedroom": "Bedrooms",
+      "bedroomDesc": "Beds, nightstands, dressers",
+      "living": "Living Rooms",
+      "livingDesc": "Wall units, TV stands, shelving",
+      "office": "Office Furniture",
+      "officeDesc": "Desks, chairs, office cabinets",
+      "children": "Children's Rooms",
+      "childrenDesc": "Furniture for kids' rooms",
+      "hallway": "Hallways",
+      "hallwayDesc": "Cabinets, coat racks, shoe storage",
+      "bathroom": "Bathrooms",
+      "bathroomDesc": "Bathroom cabinets and vanities",
+      "wardrobe": "Wardrobes",
+      "wardrobeDesc": "Storage systems and closets"
+    },
+    "designServices": {
+      "3dModeling": "3D Modeling",
+      "drawings": "Drawings & Schematics",
+      "interior": "Interior Design",
+      "materials": "Material Selection"
+    },
+    "repairServices": {
+      "assembly": "Furniture Assembly",
+      "restoration": "Restoration",
+      "repair": "Furniture Repair",
+      "upholstery": "Reupholstery",
+      "removal": "Furniture Removal"
+    },
+    "popularTags": {
+      "wardrobeCustom": "Custom Closet",
+      "kitchenCustom": "Custom Kitchen",
+      "sofaRepair": "Sofa Repair",
+      "ikeaAssembly": "IKEA Assembly",
+      "kidsBed": "Kids Bed",
+      "officeDesk": "Office Desk",
+      "dressingRoom": "Dressing Room",
+      "cornerSofa": "Corner Sofa",
+      "tvStand": "TV Stand",
+      "hallwayCustom": "Custom Hallway",
+      "barCounter": "Bar Counter",
+      "liftBed": "Lift-up Bed"
+    }
+  },
+  "modal": {
+    "accessDenied": "Access Denied",
+    "clientOnlyMessage": "You need to log in as a client to create an order. The order creation feature is only available for users with the \"Client\" role.",
+    "understood": "Understood",
+    "alreadyRegistered": "Already Registered",
+    "masterRegistrationMessage": "You are already registered as a client. To register as a master, please contact support or create a new account."  },
+  "categoryDetail": {
+    "breadcrumb": {
+      "home": "Home",
+      "categories": "Categories"
+    },
+    "stats": {
+      "masters": "masters",
+      "orders": "orders",
+      "rating": "rating"
+    },
+    "subcategories": "Subcategories",
+    "tabs": {
+      "masters": "Masters",
+      "orders": "Orders"
+    },
+    "filters": {
+      "sortByRating": "By Rating",
+      "sortByReviews": "By Reviews",
+      "sortByPriceAsc": "Price: Low to High",
+      "sortByPriceDesc": "Price: High to Low",
+      "sortByExperience": "By Experience",
+      "anyPrice": "Any Price",
+      "priceLow": "Up to 50,000 ₸",
+      "priceMedium": "50,000 - 150,000 ₸",
+      "priceHigh": "From 150,000 ₸",
+      "searchPlaceholder": "Search for a master..."
+    },
+    "master": {
+      "reviews": "reviews",
+      "projects": "projects",
+      "yearsExperience": "years of experience",
+      "from": "from",
+      "details": "Details"
+    },
+    "order": {
+      "urgent": "Urgent",
+      "premium": "Premium",
+      "new": "New",
+      "budget": "Budget",
+      "responses": "responses",
+      "respond": "Respond"
+    },
+    "popularServices": "Popular Services",
+    "serviceMasters": "masters",
+    "cta": {
+      "title": "Need Help Choosing?",
+      "text": "Leave a request and we'll find the best masters for your project",
+      "placeOrder": "Place Order",
+      "getConsultation": "Get Consultation"
+    }
+  },
+  "projectsPage": {
+    "breadcrumb": {
+      "home": "Home",
+      "projects": "Projects"
+    },
+    "hero": {
+      "title": "Project Gallery",
+      "subtitle": "Get inspired by the work of the best furniture masters in Kazakhstan"
+    },
+    "stats": {
+      "projects": "Projects",
+      "masters": "Masters",
+      "categories": "Categories"
+    },
+    "filters": {
+      "all": "All Projects",
+      "kitchen": "Kitchens",
+      "bedroom": "Bedrooms",
+      "living": "Living Rooms",
+      "office": "Offices",
+      "children": "Children's",
+      "bathroom": "Bathrooms",
+      "sortNewest": "Newest First",
+      "sortPopular": "By Popularity",
+      "sortBudgetHigh": "Budget (High to Low)",
+      "sortBudgetLow": "Budget (Low to High)"
+    },
+    "results": {
+      "found": "Found",
+      "projects": "projects"
+    },
+    "loading": "Loading projects...",
+    "noProjects": "No projects found",
+    "cta": {
+      "title": "Want to showcase your work?",
+      "text": "Register as a master and add your projects to the gallery. Thousands of clients will see your portfolio.",
+      "becomeMaster": "Become a Master",
+      "mastersCatalog": "Masters Catalog"
+    }
+  },
+  "howItWorksPage": {
+    "hero": {
+      "title": "How ALLIANCE Works",
+      "subtitle": "Simple and transparent process from request to ready result",
+      "tabCustomer": "I'm a Customer",
+      "tabMaster": "I'm a Master"
+    },
+    "customer": {
+      "step1": {
+        "title": "Describe Your Project",
+        "description": "Fill out the form: describe what furniture you want, upload photos or sketches, specify dimensions, materials and budget.",
+        "tip": "The more detailed the description, the more accurate the offers from masters will be"
+      },
+      "step2": {
+        "title": "Receive Offers",
+        "description": "Within 24 hours you will receive offers from interested masters with prices, timelines and work examples.",
+        "tip": "Usually 5-15 responses are received per request"
+      },
+      "step3": {
+        "title": "Choose a Master",
+        "description": "Review master profiles, their portfolios, reviews and ratings. Connect via chat, discuss details.",
+        "tip": "Pay attention to reviews for similar projects"
+      },
+      "step4": {
+        "title": "Complete the Deal",
+        "description": "Agree on final cost, timeline and conditions. Create a secure deal with prepayment through the platform.",
+        "tip": "Funds are frozen until work acceptance"
+      },
+      "step5": {
+        "title": "Accept the Work",
+        "description": "Track progress, receive photo reports. After completion, accept the work and confirm payment.",
+        "tip": "You have 3 days to check and accept"
+      }
+    },
+    "master": {
+      "step1": {
+        "title": "Create Profile",
+        "description": "Fill in professional information, upload portfolio and pass verification.",
+        "tip": "Verified masters receive 40% more orders"
+      },
+      "step2": {
+        "title": "Find Orders",
+        "description": "Browse order feed, set up filters and notifications, receive suitable requests.",
+        "tip": "Set up notifications for needed categories"
+      },
+      "step3": {
+        "title": "Respond to Order",
+        "description": "Send personalized offer, specify price and timeline, attach relevant works from portfolio.",
+        "tip": "Personalized responses are chosen 3 times more often"
+      },
+      "step4": {
+        "title": "Complete the Work",
+        "description": "Agree on details with customer, send progress photo reports, meet deadlines and agreements.",
+        "tip": "Regular reports increase customer trust"
+      },
+      "step5": {
+        "title": "Receive Payment",
+        "description": "After acceptance, money is transferred to your account. Receive review and increase rating.",
+        "tip": "Money arrives within 24 hours after acceptance"
+      }
+    },
+    "security": {
+      "title": "Transaction Security",
+      "subtitle": "We protect the interests of customers and masters at every stage",
+      "payment": {
+        "title": "Secure Payment",
+        "text": "Money is frozen on the platform account until work acceptance by customer"
+      },
+      "guarantee": {
+        "title": "Refund Guarantee",
+        "text": "In case of disputes, we act as arbitrator and protect the interests of both parties"
+      },
+      "support": {
+        "title": "24/7 Support",
+        "text": "Support team will help solve any problem at any time"
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Answers to popular questions about platform operation",
+      "q1": {
+        "question": "How much does it cost to place an order?",
+        "answer": "Placing an order on the platform is absolutely free. You don't pay any commission when creating a request."
+      },
+      "q2": {
+        "question": "What is the platform commission?",
+        "answer": "Platform commission is 10% of the deal amount and is charged from the master after successful order completion."
+      },
+      "q3": {
+        "question": "How does payment work?",
+        "answer": "Customer makes prepayment to platform account. Money is frozen and transferred to master only after work acceptance."
+      },
+      "q4": {
+        "question": "What to do in case of dispute?",
+        "answer": "Contact support service in case of dispute. We will review the situation and make a fair decision within 48 hours."
+      },
+      "moreButton": "All Questions"
+    },
+    "cta": {
+      "customerTitle": "Ready to Try?",
+      "customerText": "Create your first order and receive offers from the best masters",
+      "customerButton": "Create Order",
+      "masterTitle": "Want to Receive Orders?",
+      "masterText": "Register as a master and start finding clients today",
+      "masterButton": "Become a Master"
+    }
+  },
+  "pricingPage": {
+    "breadcrumb": {
+      "home": "Home",
+      "pricing": "Terms and Commission"
+    },
+    "hero": {
+      "title": "Transparent Terms for Everyone",
+      "subtitle": "No subscription fees or hidden commissions. Pay only for successful transactions."
+    },
+    "stats": {
+      "masters": "Masters on Platform",
+      "orders": "Completed Orders",
+      "satisfaction": "Satisfied Clients",
+      "support": "Support"
+    },
+    "commission": {
+      "title": "Platform Commission",
+      "subtitle": "The higher the order amount — the lower the commission",
+      "tier1": {
+        "range": "up to 100,000 ₸",
+        "rate": "10%",
+        "description": "For small orders"
+      },
+      "tier2": {
+        "range": "100,000 - 500,000 ₸",
+        "rate": "7%",
+        "description": "For medium projects"
+      },
+      "tier3": {
+        "range": "over 500,000 ₸",
+        "rate": "5%",
+        "description": "For large orders"
+      },
+      "note": "Commission is deducted only from the master after successful order completion"
+    },
+    "benefits": {
+      "title": "Why ALLIANCE?",
+      "subtitle": "We created a platform that protects the interests of both parties",
+      "security": {
+        "title": "Secure Transactions",
+        "description": "Money is kept in a protected account until work is completed. Master receives payment only after client approval."
+      },
+      "transparent": {
+        "title": "Transparent Commission",
+        "description": "Commission decreases with order value. The larger the project — the lower the commission."
+      },
+      "fast": {
+        "title": "Fast Withdrawals",
+        "description": "Withdraw your earnings within 24 hours to any bank card or Kaspi."
+      },
+      "noHidden": {
+        "title": "No Hidden Fees",
+        "description": "No subscription fees or mandatory subscriptions. Pay commission only on successful transactions."
+      }
+    },
+    "forMasters": {
+      "title": "For Masters",
+      "item1": "Free registration and profile placement",
+      "item2": "Unlimited portfolio works",
+      "item3": "Respond to any orders without limits",
+      "item4": "Direct communication with clients",
+      "item5": "Protection from unfair clients",
+      "item6": "Help in dispute resolution",
+      "button": "Become a Master"
+    },
+    "forClients": {
+      "title": "For Clients",
+      "item1": "Free order placement",
+      "item2": "Access to verified masters",
+      "item3": "Quality guarantee of completed work",
+      "item4": "Secure storage of funds until completion",
+      "item5": "Support at all stages of the order",
+      "item6": "Refund in case of disputes",
+      "button": "Place an Order"
+    },
+    "payment": {
+      "title": "How Secure Transaction Works",
+      "subtitle": "Your money is protected at every stage",
+      "step1": {
+        "title": "Client makes prepayment",
+        "description": "Money goes to ALLIANCE protected account and is reserved"
+      },
+      "step2": {
+        "title": "Master performs the work",
+        "description": "Master sees that payment is guaranteed and starts execution"
+      },
+      "step3": {
+        "title": "Client accepts the work",
+        "description": "After approval, money is transferred to master minus commission"
+      }
+    },
+    "testimonials": {
+      "title": "User Reviews",
+      "subtitle": "What masters and clients say about us",
+      "review1": {
+        "name": "Alex Kim",
+        "role": "Master Furniture Maker",
+        "text": "Completed over 30 orders in six months on the platform. Secure transaction is the main advantage, always confident in payment."
+      },
+      "review2": {
+        "name": "Maria Petrova",
+        "role": "Client",
+        "text": "Ordered a custom kitchen. Very convenient that money is protected until work acceptance. Master did everything with quality and on time."
+      },
+      "review3": {
+        "name": "Furniture Workshop \"Comfort\"",
+        "role": "Company",
+        "text": "Commission pays off through order flow. For large projects 5% is very profitable compared to advertising."
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Answers to popular questions about platform operation",
+      "q1": {
+        "question": "How is commission calculated?",
+        "answer": "Commission depends on order amount: up to 100,000 ₸ — 10%, from 100,000 to 500,000 ₸ — 7%, over 500,000 ₸ — 5%. Commission is deducted only after successful order completion and work approval by client."
+      },
+      "q2": {
+        "question": "When does the master receive money?",
+        "answer": "After the client accepts the work and confirms order completion, money is automatically transferred to the master minus commission. Withdrawal available within 24 hours."
+      },
+      "q3": {
+        "question": "How does secure transaction work?",
+        "answer": "Client makes prepayment to ALLIANCE protected account. Master sees that money is reserved and starts work. After work acceptance by client, funds are transferred to master."
+      },
+      "q4": {
+        "question": "What to do in case of dispute between client and master?",
+        "answer": "In case of dispute, contact support service. Our specialists will review the situation and help find a fair solution. Until dispute resolution, money remains in protected account."
+      },
+      "q5": {
+        "question": "Are there paid features for masters?",
+        "answer": "Basic functionality is completely free. In the future, optional PRO features for profile promotion are planned, but the main service will remain free."
+      },
+      "q6": {
+        "question": "How is order payment made?",
+        "answer": "Client can pay with Visa/Mastercard bank card or through Kaspi. For legal entities, non-cash payment by invoice is available."
+      }
+    },
+    "cta": {
+      "title": "Ready to Start?",
+      "subtitle": "Join thousands of masters and clients on ALLIANCE platform",
+      "customerTitle": "For Customers",
+      "customerText": "Post an order and receive offers from verified masters",
+      "customerButton": "Create Order",
+      "masterTitle": "For Masters",
+      "masterText": "Find orders and offer your services",
+      "masterButton": "Find Orders",
+      "registerButton": "Register",
+      "contactButton": "Contact Us"
+    },
+    "masterCannotCreateOrder": "Masters cannot create orders. Only clients can create orders."
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "submit": "Sign In",
+    "registerSubmit": "Register",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "loginLink": "Sign In",
+    "agreeToPolicy": "I agree to",
+    "privacyPolicy": "privacy policy",
+    "becomeMaster": "Become a contractor (furniture maker)",
+    "masterInfo": "Additional information for contractor",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Enter last name",
+    "birthDate": "Date of Birth",
+    "yearPlaceholder": "Year (e.g. 1990)",
+    "monthPlaceholder": "Month",
+    "dayPlaceholder": "Day",
+    "iin": "IIN (Individual Identification Number)",
+    "iinPlaceholder": "12 digits",
+    "iinInvalid": "Invalid IIN. Please check the entered data.",
+    "iinLength": "IIN must contain 12 digits",
+    "iinValid": "✓ IIN is valid",
+    "masterContract": "I have read and agree to",
+    "masterContractLink": "contractor agreement",
+    "passwordRequirements": "Password must contain:",
+    "passwordMinLength": "minimum 8 characters",
+    "passwordLowercase": "lowercase letter (a-z)",
+    "passwordUppercase": "uppercase letter (A-Z)",
+    "passwordNumber": "digit (0-9)",
+    "passwordSpecial": "special character (!@#$%^&*)",
+    "passwordStrength": "Strength:",
+    "passwordWeak": "Weak",
+    "passwordMedium": "Medium",
+    "passwordGood": "Good",
+    "passwordExcellent": "Excellent",
+    "captchaRequired": "Please confirm you are not a robot",
+    "iinRequired": "Please enter a valid IIN",
+    "registerError": "Registration error",
+    "registerAsMaster": "Register as contractor",
+    "clientLoggedInWarning": "You are logged in as a client. To become a master, please log out of your account first.",
+    "logout": "Log out",
+    "alreadyMaster": "You are already a master! You can manage your profile in your dashboard.",
+    "goToDashboard": "Go to Dashboard"
+  },
+  "masterDashboard": {
+    "title": "Master Dashboard",
+    "subtitle": "Manage orders and statistics",
+    "activeOrders": "Active Orders",
+    "completedOrders": "Completed Orders",
+    "rating": "Rating",
+    "earnings": "Earnings",
+    "totalOrders": "Total Orders",
+    "completionRate": "Completion Rate",
+    "incomeChart": "Income Chart (6 months)",
+    "ordersChart": "Orders Chart (6 months)",
+    "categoriesChart": "Order Categories",
+    "performanceMetrics": "Performance Metrics",
+    "onTimeDelivery": "On-Time Delivery",
+    "customerSatisfaction": "Customer Satisfaction",
+    "repeatClients": "Repeat Clients",
+    "averageOrderValue": "Average Order Value",
+    "recentActivity": "Recent Activity",
+    "loading": "Loading data...",
+    "loadError": "Failed to load data",
+    "noActivity": "No recent activity",
+    "income": "Income",
+    "orders": "Orders",
+    "timeAgo": {
+      "justNow": "Just now",
+      "minutesAgo": "minutes ago",
+      "hourAgo": "hour ago",
+      "hoursAgo": "hours ago",
+      "yesterday": "Yesterday",
+      "daysAgo": "days ago",
+      "manyDaysAgo": "days ago"
+    }
+  },
+  "masterOrders": {
+    "title": "Order Auction",
+    "subtitle": "Browse and bid on client orders",
+    "activeFilters": "active filters",
+    "searchPlaceholder": "Search by title, description...",
+    "category": "Category",
+    "allCategories": "All Categories",
+    "budgetFilter": "Budget",
+    "anyBudget": "Any Budget",
+    "budgetLow": "Up to 100,000 ₸",
+    "budgetMedium": "100,000 - 500,000 ₸",
+    "budgetHigh": "From 500,000 ₸",
+    "sortBy": "Sort By",
+    "sortNewest": "Newest First",
+    "sortOldest": "Oldest First",
+    "sortPriceDesc": "Price: High to Low",
+    "sortPriceAsc": "Price: Low to High",
+    "sortBidsDesc": "Most Bids",
+    "sortBidsAsc": "Fewest Bids",
+    "found": "Found",
+    "of": "of",
+    "orders": "orders",
+    "clearFilters": "Clear Filters",
+    "noOrders": "No available orders",
+    "noResults": "No results found for your search",
+    "bids": "bid",
+    "bidsPlural": "bids",
+    "createdOn": "Created on",
+    "budgetLabel": "Budget",
+    "deadline": "Deadline",
+    "materials": "Materials:",
+    "dimensions": "Dimensions:",
+    "deliveryRequired": "Delivery",
+    "assemblyRequired": "Assembly",
+    "makeBid": "Make Offer",
+    "updateBid": "Update Offer",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "of": "of"
+    },
+    "modal": {
+      "orderDescription": "Order Description",
+      "mainParams": "Main Parameters",
+      "budget": "Budget",
+      "category": "Category",
+      "additional": "Additional",
+      "style": "Style:",
+      "requirements": "Requirements",
+      "deliveryRequired": "Delivery required",
+      "assemblyRequired": "Assembly required",
+      "competition": "Competition",
+      "mastersCount": "master has already made",
+      "mastersCountPlural": "masters have already made",
+      "proposal": "an offer",
+      "no3DModel": "3D Visualization",
+      "no3DModelText": "3D model was not created for this order",
+      "photos": "Photos",
+      "photo": "Photo"
+    },
+    "bidModal": {
+      "title": "Make an Offer",
+      "titleUpdate": "Update Offer",
+      "competitionTitle": "Competition",
+      "bidsCount": "Bids",
+      "minPrice": "Min. Price",
+      "avgPrice": "Average",
+      "clientBudget": "Client Budget",
+      "yourPrice": "Your Price",
+      "required": "*",
+      "pricePlaceholder": "Enter price in tenge",
+      "commission": "Platform Commission:",
+      "commissionFixed": "(fixed rate per order in first month)",
+      "commissionPercent": "(% of order amount)",
+      "youWillGet": "You will receive:",
+      "duration": "Duration (days)",
+      "durationPlaceholder": "How many days needed",
+      "comment": "Comment",
+      "commentPlaceholder": "Additional information about your offer",
+      "submit": "Submit Offer",
+      "submitUpdate": "Update Offer",
+      "submitting": "Submitting..."
+    },
+    "notifications": {
+      "errorLoading": "Failed to load orders",
+      "errorPrice": "Please enter a valid price",
+      "errorDuration": "Please enter a valid duration",
+      "bidCreated": "Offer successfully submitted",
+      "bidUpdated": "Offer successfully updated",
+      "errorUnpaid": "You have {{count}} unpaid commissions totaling {{total}} ₸. Please pay them to continue working.",
+      "errorGeneral": "Failed to submit offer"
+    }
+  },
+  "masterActiveOrders": {
+    "title": "Active Orders",
+    "subtitle": "Orders in progress with deadline tracking",
+    "stats": {
+      "active": "Active",
+      "shipped": "Shipped",
+      "warning": "Due Soon",
+      "urgent": "Urgent"
+    },
+    "searchPlaceholder": "Search by title, description or customer...",
+    "noOrders": "You have no active orders yet",
+    "noResults": "No orders found",
+    "countdown": {
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "seconds": "Seconds"
+    },
+    "status": {
+      "pending": "Pending Shipment",
+      "shipped": "Shipped",
+      "delivered": "Delivered"
+    },
+    "labels": {
+      "price": "Price",
+      "deadline": "Deadline",
+      "deliveryAddress": "Delivery Address",
+      "shipOrder": "Ship Order",
+      "openChat": "Open Chat",
+      "submitForReview": "Submit for Review",
+      "awaitingReview": "Awaiting customer review",
+      "orderShipped": "Order shipped. Awaiting customer confirmation.",
+      "orderDelivered": "Order successfully delivered!",
+      "progress": "Progress",
+      "progressLabel": "Completion Progress",
+      "timePassed": "Time Passed",
+      "timeElapsed": "Time Elapsed",
+      "timeRemaining": "Remaining",
+      "statusLabel": "Status",
+      "urgent": "🔥 Urgent!",
+      "warning": " Due Soon",
+      "onTime": "✅ On Time",
+      "cost": "Cost",
+      "status": "Status"
+    },
+    "modal": {
+      "countdownTitle": " Countdown to Deadline",
+      "progressTitle": "Progress",
+      "detailsTitle": " Order Details",
+      "cost": "Cost",
+      "close": "Close"
+    },
+    "shipModal": {
+      "title": "Ship Order",
+      "trackingNumber": "Tracking Number (optional)",
+      "trackingPlaceholder": "Enter tracking number",
+      "notes": "Notes (optional)",
+      "notesPlaceholder": "Additional delivery information",
+      "cancel": "Cancel",
+      "submit": "Confirm Shipment",
+      "submitting": "Submitting..."
+    },
+    "notifications": {
+      "errorLoading": "Error loading orders",
+      "shippingSuccess": "Order marked as shipped!",
+      "shippingError": "Error shipping order",
+      "chatNotFound": "Chat for this order hasn't been created yet. Please wait.",
+      "chatError": "Error opening chat. Please try again later.",
+      "submitSuccess": "Work successfully submitted for review!",
+      "submitError": "Error submitting for review"
+    },
+    "submitModal": {
+      "title": "Submit Work for Review",
+      "description": "Are you sure you want to send the work for customer evaluation? After this, the customer will be able to accept or reject the result.",
+      "cancel": "Cancel",
+      "confirm": "Submit for Review",
+      "submitting": "Submitting..."
+    }
+  },
+  "auctionHistory": {
+    "title": "My Bids",
+    "subtitle": "All your order proposals",
+    "noBids": "You don't have any bids yet",
+    "status": {
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "pending": "Pending"
+    },
+    "labels": {
+      "client": "Client:",
+      "yourOffer": "Your Offer",
+      "completionTime": "Completion Time",
+      "day": "day",
+      "days": "days",
+      "clientBudget": "Client Budget",
+      "yourComment": "Your Comment:",
+      "created": "Created:"
+    },
+    "notifications": {
+      "errorLoading": "Error loading bids"
+    }
+  },
+  "masterSchedule": {
+    "title": "Schedule",
+    "subtitle": "Manage your time and deadlines",
+    "addEvent": "Add Event",
+    "noEvents": "No events",
+    "noEventsHint": "Add an event to track deadlines",
+    "order": "Order:",
+    "overdue": "Overdue",
+    "filters": {
+      "type": "Type:",
+      "status": "Status:"
+    },
+    "types": {
+      "all": "All",
+      "deadline": "Deadline",
+      "deadlines": "Deadlines",
+      "reminder": "Reminder",
+      "reminders": "Reminders",
+      "meeting": "Meeting",
+      "meetings": "Meetings",
+      "other": "Other"
+    },
+    "statuses": {
+      "all": "All",
+      "pending": "Upcoming",
+      "completed": "Completed",
+      "overdue": "Overdue"
+    },
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "time": {
+      "today": "Today",
+      "tomorrow": "Tomorrow"
+    },
+    "modal": {
+      "editTitle": "Edit Event",
+      "newTitle": "New Event"
+    },
+    "form": {
+      "title": "Title *",
+      "titlePlaceholder": "Event title",
+      "description": "Description",
+      "descriptionPlaceholder": "Additional information",
+      "date": "Date *",
+      "time": "Time *",
+      "type": "Type *",
+      "priority": "Priority *",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "save": "Save",
+      "add": "Add"
+    },
+    "confirmDelete": "Delete this event?",
+    "notifications": {
+      "loadError": "Failed to load schedule",
+      "updateSuccess": "Event updated",
+      "createSuccess": "Event added",
+      "saveError": "Failed to save event",
+      "deleteSuccess": "Event deleted",
+      "deleteError": "Failed to delete event",
+      "statusError": "Failed to change status"
+    }
+  },
+  "masterWallet": {
+    "title": "Wallet",
+    "subtitle": "Balance management and commission payments",
+    "loading": "Loading...",
+    "stats": {
+      "currentBalance": "Current Balance",
+      "balanceHint": "Available for commission payments",
+      "totalDeposits": "Total Deposited",
+      "commissionsPaid": "Commissions Paid",
+      "pendingCommissions": "Pending Payment",
+      "pendingHint": "Unpaid commissions",
+      "allTime": "All time"
+    },
+    "deposit": {
+      "title": "Top Up Wallet",
+      "amountLabel": "Amount (₸)",
+      "amountPlaceholder": "Enter amount",
+      "button": "Top Up via Stripe",
+      "success": "Wallet successfully topped up!"
+    },
+    "info": {
+      "title": " Information",
+      "text": "Payment is processed through secure Stripe service. Deposited funds will be available for commission payments. Commission is 5000₸ for each of the first 3 orders, then 3% of the order amount. Minimum deposit amount: 100₸."
+    },
+    "transactions": {
+      "title": "Transaction History",
+      "empty": "No transactions yet",
+      "order": "Order:"
+    },
+    "filters": {
+      "all": "All",
+      "deposits": "Deposits",
+      "commissions": "Commissions"
+    },
+    "types": {
+      "deposit": "Deposit",
+      "commission_payment": "Commission Payment"
+    },
+    "statuses": {
+      "completed": "Completed",
+      "pending": "Processing",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "errors": {
+      "loadError": "Failed to load wallet data",
+      "invalidAmount": "Enter a valid amount",
+      "minAmount": "Minimum deposit amount: 100 ₸"
+    }
+  },
+  "masterIncome": {
+    "title": "Income",
+    "subtitle": "Income report from completed orders",
+    "loading": "Loading...",
+    "summary": {
+      "totalIncome": "Total Income",
+      "netIncome": "Net Income",
+      "thisMonth": "This Month",
+      "ordersCompleted": "Orders Completed",
+      "commission": "Commission:",
+      "afterCommission": "After commission deduction",
+      "fromLast": "from last",
+      "averageCheck": "Average order:"
+    },
+    "search": {
+      "placeholder": "Search by title, client or number..."
+    },
+    "filters": {
+      "all": "All time",
+      "today": "Today",
+      "week": "This week",
+      "month": "This month",
+      "quarter": "This quarter",
+      "year": "This year"
+    },
+    "history": {
+      "title": "Completed Orders History",
+      "empty": "No completed orders",
+      "emptyHint": "Completed orders will appear here"
+    },
+    "table": {
+      "orderNumber": "Order #",
+      "title": "Title",
+      "client": "Client",
+      "completedDate": "Completed Date",
+      "orderAmount": "Order Amount",
+      "commission": "Commission",
+      "netIncome": "Net Income",
+      "documents": "Documents"
+    },
+    "documents": {
+      "invoice": "Invoice",
+      "act": "Act",
+      "downloadInvoice": "Download invoice",
+      "downloadAct": "Download act",
+      "downloadActFull": "Download work completion certificate",
+      "title": "Documents"
+    },
+    "modal": {
+      "title": "Order Details",
+      "orderTitle": "Order Title:",
+      "client": "Client:",
+      "completedDate": "Completed Date:",
+      "breakdown": "Income Breakdown",
+      "orderAmount": "Order Amount:",
+      "platformCommission": "Platform Commission",
+      "netIncome": "Net Income:"
+    },
+    "notifications": {
+      "loadError": "Failed to load income data",
+      "invoiceSuccess": "Invoice downloaded successfully",
+      "actSuccess": "Work completion certificate downloaded successfully",
+      "downloadError": "Failed to download document"
+    }
+  },
+  "masterCommissions": {
+    "title": "Platform Commissions",
+    "subtitle": "Information about platform usage fees",
+    "conditions": {
+      "title": "Commission Terms",
+      "firstMonth": "First month: 5,000₸ per order (maximum 3 orders = 15,000₸)",
+      "afterFirstMonth": "After first month: 3% of each order amount",
+      "directPayment": "Client pays you directly, we don't participate in transactions"
+    },
+    "balance": {
+      "walletBalance": "Wallet Balance",
+      "toPay": "To Pay",
+      "totalPaid": "Total Paid",
+      "pendingTransactions": "pending transactions",
+      "topUpWallet": "Top Up Wallet"
+    },
+    "filters": {
+      "all": "All",
+      "pending": "Pending Payment",
+      "paid": "Paid"
+    },
+    "history": {
+      "title": "Commission History",
+      "empty": "No transactions"
+    },
+    "transaction": {
+      "type": "Type:",
+      "rate": "Rate:",
+      "orderAmount": "Order Amount:",
+      "date": "Date:"
+    },
+    "types": {
+      "first_month": "First Month",
+      "percentage": "Percentage of Order"
+    },
+    "statuses": {
+      "paid": "Paid",
+      "pending": "Pending Payment",
+      "cancelled": "Cancelled"
+    },
+    "actions": {
+      "payFromWallet": "Pay from Wallet",
+      "paying": "Paying..."
+    },
+    "confirmations": {
+      "insufficientFunds": "Insufficient funds in wallet. Top up wallet?",
+      "confirmPayment": "Pay commission {amount} from wallet?"
+    },
+    "notifications": {
+      "paymentSuccess": "Commission paid successfully!",
+      "paymentError": "Failed to pay commission"
+    }
+  },
+  "masterStatistics": {
+    "title": "Statistics",
+    "subtitle": "Analysis of your work and performance",
+    "loading": "Loading statistics...",
+    "periods": {
+      "week": "Week",
+      "month": "Month",
+      "quarter": "Quarter",
+      "year": "Year"
+    },
+    "metrics": {
+      "totalOrders": "Total Orders",
+      "completed": "Completed:",
+      "totalIncome": "Total Income",
+      "averageCheck": "Average Check:",
+      "averageRating": "Average Rating",
+      "satisfaction": "Satisfaction:",
+      "clients": "Clients",
+      "repeat": "Repeat:"
+    },
+    "performance": {
+      "title": "Performance Metrics",
+      "completionRate": "Completion Rate",
+      "onTimeDelivery": "On-Time Delivery",
+      "customerSatisfaction": "Customer Satisfaction",
+      "repeatClients": "Repeat Clients"
+    },
+    "charts": {
+      "ordersDynamics": "Orders Dynamics",
+      "incomeDynamics": "Income Dynamics"
+    },
+    "categories": {
+      "title": "Popular Categories",
+      "orders": "orders"
+    },
+    "activity": {
+      "title": "Recent Activity",
+      "date": "Date",
+      "ordersCompleted": "Orders Completed",
+      "income": "Income"
+    },
+    "notifications": {
+      "loadError": "Failed to load statistics"
+    }
+  },
+  "chats": {
+    "title": "Messages",
+    "searchPlaceholder": "Search chats...",
+    "noChats": "No chats",
+    "noMessages": "No messages",
+    "noMessagesStart": "No messages. Start chatting!",
+    "writeMessage": "Write a message...",
+    "orderCompleted": "Order completed",
+    "selectChat": "Select a chat",
+    "startChatting": "Start chatting with masters",
+    "acceptWork": "Accept work",
+    "order": "Order:",
+    "backToList": "Back to chat list",
+    "status": {
+      "inProgress": "In progress",
+      "workAccepted": "✓ Work accepted"
+    },
+    "acceptModal": {
+      "title": "Accept work",
+      "description": "Do you confirm that the work is done well? Funds will be credited to the master.",
+      "rating": "Rating (1-5 stars)",
+      "review": "Review (optional)",
+      "reviewPlaceholder": "Write a review about the master's work...",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "processing": "Processing..."
+    },
+    "notifications": {
+      "chatOpened": "Chat opened",
+      "chatOpenError": "Failed to open chat",
+      "workAccepted": "Work accepted! Funds credited to master.",
+      "workAcceptError": "Failed to accept work",
+      "rulesAccepted": "Rules accepted. You can start chatting!",
+      "rulesAcceptError": "Failed to accept rules",
+      "sendMessageError": "Failed to send message"
+    }
+  },
+  "selectOrder": {
+    "title": "Select Order",
+    "subtitle": "You have multiple active orders with this user",
+    "forSubmit": "Select order to submit for review",
+    "forAccept": "Select order to accept work",
+    "loading": "Loading orders...",
+    "noOrders": "No active orders",
+    "status": {
+      "inProgress": "In Progress",
+      "review": "Under Review"
+    }
+  },
+  "masterNotifications": {
+    "title": "Notifications",
+    "unreadCount": "{{count}} unread notifications",
+    "allRead": "All notifications read",
+    "refresh": "Refresh",
+    "markAllRead": "Mark all as read",
+    "deleteAllRead": "Delete read",
+    "filters": {
+      "all": "All",
+      "unread": "Unread",
+      "read": "Read"
+    },
+    "loading": "Loading...",
+    "empty": {
+      "title": "No notifications",
+      "allRead": "All notifications read",
+      "noRead": "No read notifications",
+      "noNotifications": "You have no notifications yet"
+    },
+    "goToLink": "Go to →",
+    "timeAgo": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}} min. ago",
+      "hoursAgo": "{{count}} h. ago",
+      "daysAgo": "{{count}} d. ago"
+    },
+    "confirmations": {
+      "deleteOne": "Delete this notification?",
+      "deleteAllRead": "Delete all read notifications?"
+    },
+    "notifications": {
+      "loadError": "Failed to load notifications",
+      "markError": "Failed to mark notification",
+      "markAllSuccess": "All notifications marked as read",
+      "markAllError": "Failed to mark all notifications",
+      "deleteSuccess": "Notification deleted",
+      "deleteError": "Failed to delete notification",
+      "deleteAllSuccess": "Read notifications deleted",
+      "deleteAllError": "Failed to delete notifications"
+    }
+  },
+  "masterRatings": {
+    "title": "Ratings and Reviews",
+    "loading": "Loading...",
+    "overallStats": "Overall Statistics",
+    "reviews": {
+      "one": "review",
+      "few": "reviews",
+      "many": "reviews"
+    },
+    "allReviews": "All Reviews",
+    "noReviews": "You have no reviews yet",
+    "noReviewsHint": "Complete your first order to receive a customer review",
+    "order": "Order:",
+    "category": "Category:",
+    "amount": "Amount:"
+  },
+  "masterPortfolio": {
+    "title": "Portfolio",
+    "works": {
+      "one": "work",
+      "few": "works",
+      "many": "works"
+    },
+    "addWork": "Add work",
+    "addFirstWork": "Add first work",
+    "empty": {
+      "title": "Portfolio is empty",
+      "description": "Add your best works to attract clients"
+    },
+    "visibility": {
+      "public": "Public",
+      "hidden": "Hidden"
+    },
+    "noPhoto": "No photo",
+    "edit": "Edit",
+    "delete": "Delete",
+    "modal": {
+      "addTitle": "Add work",
+      "editTitle": "Edit work",
+      "close": "×"
+    },
+    "form": {
+      "titleLabel": "Work title *",
+      "titlePlaceholder": "For example: Custom kitchen set",
+      "categoryLabel": "Category",
+      "categoryPlaceholder": "Select category",
+      "furnitureTypeLabel": "Furniture type",
+      "furnitureTypePlaceholder": "Wardrobe, kitchen set...",
+      "styleLabel": "Style",
+      "stylePlaceholder": "Modern, classic...",
+      "descriptionLabel": "Work description",
+      "descriptionPlaceholder": "Describe the project in detail, manufacturing features, technical details...",
+      "materialsLabel": "Materials",
+      "materialsPlaceholder": "Chipboard, MDF, oak wood...",
+      "colorLabel": "Color/Finish",
+      "colorPlaceholder": "White gloss, walnut...",
+      "dimensionsLabel": "Dimensions",
+      "dimensionsPlaceholder": "200x150x60 cm (WxHxD)",
+      "executionTimeLabel": "Execution time",
+      "executionTimePlaceholder": "2 weeks, 1 month...",
+      "priceLabel": "Price (₸)",
+      "pricePlaceholder": "150000",
+      "warrantyLabel": "Warranty",
+      "warrantyPlaceholder": "1 year, 2 years...",
+      "clientNameLabel": "Client name (optional)",
+      "clientNamePlaceholder": "John Doe",
+      "locationLabel": "Installation location",
+      "locationPlaceholder": "Astana, Yesil district",
+      "assemblyIncluded": "Assembly included in price",
+      "deliveryIncluded": "Delivery included in price",
+      "imagesLabel": "Images",
+      "addPhoto": "Add photo",
+      "showInPublic": "Show in public profile",
+      "cancel": "Cancel",
+      "save": "Save",
+      "add": "Add"
+    },
+    "categories": {
+      "kitchen": "Kitchen furniture",
+      "wardrobe": "Wardrobes and closets",
+      "bedroom": "Bedroom furniture",
+      "living": "Living room (walls, cabinets)",
+      "office": "Office furniture",
+      "children": "Children's furniture",
+      "hallway": "Hallways",
+      "tables": "Tables (dining, writing)",
+      "chairs": "Chairs and armchairs",
+      "custom": "Custom cabinet furniture",
+      "soft": "Upholstered furniture",
+      "builtin": "Built-in furniture",
+      "bathroom": "Bathroom",
+      "other": "Other"
+    },
+    "confirmDelete": {
+      "title": "Confirm deletion",
+      "message": "Are you sure you want to delete this work from portfolio?",
+      "warning": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "notifications": {
+      "loadError": "Error loading portfolio",
+      "titleRequired": "Enter work title",
+      "updateSuccess": "Work updated successfully",
+      "addSuccess": "Work added successfully",
+      "saveError": "Error saving",
+      "deleteSuccess": "Work deleted",
+      "deleteError": "Error deleting",
+      "fileTooLarge": "File {{name}} is too large. Maximum 5MB",
+      "notAnImage": "File {{name}} is not an image",
+      "imageLoadError": "Error loading images"
+    }
+  },
+  "masterClients": {
+    "title": "Clients",
+    "subtitle": "Your client base and work history with them",
+    "searchPlaceholder": "Search by name or email...",
+    "filters": {
+      "all": "All clients",
+      "active": "Active",
+      "completed": "Completed",
+      "inactive": "Inactive"
+    },
+    "sortBy": {
+      "recent": "By date",
+      "name": "By name",
+      "orders": "By orders",
+      "spent": "By amount"
+    },
+    "stats": {
+      "totalClients": "Total clients",
+      "activeProjects": "Active projects",
+      "totalRevenue": "Total revenue"
+    },
+    "status": {
+      "active": "Active",
+      "completed": "Completed",
+      "inactive": "Inactive"
+    },
+    "loading": "Loading...",
+    "notFound": "No clients found",
+    "notFoundHint": "Try changing search parameters",
+    "orders": "Orders",
+    "revenue": "Revenue",
+    "rating": "Rating",
+    "lastOrder": "Last order:",
+    "history": "History",
+    "modal": {
+      "clientInfo": "Client information",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "firstOrder": "First order",
+      "statistics": "Statistics",
+      "totalOrders": "Total orders",
+      "completed": "Completed",
+      "active": "Active",
+      "totalAmount": "Total amount",
+      "orderHistory": "Order history",
+      "created": "Created:",
+      "close": "×"
+    },
+    "notifications": {
+      "loadError": "Failed to load clients",
+      "detailsError": "Failed to load client data"
+    }
+  },
+  "masterProfile": {
+    "title": "Master Profile",
+    "subtitle": "Fill in information about yourself to attract clients",
+    "sections": {
+      "basicInfo": "Basic Information",
+      "professionalInfo": "Professional Information",
+      "workConditions": "Work Conditions",
+      "materialsEquipment": "Materials and Equipment",
+      "financialTerms": "Financial Terms",
+      "contactsSocial": "Contacts and Social Media",
+      "additionalServices": "Additional Services"
+    },
+    "avatar": {
+      "change": "Change photo",
+      "select": "Select photo",
+      "delete": "Delete",
+      "hint": "JPG, PNG or GIF. Maximum 5MB.",
+      "hintLink": "Or enter image link in the field below.",
+      "urlLabel": "Or enter profile photo link",
+      "urlPlaceholder": "https://example.com/avatar.jpg",
+      "uploading": "Uploading..."
+    },
+    "fields": {
+      "name": "Name *",
+      "companyName": "Company Name",
+      "companyPlaceholder": "SP Furniture Maker",
+      "phone": "Phone",
+      "phonePlaceholder": "+7 (777) 123-45-67",
+      "address": "Address",
+      "addressPlaceholder": "City, street, building",
+      "bio": "About",
+      "bioPlaceholder": "Tell about your experience, achievements and approach to work...",
+      "experience": "Work experience (years)",
+      "specializations": "Specializations (comma-separated)",
+      "specializationsPlaceholder": "Kitchens, Wardrobes, Cabinet furniture",
+      "education": "Education",
+      "educationPlaceholder": "Educational institution, specialty",
+      "certifications": "Certificates (comma-separated)",
+      "certificationsPlaceholder": "Certificate 1, Certificate 2",
+      "workSchedule": "Work schedule",
+      "workSchedulePlaceholder": "Mon-Fri 9:00-18:00",
+      "minOrderAmount": "Minimum order amount (₸)",
+      "maxProjects": "Max. projects simultaneously",
+      "services": "Services (comma-separated)",
+      "servicesPlaceholder": "Manufacturing, Repair, Restoration",
+      "materials": "Materials (comma-separated)",
+      "materialsPlaceholder": "Chipboard, MDF, Solid wood, Veneer",
+      "equipment": "Equipment",
+      "equipmentPlaceholder": "CNC machine, Edge banding machine",
+      "workspaceSize": "Workshop size",
+      "workspacePlaceholder": "50 sq.m",
+      "hasShowroom": "Has showroom",
+      "showroomAddress": "Showroom address",
+      "showroomPlaceholder": "City, street, building",
+      "paymentMethods": "Payment methods (comma-separated)",
+      "paymentPlaceholder": "Cash, Kaspi, Bank transfer",
+      "warrantyTerms": "Warranty terms",
+      "warrantyPlaceholder": "12 months on product",
+      "returnPolicy": "Return policy",
+      "returnPlaceholder": "Return and exchange terms...",
+      "website": "Website",
+      "websitePlaceholder": "https://mysite.com",
+      "instagram": "Instagram",
+      "instagramPlaceholder": "@username",
+      "facebook": "Facebook",
+      "facebookPlaceholder": "facebook.com/page",
+      "telegram": "Telegram",
+      "telegramPlaceholder": "@username",
+      "whatsapp": "WhatsApp",
+      "whatsappPlaceholder": "+7 777 123 45 67",
+      "languages": "Languages (comma-separated)",
+      "languagesPlaceholder": "Russian, Kazakh, English",
+      "deliveryAvailable": "Delivery available",
+      "assemblyAvailable": "Assembly available",
+      "designServices": "Design services",
+      "consultationFree": "Free consultation"
+    },
+    "actions": {
+      "save": "Save profile",
+      "saving": "Saving..."
+    },
+    "notifications": {
+      "loadError": "Error loading profile",
+      "updateSuccess": "Profile updated successfully",
+      "updateError": "Error saving profile",
+      "imageNotSelected": "Please select an image",
+      "imageTooLarge": "File size must not exceed 5MB",
+      "imageSelected": "Image selected. Click \"Save profile\" to apply changes.",
+      "avatarUploadError": "Error uploading avatar",
+      "avatarDeleted": "Avatar deleted"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "saveButton": "Save",
+    "saving": "Saving...",
+    "resetButton": "Reset",
+    "resetConfirm": "Reset all settings to default values?",
+    "workSettings": "Work Settings",
+    "autoAcceptAuctions": "Auto-accept auctions",
+    "autoAcceptAuctionsDesc": "Automatically participate in new auctions",
+    "maxActiveOrders": "Maximum active orders",
+    "maxActiveOrdersDesc": "Maximum number of orders in progress simultaneously",
+    "minOrderAmount": "Minimum order amount",
+    "minOrderAmountDesc": "Don't show orders cheaper than specified amount",
+    "workingDays": "Working days",
+    "workingHours": "Working hours",
+    "from": "From",
+    "to": "To",
+    "financeSettings": "Financial Settings",
+    "currency": "Currency",
+    "currencyDesc": "Main currency for calculations",
+    "currencyKZT": "₸ Tenge (KZT)",
+    "currencyRUB": "₽ Ruble (RUB)",
+    "currencyUSD": "$ Dollar (USD)",
+    "taxRate": "Tax rate (%)",
+    "taxRateDesc": "Tax percentage for net profit calculation",
+    "notificationsTitle": "Notifications",
+    "emailNotifications": "Email notifications",
+    "emailNotificationsDesc": "Receive notifications by email",
+    "pushNotifications": "Push notifications",
+    "pushNotificationsDesc": "Receive browser notifications",
+    "newAuctions": "New auctions",
+    "newAuctionsDesc": "Notifications about new auctions in your category",
+    "bidAccepted": "Bid accepted",
+    "bidAcceptedDesc": "Notifications when client accepts your bid",
+    "orderUpdates": "Order updates",
+    "orderUpdatesDesc": "Order status changes",
+    "messages": "Messages",
+    "messagesDesc": "New messages from clients",
+    "reviews": "New reviews",
+    "reviewsDesc": "Notifications about new reviews from clients",
+    "payments": "Payments",
+    "paymentsDesc": "Notifications about incoming payments",
+    "securityTitle": "Security",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password (minimum 6 characters)",
+    "confirmPassword": "Confirm new password",
+    "changePasswordButton": "Change password",
+    "fillAllFields": "Fill in all fields",
+    "passwordsMismatch": "Passwords don't match",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordChanged": "Password changed successfully",
+    "passwordChangeError": "Password change error",
+    "privacyTitle": "Privacy",
+    "showProfile": "Show profile",
+    "showProfileDesc": "Your profile will be visible to clients",
+    "showPortfolio": "Show portfolio",
+    "showPortfolioDesc": "Your works will be visible in public profile",
+    "showRating": "Show rating",
+    "showRatingDesc": "Your rating will be visible to everyone",
+    "showCompletedOrders": "Show completed orders",
+    "showCompletedOrdersDesc": "Number of completed orders in profile",
+    "allowDirectMessages": "Allow direct messages",
+    "allowDirectMessagesDesc": "Clients will be able to message you directly",
+    "languageTitle": "Language",
+    "languageInterface": "Interface language",
+    "languageInterfaceDesc": "Select interface language",
+    "russian": "Russian",
+    "kazakh": "Kazakh",
+    "english": "English",
+    "themeTitle": "Theme",
+    "themeInterface": "Interface theme",
+    "themeInterfaceDesc": "Select interface theme",
+    "light": "Light",
+    "dark": "Dark",
+    "auto": "Auto",
+    "loadError": "Error loading settings",
+    "saveSuccess": "Settings saved successfully",
+    "saveError": "Error saving settings",
+    "resetSuccess": "Settings reset",
+    "resetError": "Error resetting settings",
+    "weekDays": {
+      "monday": "Mon",
+      "tuesday": "Tue",
+      "wednesday": "Wed",
+      "thursday": "Thu",
+      "friday": "Fri",
+      "saturday": "Sat",
+      "sunday": "Sun"
+    }
+  },
+  "help": {
+    "title": "Help Center",
+    "faqTitle": "Frequently Asked Questions",
+    "searchPlaceholder": "Search questions...",
+    "allCategories": "All",
+    "noResults": "No results found for your query",
+    "contactSupport": "Contact Support",
+    "supportDescription": "Didn't find the answer to your question? Send us a request and we'll help you within 24 hours.",
+    "ticketSubject": "Subject",
+    "subjectPlaceholder": "Describe the essence of the question",
+    "message": "Message",
+    "messagePlaceholder": "Describe your problem or question in detail",
+    "submitButton": "Submit request",
+    "fillAllFields": "Please fill in all fields",
+    "ticketSent": "Request sent! We will contact you shortly.",
+    "ticketError": "Error sending request",
+    "otherContacts": "Other contact methods:",
+    "email": "Email",
+    "phone": "Phone",
+    "workingHours": "Working hours",
+    "workingHoursValue": "Mon-Fri 9:00-18:00",
+    "emailValue": "support@furniture-auction.kz",
+    "phoneValue": "+7 (777) 123-45-67"
+  },
+  "dashboard": {
+    "welcome": "Welcome to your personal account!",
+    "totalOrders": "Total orders",
+    "inProgress": "In progress",
+    "completed": "Completed",
+    "notifications": "Notifications"
+  },
+  "createOrder": {
+    "furnitureTypes": {
+      "title": "Furniture Type",
+      "kitchen": "Kitchen Set",
+      "bedroom": "Bedroom Set",
+      "hallway": "Hallway Furniture",
+      "office": "Office Furniture",
+      "bathroom": "Bathroom Furniture",
+      "bed": "Bed",
+      "tvStand": "TV Stand",
+      "wardrobe": "Wardrobes",
+      "dressingRoom": "Dressing Room",
+      "other": "Other"
+    },
+    "configuration": {
+      "title": "Configuration",
+      "straight": "Straight",
+      "lShaped": "L-shaped",
+      "uShaped": "U-shaped",
+      "twoPart": "Two-part",
+      "withIsland": "With island",
+      "corner": "Corner",
+      "straightSoft": "Straight with soft seat and backrest",
+      "cornerSoft": "Corner with soft seat and backrest",
+      "straightMirror": "Straight with mirror and console",
+      "cornerMirror": "Corner with mirror and console",
+      "tableChairs": "Table with chairs",
+      "officeWardrobe": "Office cabinets",
+      "reception": "Reception desk",
+      "sinkCabinetTall": "Sink cabinet with tall unit",
+      "sinkCabinetStraight": "Straight sink cabinet",
+      "washingMachineCabinet": "Cabinet over washing machine",
+      "storageCabinets": "Storage cabinets",
+      "singleHard": "Single with hard headboard",
+      "singleSoft": "Single with soft headboard",
+      "singleLift": "Single with lift mechanism",
+      "doubleHard": "Double with hard headboard",
+      "doubleSoft": "Double with soft headboard",
+      "doubleLift": "Double with lift mechanism",
+      "withCabinet": "TV stand with cabinet",
+      "hinged": "Hinged wardrobe",
+      "sliding": "Sliding wardrobe",
+      "shelving": "Shelving",
+      "shelves": "Shelves",
+      "cabinets": "Cabinets",
+      "showcases": "Showcases"
+    },
+    "bedroomConfig": {
+      "title": "Set Composition",
+      "dresser": "Dresser",
+      "nightstand": "Nightstand",
+      "consoleWithMirror": "Console with mirror"
+    },
+    "dimensions": {
+      "title": "Dimensions (meters)",
+      "width": "Width",
+      "height": "Height",
+      "depth": "Depth"
+    },
+    "color": {
+      "title": "Color",
+      "brown": "Brown",
+      "white": "White",
+      "black": "Black",
+      "gray": "Gray",
+      "beige": "Beige",
+      "blue": "Blue",
+      "green": "Green",
+      "red": "Red"
+    },
+    "material": {
+      "title": "Material",
+      "wood": "Wood",
+      "metal": "Metal",
+      "plastic": "Plastic",
+      "fabric": "Fabric"
+    },
+    "woodType": {
+      "title": "Wood Type",
+      "oak": "Oak",
+      "oakDesc": "Durable, noble",
+      "pine": "Pine",
+      "pineDesc": "Lightweight, affordable",
+      "birch": "Birch",
+      "birchDesc": "Light, durable",
+      "walnut": "Walnut",
+      "walnutDesc": "Elite, dark",
+      "mahogany": "Mahogany",
+      "mahoganyDesc": "Premium class",
+      "mdf": "MDF",
+      "mdfDesc": "Budget option"
+    },
+    "finish": {
+      "title": "Finish",
+      "matte": "Matte",
+      "glossy": "Glossy",
+      "satin": "Satin",
+      "natural": "Natural"
+    },
+    "hardware": {
+      "title": "Hardware",
+      "standard": "Standard hardware",
+      "premium": "Premium hardware",
+      "hidden": "Hidden hardware",
+      "decorative": "Decorative hardware"
+    },
+    "extras": {
+      "title": "Additional Options",
+      "builtInLighting": "Built-in lighting",
+      "softCloseDoors": "Soft-close doors",
+      "drawers": "Drawers",
+      "builtInAppliances": "Built-in appliances",
+      "stoneCountertop": "Stone countertop",
+      "glassBacksplash": "Glass backsplash",
+      "doorClosers": "Door closers",
+      "softUpholstery": "Soft upholstery",
+      "mirror": "Mirror",
+      "storageBoxes": "Storage boxes",
+      "liftMechanism": "Lift mechanism",
+      "orthopedicBase": "Orthopedic base",
+      "softSeatUpholstery": "Soft seat upholstery",
+      "clothingHooks": "Clothing hooks",
+      "shoeRack": "Shoe rack",
+      "softBackrest": "Soft backrest",
+      "adjustableHeight": "Adjustable height",
+      "casters": "Casters",
+      "cableManagement": "Cable management",
+      "keyboardTray": "Keyboard tray",
+      "drawerLocks": "Drawer locks",
+      "ergonomicDesign": "Ergonomic design",
+      "moistureResistant": "Moisture-resistant coating",
+      "heatedMirror": "Heated mirror",
+      "antibacterialCoating": "Antibacterial coating",
+      "softHeadboard": "Soft headboard",
+      "sideNightstands": "Side nightstands",
+      "cableHoles": "Cable holes",
+      "glassDoors": "Glass doors",
+      "equipmentShelves": "Equipment shelves",
+      "mirrorDoors": "Mirror doors",
+      "clothingRods": "Clothing rods",
+      "variableHeightShelves": "Variable height shelves",
+      "shoeShelves": "Shoe shelves",
+      "fullLengthMirror": "Full-length mirror",
+      "laundryBaskets": "Laundry baskets",
+      "hangersWithHooks": "Hangers with hooks",
+      "adjustableShelves": "Adjustable shelves",
+      "slideOutMechanisms": "Slide-out mechanisms",
+      "antiTipProtection": "Anti-tip protection"
+    },
+    "quantity": {
+      "title": "Quantity"
+    },
+    "delivery": {
+      "title": "Delivery",
+      "standard": "Standard delivery (5-7 days)",
+      "express": "Express delivery (1-2 days)",
+      "pickup": "Pickup (free)",
+      "floorDelivery": "Delivery + floor lift",
+      "free": "Free"
+    },
+    "assembly": {
+      "title": "Assembly",
+      "required": "Professional assembly required (+3,000 ₸ per unit)",
+      "included": "✓ Professional assembly included (mandatory for this furniture type)"
+    },
+    "warranty": {
+      "title": "Warranty",
+      "oneYear": "1 year",
+      "twoYears": "2 years",
+      "threeYears": "3 years",
+      "fiveYears": "5 years"
+    },
+    "notes": {
+      "title": "Special Requests",
+      "placeholder": "Specify any special requirements for furniture, color, packaging, etc."
+    },
+    "pricing": {
+      "title": "Price Calculation",
+      "basePrice": "Base price:",
+      "maxBudget": "With negotiation (max):",
+      "note": "Price is calculated automatically based on all selected parameters. Masters will be able to offer their prices within the specified range."
+    },
+    "timing": {
+      "title": "Timeline",
+      "deadline": "Deadline",
+      "urgency": {
+        "low": "Low priority",
+        "lowDesc": "Not urgent, can wait",
+        "medium": "Medium priority",
+        "mediumDesc": "Preferably soon",
+        "high": "High priority",
+        "highDesc": "Urgent, needed ASAP"
+      }
+    },
+    "submit": "Submit to auction",
+    "validation": {
+      "deadlineRequired": "Please specify the desired deadline",
+      "budgetRequired": "Please specify a valid budget",
+      "maxBudgetTooLow": "Maximum budget must be greater than desired price"
+    },
+    "success": "Order successfully created and submitted to auction!",
+    "error": "Error creating order"
+  },
+  "browsePortfolio": {
+    "title": "Furniture Makers' Works",
+    "workCount": {
+      "one": "work",
+      "few": "works",
+      "many": "works"
+    },
+    "search": {
+      "placeholder": "Search by name, materials, furniture type...",
+      "filters": "Filters",
+      "clearFilters": "Clear filters"
+    },
+    "filters": {
+      "category": "Category",
+      "style": "Style",
+      "material": "Material",
+      "priceFrom": "Price from (₸)",
+      "priceTo": "Price to (₸)",
+      "allCategories": "All categories",
+      "allStyles": "All styles",
+      "allMaterials": "All materials"
+    },
+    "categories": {
+      "kitchen": "Kitchen furniture",
+      "wardrobes": "Wardrobes and dressing rooms",
+      "bedroom": "Bedroom furniture",
+      "living": "Living room (walls, cabinets)",
+      "office": "Office furniture",
+      "children": "Children's furniture",
+      "hallway": "Hallways",
+      "tables": "Tables (dining, writing)",
+      "chairs": "Chairs and armchairs",
+      "custom": "Custom cabinet furniture",
+      "soft": "Upholstered furniture",
+      "builtin": "Built-in furniture",
+      "bathroom": "Bathroom"
+    },
+    "styles": {
+      "modern": "Modern",
+      "classic": "Classic",
+      "minimalism": "Minimalism",
+      "loft": "Loft",
+      "scandinavian": "Scandinavian",
+      "provence": "Provence"
+    },
+    "materials": {
+      "chipboard": "Chipboard",
+      "mdf": "MDF",
+      "solid": "Solid wood",
+      "veneer": "Veneer",
+      "plastic": "Plastic",
+      "glass": "Glass",
+      "metal": "Metal"
+    },
+    "card": {
+      "noPhoto": "No photo",
+      "type": "Type:",
+      "style": "Style:",
+      "materials": "Materials:"
+    },
+    "emptyState": {
+      "title": "No works found",
+      "description": "Try changing search parameters or filters"
+    },
+    "modal": {
+      "description": "Description",
+      "furnitureType": "Furniture type:",
+      "style": "Style:",
+      "materials": "Materials:",
+      "color": "Color/Finish:",
+      "dimensions": "Dimensions:",
+      "executionTime": "Production time:",
+      "warranty": "Warranty:",
+      "location": "Location:",
+      "assemblyIncluded": "Assembly included",
+      "deliveryIncluded": "Delivery included",
+      "price": "Price:",
+      "noImages": "No images"
+    },
+    "master": {
+      "title": "Master information",
+      "defaultName": "Master",
+      "noRating": "No rating",
+      "orderCount": {
+        "one": "order",
+        "few": "orders",
+        "many": "orders"
+      },
+      "viewProfile": "Master profile",
+      "sendMessage": "Send message"
+    },
+    "favorites": {
+      "add": "Add to favorites",
+      "remove": "Remove from favorites",
+      "added": "Added to favorites",
+      "removed": "Removed from favorites",
+      "error": "Error changing favorites"
+    },
+    "favoritesPage": {
+    "title": "Favorites",
+    "subtitle": "Your favorite orders and designs",
+    "stats": {
+      "total": "Total favorites",
+      "totalCost": "Total cost"
+    },
+    "tabs": {
+      "orders": "Orders",
+      "portfolio": "Furniture Works"
+    },
+    "search": "Search favorites...",
+    "loading": "Loading favorites...",
+    "empty": {
+      "title": "No favorites yet",
+      "orders": "Add orders to favorites to find them quickly",
+      "portfolio": "Add furniture works to favorites"
+    },
+    "portfolio": {
+      "noTitle": "Untitled",
+      "details": {
+        "furnitureType": "Furniture Type:",
+        "style": "Style:",
+        "materials": "Materials:",
+        "color": "Color:",
+        "dimensions": "Dimensions:",
+        "executionTime": "Execution Time:",
+        "days": "days",
+        "warranty": "Warranty:",
+        "months": "months",
+        "location": "Location:"
+      },
+      "services": {
+        "title": "Additional Services:",
+        "assembly": "✓ Assembly included",
+        "delivery": "✓ Delivery included"
+      },
+      "master": {
+        "title": "About Master",
+        "reviews": "reviews",
+        "profile": "Profile",
+        "contact": "Contact"
+      }
+    }
+  },
+    "errors": {
+      "loadFailed": "Error loading works"
+    }
+  },
+  "myOrders": {
+    "title": "My Orders",
+    "subtitle": "All your furniture orders in one place",
+    "stats": {
+      "completed": "Completed",
+      "active": "Active",
+      "total": "Total"
+    },
+    "search": {
+      "placeholder": "Search orders..."
+    },
+    "filters": {
+      "allStatuses": "All statuses",
+      "pending": "Pending",
+      "active": "Active",
+      "inProgress": "In progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "loading": "Loading orders...",
+    "emptyState": {
+      "title": "No orders found",
+      "description": "Try changing search parameters"
+    },
+    "viewBids": "View bids",
+    "bidsModal": {
+      "title": "Master bids",
+      "loading": "Loading bids...",
+      "noBids": "No bids from masters yet",
+      "defaultMaster": "Master",
+      "orders": "orders",
+      "reviews": "reviews",
+      "accepted": "Accepted",
+      "price": "Price",
+      "deadline": "Deadline",
+      "day": "day",
+      "days": "days",
+      "masterComment": "Master's comment:",
+      "bidSent": "Bid sent:",
+      "acceptBid": "Accept bid"
+    },
+    "messages": {
+      "accepting": "Accepting master's bid",
+      "bidAccepted": "Bid accepted! Master received the order. Chat created. Redirecting to chat...",
+      "insufficientFunds": "Master cannot accept order: insufficient funds in wallet to pay commission. Required: {{required}}₸, available: {{available}}₸. Ask the master to top up the wallet.",
+      "unpaidCommissions": "Master cannot accept order: has unpaid commissions for previous orders. Ask the master to pay commissions.",
+      "acceptError": "Error accepting bid"
+    }
+  },
+  "activeOrders": {
+    "title": "Active Orders",
+    "subtitle": "Orders currently in progress",
+    "stats": {
+      "active": "Active",
+      "inProgress": "In Progress",
+      "soonDeadline": "Soon Deadline",
+      "urgent": "Urgent"
+    },
+    "search": {
+      "placeholder": "Search active orders..."
+    },
+    "loading": "Loading active orders...",
+    "emptyState": {
+      "title": "No active orders",
+      "description": "You don't have any orders in progress yet"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "active": "Active",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "countdown": {
+      "title": "Time remaining until deadline:",
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "seconds": "Seconds"
+    },
+    "progress": {
+      "title": "Execution progress",
+      "elapsed": "Time elapsed",
+      "remaining": "Remaining"
+    },
+    "timeline": {
+      "title": "Execution stages",
+      "created": "Order created",
+      "inProgress": "In progress",
+      "executing": "Executing",
+      "waiting": "Waiting",
+      "delivery": "Delivery",
+      "notSpecified": "Not specified"
+    },
+    "info": {
+      "cost": "Cost",
+      "deadline": "Deadline",
+      "client": "Client",
+      "deliveryAddress": "Delivery address",
+      "status": "Status"
+    },
+    "tags": {
+      "delivery": "Delivery",
+      "materials": "Materials:"
+    },
+    "buttons": {
+      "details": "Details",
+      "acceptWork": "Accept Work",
+      "openChat": "Open Chat"
+    },
+    "notifications": {
+      "acceptSuccess": "Work successfully accepted!",
+      "acceptError": "Error accepting work",
+      "chatNotFound": "Chat for this order hasn't been created yet",
+      "chatError": "Error opening chat"
+    },
+    "acceptModal": {
+      "title": "Accept Work",
+      "description": "Are you sure you want to accept the work? Please rate the quality and leave feedback for the master.",
+      "ratingLabel": "Work rating",
+      "reviewLabel": "Review (optional)",
+      "reviewPlaceholder": "Share your opinion about the master's work...",
+      "cancel": "Cancel",
+      "confirm": "Accept Work",
+      "submitting": "Submitting..."
+    },
+    "modal": {
+      "progressTitle": "Execution progress",
+      "countdownTitle": "Countdown to deadline",
+      "description": "Description",
+      "descriptionEmpty": "No description provided",
+      "timelineTitle": "Timeline",
+      "progressTitle2": "Progress",
+      "infoTitle": "Information",
+      "statusUrgent": "Urgent!",
+      "statusWarning": "Soon deadline",
+      "statusOnTime": "On time"
+    }
+  },
+  "aiDesigner": {
+    "title": "AI Designer",
+    "subtitle": "Create unique furniture designs with artificial intelligence",
+    "clearChat": "Clear chat",
+    "welcomeMessage": "Hello! I'm AI Designer. Describe the furniture you want to see, and I'll generate an image for you. For example: 'modern sofa in Scandinavian style' or 'wooden oak dining table'.",
+    "generating": "Generating image... This may take a few seconds.",
+    "generatedImage": "Here's your furniture! If you want to change something, describe new requirements.",
+    "generationError": "Sorry, an error occurred while generating the image. Please try again.",
+    "downloadImage": "Download image",
+    "regenerate": "Regenerate",
+    "copyPrompt": "Copy prompt",
+    "tryExamples": "Try these examples:",
+    "examples": {
+      "modernSofa": "Modern sofa in Scandinavian style",
+      "woodenTable": "Wooden oak dining table",
+      "minimalistBed": "Minimalist bed with soft headboard",
+      "luxuryChair": "Luxury velvet armchair in art deco style"
+    },
+    "inputPlaceholder": "Describe the furniture you want to generate...",
+    "inputHint": "Press Enter to send, Shift+Enter for new line",
+    "sendToChat": "Send to chat",
+    "selectChat": "Select chat",
+    "loadingChats": "Loading chats...",
+    "noChats": "You don't have any active chats yet",
+    "master": "Master",
+    "client": "Client",
+    "sentFromAI": "Image from AI Designer",
+    "imageSentSuccess": "Image successfully sent to chat!",
+    "imageSentError": "Error sending image. Please try again."
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "appTitle": "Management System",
+    "adminRole": "Administrator",
+    "users": "Users",
+    "auctions": "Auctions",
+    "ratings": "Ratings",
+    "statistics": "Statistics",
+    "notifications": "Notifications",
+    "models3d": "3D Models",
+    "totalUsers": "Total Users",
+    "activeUsers": "Active Users",
+    "newUsers": "New This Month",
+    "createUser": "Create User",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "newPassword": "New Password",
+    "phone": "Phone",
+    "address": "Address",
+    "role": "Role",
+    "status": "Status",
+    "registeredAt": "Registration Date",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "block": "Block",
+    "unblock": "Unblock",
+    "save": "Save",
+    "cancel": "Cancel",
+    "create": "Create",
+    "active": "Active",
+    "banned": "Banned",
+    "customer": "Customer",
+    "master": "Furniture Maker",
+    "admin": "Admin",
+    "activeAuctions": "Active Auctions",
+    "completedAuctions": "Completed Auctions",
+    "pending": "Pending",
+    "client": "Client",
+    "bidsCount": "Number of Bids",
+    "viewDetails": "View Details",
+    "seller": "Seller",
+    "rating": "Rating",
+    "completedOrders": "Completed Orders",
+    "avgPrice": "Average Price",
+    "totalAuctions": "Total Auctions",
+    "totalRevenue": "Total Revenue",
+    "newAuction": "New Auction",
+    "agoMinutes": "minutes ago",
+    "totalModels": "Total Models",
+    "uploadModel": "Upload Model",
+    "modelName": "Model Name",
+    "modelCategory": "Category",
+    "modelPrice": "Price",
+    "modelDescription": "Description",
+    "objFile": "OBJ File",
+    "mtlFile": "MTL File",
+    "textureFiles": "Texture Files",
+    "selectObjFile": "Select OBJ File",
+    "selectMtlFile": "Select MTL File",
+    "uploadSuccess": "Model uploaded successfully",
+    "uploadError": "Error uploading model",
+    "deleteModel": "Delete Model",
+    "modelDeleted": "Model deleted successfully",
+    "deleteError": "Error deleting model",
+    "loadError": "Error loading data",
+    "preview": "Preview",
+    "dimensions": "Dimensions",
+    "width": "Width",
+    "height": "Height",
+    "depth": "Depth",
+    "materials": "Materials",
+    "style": "Style",
+    "objRequired": "OBJ file is required",
+    "confirmDelete": "Are you sure you want to delete this model?"
+  },
+  "contactPage": {
+    "heroTitle": "Contact Us",
+    "heroSubtitle": "We're always in touch and ready to help you with any questions about the platform, orders, or partnerships",
+    "contactInfo": "Contact Information",
+    "phone": "Phone",
+    "mainOffice": "Main Office",
+    "mainOfficeAddress": "Almaty, Al-Farabi ave. 77/8, Esentai Tower BC, office 1201",
+    "workHours": "Working Hours",
+    "mondayFriday": "Monday - Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday",
+    "dayOff": "Day Off",
+    "quickActions": "Quick Actions",
+    "onlineChat": "Online Chat",
+    "sendMessage": "Send Message",
+    "formSubtitle": "Fill out the form below and we'll get back to you as soon as possible",
+    "yourName": "Your Name",
+    "enterName": "Enter your name",
+    "subject": "Subject",
+    "selectSubject": "Select subject",
+    "generalQuestion": "General Question",
+    "partnership": "Partnership",
+    "techSupport": "Technical Support",
+    "complaint": "Complaint",
+    "press": "Press",
+    "message": "Message",
+    "messagePlaceholder": "Describe your question or suggestion in detail",
+    "attachFiles": "Attach Files (optional)",
+    "dragFiles": "Drag files here or click to select",
+    "fileLimit": "Maximum 5 files, up to 10 MB each",
+    "ourLocation": "Our Location",
+    "mapPlaceholder": "Interactive map of ALLIANCE offices",
+    "ourOffices": "Our Offices",
+    "almaty": "Almaty",
+    "almatyAddress": "Al-Farabi ave. 77/8, Esentai Tower BC",
+    "astana": "Astana",
+    "astanaAddress": "Mangilik El ave. 55/20, Expo BC",
+    "shymkent": "Shymkent",
+    "shymkentAddress": "Tauke khan ave. 4, Mega Tower BC",
+    "noAnswer": "Didn't find an answer to your question?",
+    "checkFaq": "Check our frequently asked questions section - there might be an answer to your question",
+    "goToFaq": "Go to FAQ"
+  }
+}

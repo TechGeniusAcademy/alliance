@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { orderService } from '../services/orderService';
 import type { Order } from '../types/order';
+import { API_BASE_URL } from '../config/api';
 import OrderCard from '../components/OrderCard';
 import { MdFilterList, MdSearch, MdInbox, MdClose, MdPerson, MdAttachMoney, MdTimer, MdStar, MdCheck } from 'react-icons/md';
 import Toast from '../components/Toast';
@@ -24,6 +27,8 @@ interface OrderBid {
 }
 
 const MyOrders = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,18 +55,6 @@ const MyOrders = () => {
     }
   };
 
-  const handleFavoriteToggle = async (orderId: number, isFavorite: boolean) => {
-    try {
-      if (isFavorite) {
-        await orderService.addToFavorites(orderId);
-      } else {
-        await orderService.removeFromFavorites(orderId);
-      }
-    } catch (error) {
-      console.error('Failed to toggle favorite:', error);
-    }
-  };
-
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          order.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -80,7 +73,7 @@ const MyOrders = () => {
     setLoadingBids(true);
     
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${order.id}/bids`, {
+      const response = await fetch(`${API_BASE_URL}/api/orders/${order.id}/bids`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
@@ -111,20 +104,31 @@ const MyOrders = () => {
 
       // Показываем информационное уведомление
       setToast({ 
-        message: `Принимаем заявку мастера ${bid.master_name}...`, 
+        message: `${t('myOrders.messages.accepting')} ${bid.master_name}...`, 
         type: 'info' 
       });
 
       // Принимаем заявку напрямую
-      await orderService.acceptBid(bidId);
+      const response = await orderService.acceptBid(bidId);
+      
+      console.log('🔍 ACCEPT BID RESPONSE:', response);
+      console.log('🔍 chatId from response:', response.chatId);
       
       setToast({ 
-        message: 'Заявка принята! Мастер получил заказ в работу. Комиссия списана с кошелька мастера.', 
+        message: t('myOrders.messages.bidAccepted'), 
         type: 'success' 
       });
       
       handleCloseBidsModal();
       loadOrders(); // Обновляем список заказов
+      
+      // Перенаправляем в чат через 1 секунду с информацией о chatId
+      setTimeout(() => {
+        console.log('🔍 NAVIGATING TO CHAT with chatId:', response.chatId);
+        navigate('/dashboard/chats', { 
+          state: { chatId: response.chatId, forceReload: true } 
+        });
+      }, 1000);
       
     } catch (error: unknown) {
       console.error('Error accepting bid:', error);
@@ -135,17 +139,17 @@ const MyOrders = () => {
         const required = err.response.data.required || 0;
         const available = err.response.data.available || 0;
         setToast({ 
-          message: `Мастер не может принять заказ: недостаточно средств на кошельке для оплаты комиссии. Требуется: ${required}₸, доступно: ${available}₸. Попросите мастера пополнить кошелек.`,
+          message: t('myOrders.messages.insufficientFunds', { required, available }),
           type: 'error' 
         });
       } else if (err.response?.data?.error === 'UNPAID_COMMISSIONS') {
         setToast({ 
-          message: 'Мастер не может принять заказ: у него есть неоплаченные комиссии за предыдущие заказы. Попросите мастера оплатить комиссии.',
+          message: t('myOrders.messages.unpaidCommissions'),
           type: 'error' 
         });
       } else {
         setToast({ 
-          message: err.response?.data?.message || 'Ошибка при принятии заявки', 
+          message: err.response?.data?.message || t('myOrders.messages.acceptError'), 
           type: 'error' 
         });
       }
@@ -165,21 +169,21 @@ const MyOrders = () => {
     <div className={styles.ordersPage}>
       <div className={styles.pageHeader}>
         <div>
-          <h1 className={styles.pageTitle}>Мои заказы</h1>
-          <p className={styles.pageSubtitle}>Все ваши заказы мебели в одном месте</p>
+          <h1 className={styles.pageTitle}>{t('myOrders.title')}</h1>
+          <p className={styles.pageSubtitle}>{t('myOrders.subtitle')}</p>
         </div>
         <div className={styles.headerStats}>
           <div className={styles.statCard}>
             <div className={styles.statValue}>{getStatusCount('completed')}</div>
-            <div className={styles.statLabel}>Завершено</div>
+            <div className={styles.statLabel}>{t('myOrders.stats.completed')}</div>
           </div>
           <div className={styles.statCard}>
             <div className={styles.statValue}>{getStatusCount('active')}</div>
-            <div className={styles.statLabel}>Активные</div>
+            <div className={styles.statLabel}>{t('myOrders.stats.active')}</div>
           </div>
           <div className={styles.statCard}>
             <div className={styles.statValue}>{orders.length}</div>
-            <div className={styles.statLabel}>Всего</div>
+            <div className={styles.statLabel}>{t('myOrders.stats.total')}</div>
           </div>
         </div>
       </div>
@@ -189,7 +193,7 @@ const MyOrders = () => {
           <MdSearch className={styles.searchIcon} />
           <input
             type="text"
-            placeholder="Поиск заказов..."
+            placeholder={t('myOrders.search.placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={styles.searchInput}
@@ -203,12 +207,12 @@ const MyOrders = () => {
             onChange={(e) => setFilterStatus(e.target.value as Order['status'] | 'all')}
             className={styles.filterSelect}
           >
-            <option value="all">Все статусы ({getStatusCount('all')})</option>
-            <option value="pending">Ожидает ({getStatusCount('pending')})</option>
-            <option value="active">Активен ({getStatusCount('active')})</option>
-            <option value="in_progress">В работе ({getStatusCount('in_progress')})</option>
-            <option value="completed">Завершён ({getStatusCount('completed')})</option>
-            <option value="cancelled">Отменён ({getStatusCount('cancelled')})</option>
+            <option value="all">{t('myOrders.filters.allStatuses')} ({getStatusCount('all')})</option>
+            <option value="pending">{t('myOrders.filters.pending')} ({getStatusCount('pending')})</option>
+            <option value="active">{t('myOrders.filters.active')} ({getStatusCount('active')})</option>
+            <option value="in_progress">{t('myOrders.filters.inProgress')} ({getStatusCount('in_progress')})</option>
+            <option value="completed">{t('myOrders.filters.completed')} ({getStatusCount('completed')})</option>
+            <option value="cancelled">{t('myOrders.filters.cancelled')} ({getStatusCount('cancelled')})</option>
           </select>
         </div>
       </div>
@@ -216,15 +220,15 @@ const MyOrders = () => {
       {loading ? (
         <div className={styles.loadingContainer}>
           <div className={styles.loader}></div>
-          <p>Загрузка заказов...</p>
+          <p>{t('myOrders.loading')}</p>
         </div>
       ) : filteredOrders.length === 0 ? (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>
             <MdInbox size={64} />
           </div>
-          <h3>Заказы не найдены</h3>
-          <p>Попробуйте изменить параметры поиска</p>
+          <h3>{t('myOrders.emptyState.title')}</h3>
+          <p>{t('myOrders.emptyState.description')}</p>
         </div>
       ) : (
         <div className={styles.ordersGrid}>
@@ -232,7 +236,7 @@ const MyOrders = () => {
             <div key={order.id} style={{ position: 'relative' }}>
               <OrderCard
                 order={order}
-                onFavoriteToggle={handleFavoriteToggle}
+                showActions={false}
               />
               {order.bidsCount > 0 && (order.status === 'auction' || order.status === 'pending' || order.status === 'active') && (
                 <button
@@ -255,7 +259,7 @@ const MyOrders = () => {
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                 >
-                  Посмотреть предложения ({order.bidsCount})
+                  {t('myOrders.viewBids')} ({order.bidsCount})
                 </button>
               )}
             </div>
@@ -314,7 +318,7 @@ const MyOrders = () => {
                   <MdClose size={24} />
                 </button>
                 <h2 style={{ margin: '0 0 8px 0', fontSize: '1.8rem', color: '#2d3748' }}>
-                  Предложения мастеров
+                  {t('myOrders.bidsModal.title')}
                 </h2>
                 <p style={{ margin: 0, color: '#718096', fontSize: '0.95rem' }}>
                   {selectedOrder.title}
@@ -324,12 +328,12 @@ const MyOrders = () => {
               {loadingBids ? (
                 <div style={{ textAlign: 'center', padding: '40px' }}>
                   <div className={styles.loader}></div>
-                  <p style={{ color: '#718096', marginTop: '16px' }}>Загрузка предложений...</p>
+                  <p style={{ color: '#718096', marginTop: '16px' }}>{t('myOrders.bidsModal.loading')}</p>
                 </div>
               ) : bids.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px' }}>
                   <MdInbox size={64} style={{ color: '#cbd5e0', marginBottom: '16px' }} />
-                  <p style={{ color: '#718096', fontSize: '1.1rem' }}>Пока нет предложений от мастеров</p>
+                  <p style={{ color: '#718096', fontSize: '1.1rem' }}>{t('myOrders.bidsModal.noBids')}</p>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -370,7 +374,7 @@ const MyOrders = () => {
                           </div>
                           <div>
                             <h3 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', color: '#2d3748' }}>
-                              {bid.master_name || 'Мастер'}
+                              {bid.master_name || t('myOrders.bidsModal.defaultMaster')}
                             </h3>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#718096' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -378,9 +382,9 @@ const MyOrders = () => {
                                 <span>{bid.rating !== null && bid.rating !== undefined ? Number(bid.rating).toFixed(1) : '0.0'}</span>
                               </div>
                               <span>•</span>
-                              <span>{bid.completed_orders || 0} заказов</span>
+                              <span>{bid.completed_orders || 0} {t('myOrders.bidsModal.orders')}</span>
                               <span>•</span>
-                              <span>{bid.reviews_count || 0} отзывов</span>
+                              <span>{bid.reviews_count || 0} {t('myOrders.bidsModal.reviews')}</span>
                             </div>
                           </div>
                         </div>
@@ -397,7 +401,7 @@ const MyOrders = () => {
                             gap: '6px',
                           }}>
                             <MdCheck size={18} />
-                            Принято
+                            {t('myOrders.bidsModal.accepted')}
                           </div>
                         )}
                       </div>
@@ -406,7 +410,7 @@ const MyOrders = () => {
                         <div style={{ padding: '12px', background: '#f7fafc', borderRadius: '8px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                             <MdAttachMoney size={20} color="#667eea" />
-                            <span style={{ fontSize: '0.85rem', color: '#718096' }}>Цена</span>
+                            <span style={{ fontSize: '0.85rem', color: '#718096' }}>{t('myOrders.bidsModal.price')}</span>
                           </div>
                           <div style={{ fontSize: '1.2rem', fontWeight: '600', color: '#2d3748' }}>
                             {formatPrice(bid.proposed_price)}
@@ -415,10 +419,10 @@ const MyOrders = () => {
                         <div style={{ padding: '12px', background: '#f7fafc', borderRadius: '8px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                             <MdTimer size={20} color="#667eea" />
-                            <span style={{ fontSize: '0.85rem', color: '#718096' }}>Срок</span>
+                            <span style={{ fontSize: '0.85rem', color: '#718096' }}>{t('myOrders.bidsModal.deadline')}</span>
                           </div>
                           <div style={{ fontSize: '1.2rem', fontWeight: '600', color: '#2d3748' }}>
-                            {bid.estimated_days} {bid.estimated_days === 1 ? 'день' : 'дней'}
+                            {bid.estimated_days} {bid.estimated_days === 1 ? t('myOrders.bidsModal.day') : t('myOrders.bidsModal.days')}
                           </div>
                         </div>
                       </div>
@@ -426,7 +430,7 @@ const MyOrders = () => {
                       {bid.comment && (
                         <div style={{ marginBottom: '16px', padding: '12px', background: '#f7fafc', borderRadius: '8px' }}>
                           <div style={{ fontSize: '0.85rem', fontWeight: '600', color: '#4a5568', marginBottom: '4px' }}>
-                            Комментарий мастера:
+                            {t('myOrders.bidsModal.masterComment')}
                           </div>
                           <p style={{ margin: 0, color: '#718096', fontSize: '0.9rem', lineHeight: '1.5' }}>
                             {bid.comment}
@@ -435,7 +439,7 @@ const MyOrders = () => {
                       )}
 
                       <div style={{ fontSize: '0.85rem', color: '#a0aec0', marginBottom: '12px' }}>
-                        Предложение отправлено: {formatDate(bid.created_at)}
+                        {t('myOrders.bidsModal.bidSent')} {formatDate(bid.created_at)}
                       </div>
 
                       {bid.status === 'pending' && (
@@ -456,7 +460,7 @@ const MyOrders = () => {
                           onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
                           onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                         >
-                          Принять предложение
+                          {t('myOrders.bidsModal.acceptBid')}
                         </button>
                       )}
                     </div>

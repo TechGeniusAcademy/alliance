@@ -29,6 +29,7 @@ export interface Message {
   chat_id: number;
   sender_id: number;
   message: string;
+  image_url?: string | null;
   is_read: boolean;
   created_at: string;
   sender_name: string;
@@ -62,13 +63,28 @@ class ChatService {
   }
 
   async getMyChats(): Promise<Chat[]> {
-    const response = await axios.get(`${API_URL}/chats`, this.getAuthHeader());
-    return response.data.chats;
+    try {
+      const response = await axios.get(`${API_URL}/chats`, this.getAuthHeader());
+      // Backend returns array directly, not wrapped in { chats: [] }
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      console.error('Error in getMyChats:', error);
+      return [];
+    }
   }
 
   async getOrCreateChat(orderId: number): Promise<Chat> {
     const response = await axios.get(
       `${API_URL}/chats/order/${orderId}`,
+      this.getAuthHeader()
+    );
+    return response.data.chat;
+  }
+
+  async createOrGetChatWithMaster(masterId: number): Promise<Chat> {
+    const response = await axios.post(
+      `${API_URL}/chats/master/${masterId}`,
+      {},
       this.getAuthHeader()
     );
     return response.data.chat;
@@ -105,6 +121,17 @@ class ChatService {
       {},
       this.getAuthHeader()
     );
+  }
+
+  async getActiveOrdersWithUser(otherUserId: number, role: 'master' | 'customer'): Promise<any[]> {
+    const response = await axios.get(
+      `${API_URL}/chats/active-orders`,
+      {
+        ...this.getAuthHeader(),
+        params: { otherUserId, role }
+      }
+    );
+    return response.data.orders || [];
   }
 
   async acceptWork(orderId: number, rating?: number, review?: string): Promise<void> {

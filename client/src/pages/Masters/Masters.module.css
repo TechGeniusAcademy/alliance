@@ -1,0 +1,658 @@
+/* ==========================================
+   Masters Page Styles
+   ========================================== */
+
+/* Hero Section */
+.hero {
+  padding: var(--spacing-16) 0;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-white);
+}
+
+.heroContainer {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
+  text-align: center;
+}
+
+.breadcrumbs {
+  margin-top: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-6);
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.breadcrumbs a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.breadcrumbs a:hover {
+  color: var(--color-white);
+}
+
+.breadcrumbSeparator {
+  font-size: var(--text-xs);
+}
+
+.heroTitle {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  margin-bottom: var(--spacing-4);
+  color: white;
+}
+
+.heroSubtitle {
+  font-size: var(--text-lg);
+  max-width: 600px;
+  margin: 0 auto var(--spacing-8);
+  opacity: 0.9;
+  color: white;
+}
+
+/* Search */
+.search {
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  gap: 12px;
+}
+
+.searchInputWrapper {
+  flex: 1;
+  position: relative;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.25rem;
+  color: #9ca3af;
+  pointer-events: none;
+  transition: color 0.2s ease;
+  z-index: 1;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 16px 24px 16px 52px;
+  font-size: 1rem;
+  color: #1f2937;
+  background-color: #ffffff;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.searchInput::placeholder {
+  color: #9ca3af;
+}
+
+.searchInput:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), 0 0 0 4px rgba(255, 107, 53, 0.2);
+}
+
+.searchInputWrapper:focus-within .searchIcon {
+  color: #ff6b35;
+}
+
+/* Main Content */
+.main {
+  padding: var(--spacing-10) 0 var(--spacing-20);
+  background-color: var(--color-gray-50);
+}
+
+.mainContainer {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
+}
+
+/* Quick Filters */
+.quickFilters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-8);
+}
+
+.filterChip {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filterChip:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.filterChip.active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.filterChip svg {
+  font-size: 14px;
+}
+
+.filterReset {
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.filterReset:hover {
+  color: var(--color-error);
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-6);
+}
+
+.resultsCount {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.resultsCount strong {
+  color: var(--color-text);
+}
+
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.viewToggle {
+  display: flex;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.viewButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.viewButton:hover {
+  color: var(--color-primary);
+  background-color: var(--color-gray-50);
+}
+
+.viewButton.active {
+  color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.sortSelect {
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+/* Masters Grid */
+.mastersGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-10);
+}
+
+.mastersList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-10);
+}
+
+.mastersList .masterCard {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  padding: var(--spacing-5);
+}
+
+.mastersList .masterCard:hover {
+  transform: translateX(4px);
+}
+
+.mastersList .cardHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: 0;
+  flex-shrink: 0;
+  width: 320px;
+}
+
+.mastersList .favoriteBtn {
+  position: relative;
+  top: auto;
+  right: auto;
+  order: -1;
+}
+
+.mastersList .avatar {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.mastersList .masterInfo {
+  flex: 1;
+}
+
+.mastersList .cardBody {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding: 0;
+  padding-left: var(--spacing-6);
+  border-left: 1px solid var(--color-border);
+}
+
+.mastersList .stats {
+  flex-direction: row;
+  border: none;
+  padding: 0;
+  margin-right: var(--spacing-6);
+  min-width: 200px;
+}
+
+.mastersList .portfolioPreview {
+  display: flex;
+  gap: var(--spacing-2);
+  padding: 0;
+  flex: 1;
+}
+
+.mastersList .portfolioItem {
+  width: 70px;
+  height: 70px;
+}
+
+.mastersList .portfolioMore {
+  width: 70px;
+  height: 70px;
+}
+
+.mastersList .cardFooter {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: 0;
+  padding-left: var(--spacing-6);
+  border-top: none;
+  border-left: 1px solid var(--color-border);
+  width: 300px;
+  flex-shrink: 0;
+}
+
+.mastersList .cardFooter button {
+  flex: 1;
+}
+
+/* Master Card */
+.masterCard {
+  background-color: var(--color-white);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  text-decoration: none;
+  transition: all var(--transition-normal);
+}
+
+.masterCard:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
+}
+
+.cardHeader {
+  position: relative;
+  padding: var(--spacing-6);
+  padding-bottom: var(--spacing-4);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-4);
+}
+
+.favoriteBtn {
+  position: absolute;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: var(--color-gray-100);
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.favoriteBtn:hover {
+  background-color: var(--color-error);
+  color: var(--color-white);
+}
+
+.avatar {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.onlineBadge {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--color-success);
+  border: 2px solid var(--color-white);
+  border-radius: var(--radius-full);
+}
+
+.masterInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.masterName {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-1);
+}
+
+.verifiedBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background-color: var(--color-primary);
+  border-radius: var(--radius-full);
+  color: var(--color-white);
+  font-size: 10px;
+}
+
+.proBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--color-white);
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  border-radius: var(--radius-sm);
+  margin-left: var(--spacing-2);
+}
+
+.specialization {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-2);
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.location svg {
+  font-size: 14px;
+}
+
+/* Card Body */
+.cardBody {
+  padding: 0 var(--spacing-6);
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4) 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.stat svg {
+  color: var(--color-accent);
+}
+
+.rating {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* Portfolio Preview */
+.portfolioPreview {
+  display: flex;
+  gap: var(--spacing-2);
+  padding: var(--spacing-4) 0;
+}
+
+.portfolioItem {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.portfolioItem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.portfolioMore {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-gray-100);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* Card Footer */
+.cardFooter {
+  display: flex;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4) var(--spacing-6) var(--spacing-6);
+}
+
+.cardFooter button {
+  flex: 1;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+}
+
+.pageButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 var(--spacing-3);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.pageButton:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.pageButton.active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.pageButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* CTA Section */
+.cta {
+  padding: var(--spacing-16) 0;
+  background-color: var(--color-white);
+  text-align: center;
+}
+
+.ctaContainer {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
+}
+
+.ctaTitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-3);
+}
+
+.ctaText {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-6);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .mastersGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .search {
+    flex-direction: column;
+  }
+
+  .quickFilters {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: var(--spacing-2);
+    margin-bottom: var(--spacing-6);
+  }
+
+  .filterChip {
+    white-space: nowrap;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    gap: var(--spacing-4);
+    align-items: stretch;
+  }
+
+  .toolbarRight {
+    justify-content: space-between;
+  }
+
+  .mastersGrid {
+    grid-template-columns: 1fr;
+  }
+}

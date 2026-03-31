@@ -1,21 +1,22 @@
 .container {
-  padding: 2rem;
-  height: calc(100vh - 4rem);
+  padding: 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
 .title {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #1e293b;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  padding: 1.5rem 1.5rem 0 1.5rem;
 }
 
 .content {
   display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 2rem;
+  grid-template-columns: 1fr 450px;
+  gap: 0;
   flex: 1;
   overflow: hidden;
 }
@@ -23,20 +24,21 @@
 /* 3D Viewport */
 .viewport {
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: none;
   position: relative;
-  border: 2px solid #e5e7eb;
+  border: none;
 }
 
 /* Панель управления */
 .controls {
   background: white;
-  border-radius: 16px;
+  border-radius: 0;
   padding: 1.5rem;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.05);
+  border-left: 1px solid #e2e8f0;
 }
 
 .controls::-webkit-scrollbar {
@@ -59,8 +61,8 @@
 
 /* Секции */
 .section {
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -71,10 +73,10 @@
 }
 
 .sectionTitle {
-  font-size: 1.125rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   color: #334155;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 /* Сетка выбора мебели */
@@ -89,10 +91,10 @@
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: 0.75rem;
   background: #f8fafc;
   border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
   color: #64748b;
@@ -105,14 +107,14 @@
 }
 
 .furnitureButton.active {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  background: #8b5cf6;
   border-color: #8b5cf6;
   color: white;
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
 .furnitureButton span {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
@@ -218,7 +220,7 @@
 }
 
 .optionButton.active {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  background: #8b5cf6;
   border-color: #8b5cf6;
   color: white;
   box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
@@ -257,8 +259,8 @@
 
 /* Футер с ценой */
 .footer {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
   border-top: 2px solid #e2e8f0;
 }
 
@@ -268,7 +270,7 @@
   align-items: center;
   margin-bottom: 1rem;
   padding: 1rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #f8fafc;
   border-radius: 8px;
 }
 
@@ -279,18 +281,18 @@
 }
 
 .price {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #8b5cf6;
 }
 
 .submitButton {
   width: 100%;
-  padding: 1rem;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  padding: 0.875rem;
+  background: #8b5cf6;
   border: none;
-  border-radius: 12px;
-  font-size: 1rem;
+  border-radius: 8px;
+  font-size: 0.9375rem;
   font-weight: 600;
   color: white;
   cursor: pointer;
@@ -334,7 +336,7 @@
 }
 
 .woodButton.active {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  background: #8b5cf6;
   border-color: #8b5cf6;
   color: white;
 }
@@ -415,7 +417,7 @@
 }
 
 .radioLabel:has(input:checked) {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+  background: rgba(139, 92, 246, 0.1);
   border-color: #8b5cf6;
 }
 
@@ -544,7 +546,7 @@
 
 .urgencyButtonActive {
   border-color: #8b5cf6;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+  background: rgba(139, 92, 246, 0.1);
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
 }
 
@@ -558,6 +560,50 @@
 .urgencyDesc {
   font-size: 12px;
   color: #6b7280;
+}
+
+/* Расчет стоимости */
+.priceBreakdown {
+  background: #667eea;
+  border-radius: 16px;
+  padding: 24px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.priceItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.priceItem:last-of-type {
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.priceLabel {
+  font-size: 1rem;
+  opacity: 0.95;
+}
+
+.priceValue {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.priceNote {
+  margin-top: 20px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  border-left: 4px solid rgba(255, 255, 255, 0.5);
 }
 
 /* Адаптивность */

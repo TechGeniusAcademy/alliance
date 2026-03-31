@@ -1,0 +1,150 @@
+.section {
+  width: 100%;
+  padding: var(--spacing-20) 0;
+  background-color: var(--color-gray-50);
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--spacing-6);
+}
+
+.header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto var(--spacing-12);
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-4);
+}
+
+.subtitle {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-6);
+}
+
+.card {
+  padding: var(--spacing-8);
+  background-color: var(--color-white);
+  border-radius: var(--radius-xl);
+  transition: all var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--spacing-4);
+  background-color: var(--color-primary-light);
+  border-radius: var(--radius-lg);
+}
+
+.icon {
+  font-size: 28px;
+  color: var(--color-primary);
+}
+
+.cardTitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-3);
+}
+
+.cardDescription {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .section {
+    padding: var(--spacing-16) 0;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: var(--spacing-6);
+  }
+}
+
+@media (max-width: 360px) {
+  .section {
+    padding: var(--spacing-12) 0;
+  }
+
+  .container {
+    padding: 0 var(--spacing-3);
+  }
+
+  .header {
+    margin-bottom: var(--spacing-8);
+  }
+
+  .title {
+    font-size: var(--text-2xl);
+  }
+
+  .subtitle {
+    font-size: var(--text-base);
+  }
+
+  .grid {
+    gap: var(--spacing-3);
+  }
+
+  .card {
+    padding: var(--spacing-4);
+  }
+
+  .iconWrapper {
+    width: 50px;
+    height: 50px;
+    margin-bottom: var(--spacing-3);
+  }
+
+  .icon {
+    font-size: 24px;
+  }
+
+  .cardTitle {
+    font-size: var(--text-lg);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .cardDescription {
+    font-size: var(--text-sm);
+  }
+}

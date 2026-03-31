@@ -70,6 +70,65 @@ export const initializeDatabase = async () => {
     await pool.query(createEmailIndex);
     console.log('✓ Индекс для email создан/проверен');
 
+    // Миграция: добавляем поле name если его нет
+    const addNameField = `
+      DO $$ 
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='users' AND column_name='name') THEN
+              ALTER TABLE users ADD COLUMN name VARCHAR(100);
+              -- Заполняем name из email для существующих пользователей
+              UPDATE users SET name = split_part(email, '@', 1) WHERE name IS NULL;
+              -- Делаем поле обязательным после заполнения
+              ALTER TABLE users ALTER COLUMN name SET NOT NULL;
+          END IF;
+      END $$;
+    `;
+    await pool.query(addNameField);
+    console.log('✓ Поле name добавлено/проверено в users');
+
+    // Миграция: переименовываем password в password_hash если нужно, или удаляем дубликаты
+    const fixPasswordField = `
+      DO $$ 
+      BEGIN
+          -- Если есть оба поля, копируем данные из password в password_hash и удаляем password
+          IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='password')
+             AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='password_hash') THEN
+              -- Копируем данные из password в password_hash где password_hash пустой
+              UPDATE users SET password_hash = password WHERE password_hash IS NULL AND password IS NOT NULL;
+              -- Удаляем поле password
+              ALTER TABLE users DROP COLUMN password;
+          -- Если есть только password, переименовываем его в password_hash
+          ELSIF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='password')
+             AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='password_hash') THEN
+              ALTER TABLE users RENAME COLUMN password TO password_hash;
+          -- Если есть только password_hash - ничего не делаем
+          ELSIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='password_hash') THEN
+              -- Если нет ни того ни другого, создаем password_hash
+              ALTER TABLE users ADD COLUMN password_hash VARCHAR(255) NOT NULL DEFAULT '$2b$10$defaulthash';
+          END IF;
+      END $$;
+    `;
+    await pool.query(fixPasswordField);
+    console.log('✓ Поле password_hash настроено корректно');
+
+    // Миграция: добавляем поле email если его нет
+    const addEmailField = `
+      DO $$ 
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='users' AND column_name='email') THEN
+              ALTER TABLE users ADD COLUMN email VARCHAR(100);
+              -- Для существующих пользователей генерируем email из id
+              UPDATE users SET email = CONCAT('user', id, '@temp.com') WHERE email IS NULL;
+              ALTER TABLE users ALTER COLUMN email SET NOT NULL;
+              ALTER TABLE users ADD CONSTRAINT users_email_key UNIQUE (email);
+          END IF;
+      END $$;
+    `;
+    await pool.query(addEmailField);
+    console.log('✓ Поле email добавлено/проверено в users');
+
     // Применяем миграции для добавления полей профиля
     const addProfileFields = `
       DO $$ 
@@ -119,6 +178,50 @@ export const initializeDatabase = async () => {
 
     await pool.query(addRoleAndActiveFields);
     console.log('✓ Миграции для полей role и active применены');
+
+    // Миграция: удаляем старое ограничение role если оно есть и создаем новое
+    const fixRoleConstraint = `
+      DO $$ 
+      BEGIN
+          -- Удаляем старое ограничение если оно существует
+          IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'users_role_check') THEN
+              ALTER TABLE users DROP CONSTRAINT users_role_check;
+          END IF;
+          
+          -- Создаем новое ограничение с правильными значениями
+          IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'users_role_check_new') THEN
+              ALTER TABLE users ADD CONSTRAINT users_role_check_new 
+              CHECK (role IN ('customer', 'master', 'admin'));
+          END IF;
+      END $$;
+    `;
+    await pool.query(fixRoleConstraint);
+    console.log('✓ Ограничение role обновлено');
+
+    // Применяем миграции для добавления полей мастера (last_name, birth_date, iin)
+    const addMasterFields = `
+      DO $$ 
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='users' AND column_name='last_name') THEN
+              ALTER TABLE users ADD COLUMN last_name VARCHAR(100);
+          END IF;
+
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='users' AND column_name='birth_date') THEN
+              ALTER TABLE users ADD COLUMN birth_date DATE;
+          END IF;
+
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='users' AND column_name='iin') THEN
+              ALTER TABLE users ADD COLUMN iin VARCHAR(12) UNIQUE;
+              CREATE INDEX IF NOT EXISTS idx_users_iin ON users(iin);
+          END IF;
+      END $$;
+    `;
+
+    await pool.query(addMasterFields);
+    console.log('✓ Поля мастера (last_name, birth_date, iin) добавлены/проверены');
 
     // Создаем таблицу portfolio
     const createPortfolioTable = `
@@ -335,8 +438,74 @@ export const initializeDatabase = async () => {
     await pool.query(createOrdersTable);
     console.log('✓ Таблица orders создана/проверена');
 
+    // Миграция: добавляем customer_id если его нет
+    const addCustomerIdField = `
+      DO $$ 
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='orders' AND column_name='customer_id') THEN
+              ALTER TABLE orders ADD COLUMN customer_id INTEGER REFERENCES users(id) ON DELETE CASCADE;
+              -- Обновляем существующие записи, устанавливая customer_id = user_id если такое поле есть
+              IF EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='orders' AND column_name='user_id') THEN
+                  UPDATE orders SET customer_id = user_id WHERE customer_id IS NULL;
+              END IF;
+              -- Делаем поле NOT NULL после заполнения данных
+              ALTER TABLE orders ALTER COLUMN customer_id SET NOT NULL;
+          END IF;
+      END $$;
+    `;
+    await pool.query(addCustomerIdField);
+    console.log('✓ Поле customer_id добавлено/проверено в orders');
+
+    // Миграция: добавляем assigned_master_id если его нет
+    const addAssignedMasterIdField = `
+      DO $$ 
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='orders' AND column_name='assigned_master_id') THEN
+              ALTER TABLE orders ADD COLUMN assigned_master_id INTEGER REFERENCES users(id) ON DELETE SET NULL;
+              -- Обновляем существующие записи, устанавливая assigned_master_id = master_id если такое поле есть
+              IF EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='orders' AND column_name='master_id') THEN
+                  UPDATE orders SET assigned_master_id = master_id WHERE assigned_master_id IS NULL;
+              END IF;
+          END IF;
+      END $$;
+    `;
+    await pool.query(addAssignedMasterIdField);
+    console.log('✓ Поле assigned_master_id добавлено/проверено в orders');
+
     await pool.query(createOrdersIndexes);
     console.log('✓ Индексы для orders созданы/проверены');
+
+    // Миграция: добавляем поля category и final_price если их нет
+    const addOrderFields = `
+      DO $$ 
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='orders' AND column_name='category') THEN
+              ALTER TABLE orders ADD COLUMN category VARCHAR(100);
+          END IF;
+          
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='orders' AND column_name='final_price') THEN
+              ALTER TABLE orders ADD COLUMN final_price DECIMAL(10, 2);
+          END IF;
+          
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='orders' AND column_name='title') THEN
+              ALTER TABLE orders ADD COLUMN title VARCHAR(255);
+          END IF;
+          
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='orders' AND column_name='description') THEN
+              ALTER TABLE orders ADD COLUMN description TEXT;
+          END IF;
+      END $$;
+    `;
+    await pool.query(addOrderFields);
+    console.log('✓ Поля category, final_price, title, description добавлены/проверены в orders');
 
     // Добавляем поле furniture_config для хранения 3D конфигурации
     const addFurnitureConfigField = `
@@ -436,6 +605,39 @@ export const initializeDatabase = async () => {
     await pool.query(createChatsIndexes);
     console.log('✓ Индексы для chats созданы/проверены');
 
+    // Миграция: Проверяем и добавляем колонки для правил чата
+    const checkCustomerRulesColumn = `
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'chats' 
+      AND column_name = 'customer_accepted_rules'
+    `;
+    const customerRulesCheck = await pool.query(checkCustomerRulesColumn);
+    
+    if (customerRulesCheck.rows.length === 0) {
+      console.log(' Колонка customer_accepted_rules отсутствует в chats. Добавляю...');
+      await pool.query(`ALTER TABLE chats ADD COLUMN customer_accepted_rules BOOLEAN DEFAULT FALSE`);
+      console.log('✓ Колонка customer_accepted_rules добавлена в chats');
+    } else {
+      console.log('✓ Колонка customer_accepted_rules уже существует в chats');
+    }
+
+    const checkMasterRulesColumn = `
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'chats' 
+      AND column_name = 'master_accepted_rules'
+    `;
+    const masterRulesCheck = await pool.query(checkMasterRulesColumn);
+    
+    if (masterRulesCheck.rows.length === 0) {
+      console.log(' Колонка master_accepted_rules отсутствует в chats. Добавляю...');
+      await pool.query(`ALTER TABLE chats ADD COLUMN master_accepted_rules BOOLEAN DEFAULT FALSE`);
+      console.log('✓ Колонка master_accepted_rules добавлена в chats');
+    } else {
+      console.log('✓ Колонка master_accepted_rules уже существует в chats');
+    }
+
     // Создаем таблицу chat_messages (сообщения в чатах)
     const createChatMessagesTable = `
       CREATE TABLE IF NOT EXISTS chat_messages (
@@ -460,6 +662,32 @@ export const initializeDatabase = async () => {
     await pool.query(createChatMessagesIndexes);
     console.log('✓ Индексы для chat_messages созданы/проверены');
 
+    // Создаем таблицу order_work_stages (этапы работы над заказом)
+    const createWorkStagesTable = `
+      CREATE TABLE IF NOT EXISTS order_work_stages (
+        id SERIAL PRIMARY KEY,
+        order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        stage_key VARCHAR(50) NOT NULL,
+        stage_name VARCHAR(255) NOT NULL,
+        stage_order INTEGER NOT NULL,
+        completed BOOLEAN DEFAULT false,
+        completed_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(order_id, stage_key)
+      );
+    `;
+
+    const createWorkStagesIndexes = `
+      CREATE INDEX IF NOT EXISTS idx_work_stages_order_id ON order_work_stages(order_id);
+      CREATE INDEX IF NOT EXISTS idx_work_stages_completed ON order_work_stages(completed);
+    `;
+
+    await pool.query(createWorkStagesTable);
+    console.log('✓ Таблица order_work_stages создана/проверена');
+
+    await pool.query(createWorkStagesIndexes);
+    console.log('✓ Индексы для order_work_stages созданы/проверены');
+
     // Создаем таблицу transactions (транзакции для выплат мастерам)
     const createTransactionsTable = `
       CREATE TABLE IF NOT EXISTS transactions (
@@ -482,6 +710,34 @@ export const initializeDatabase = async () => {
 
     await pool.query(createTransactionsTable);
     console.log('✓ Таблица transactions создана/проверена');
+
+    // Миграция: добавляем master_id если его нет
+    const addMasterIdToTransactions = `
+      DO $$ 
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='transactions' AND column_name='master_id') THEN
+              ALTER TABLE transactions ADD COLUMN master_id INTEGER REFERENCES users(id) ON DELETE CASCADE;
+              ALTER TABLE transactions ALTER COLUMN master_id SET NOT NULL;
+          END IF;
+      END $$;
+    `;
+    await pool.query(addMasterIdToTransactions);
+    console.log('✓ Поле master_id добавлено/проверено в transactions');
+
+    // Миграция: добавляем order_id если его нет
+    const addOrderIdToTransactions = `
+      DO $$ 
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='transactions' AND column_name='order_id') THEN
+              ALTER TABLE transactions ADD COLUMN order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE;
+              ALTER TABLE transactions ALTER COLUMN order_id SET NOT NULL;
+          END IF;
+      END $$;
+    `;
+    await pool.query(addOrderIdToTransactions);
+    console.log('✓ Поле order_id добавлено/проверено в transactions');
 
     await pool.query(createTransactionsIndexes);
     console.log('✓ Индексы для transactions созданы/проверены');
@@ -522,6 +778,215 @@ export const initializeDatabase = async () => {
     `;
     await pool.query(createReviewsIndexes);
     console.log('✓ Индексы для reviews созданы/проверены');
+
+    // Миграция: добавляем поля в reviews если их нет
+    const addReviewFields = `
+      DO $$ 
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='reviews' AND column_name='customer_id') THEN
+              ALTER TABLE reviews ADD COLUMN customer_id INTEGER REFERENCES users(id) ON DELETE CASCADE;
+              -- Пытаемся заполнить из orders.customer_id
+              UPDATE reviews r 
+              SET customer_id = o.customer_id 
+              FROM orders o 
+              WHERE r.order_id = o.id AND r.customer_id IS NULL;
+          END IF;
+          
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='reviews' AND column_name='master_id') THEN
+              ALTER TABLE reviews ADD COLUMN master_id INTEGER REFERENCES users(id) ON DELETE CASCADE;
+              -- Пытаемся заполнить из orders.assigned_master_id
+              UPDATE reviews r 
+              SET master_id = o.assigned_master_id 
+              FROM orders o 
+              WHERE r.order_id = o.id AND r.master_id IS NULL;
+          END IF;
+          
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                         WHERE table_name='reviews' AND column_name='order_id') THEN
+              ALTER TABLE reviews ADD COLUMN order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE;
+          END IF;
+      END $$;
+    `;
+    await pool.query(addReviewFields);
+    console.log('✓ Поля customer_id, master_id, order_id добавлены/проверены в reviews');
+
+    // Миграция: Добавляем недостающие поля в master_profiles
+    const addMasterProfileFields = `
+      DO $$ 
+      BEGIN
+        -- Добавляем bio
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='bio') THEN
+            ALTER TABLE master_profiles ADD COLUMN bio TEXT;
+        END IF;
+        
+        -- Добавляем company_name
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='company_name') THEN
+            ALTER TABLE master_profiles ADD COLUMN company_name VARCHAR(255);
+        END IF;
+        
+        -- Добавляем specializations
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='specializations') THEN
+            ALTER TABLE master_profiles ADD COLUMN specializations TEXT[];
+        END IF;
+        
+        -- Добавляем years_of_experience
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='years_of_experience') THEN
+            ALTER TABLE master_profiles ADD COLUMN years_of_experience INTEGER DEFAULT 0;
+        END IF;
+        
+        -- Добавляем education
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='education') THEN
+            ALTER TABLE master_profiles ADD COLUMN education VARCHAR(500);
+        END IF;
+        
+        -- Добавляем certifications
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='certifications') THEN
+            ALTER TABLE master_profiles ADD COLUMN certifications TEXT[];
+        END IF;
+        
+        -- Добавляем work_schedule
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='work_schedule') THEN
+            ALTER TABLE master_profiles ADD COLUMN work_schedule VARCHAR(255);
+        END IF;
+        
+        -- Добавляем min_order_amount
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='min_order_amount') THEN
+            ALTER TABLE master_profiles ADD COLUMN min_order_amount DECIMAL(10, 2);
+        END IF;
+        
+        -- Добавляем max_projects_simultaneously
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='max_projects_simultaneously') THEN
+            ALTER TABLE master_profiles ADD COLUMN max_projects_simultaneously INTEGER DEFAULT 3;
+        END IF;
+        
+        -- Добавляем services_offered
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='services_offered') THEN
+            ALTER TABLE master_profiles ADD COLUMN services_offered TEXT[];
+        END IF;
+        
+        -- Добавляем materials_work_with
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='materials_work_with') THEN
+            ALTER TABLE master_profiles ADD COLUMN materials_work_with TEXT[];
+        END IF;
+        
+        -- Добавляем equipment
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='equipment') THEN
+            ALTER TABLE master_profiles ADD COLUMN equipment TEXT;
+        END IF;
+        
+        -- Добавляем workspace_size
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='workspace_size') THEN
+            ALTER TABLE master_profiles ADD COLUMN workspace_size VARCHAR(100);
+        END IF;
+        
+        -- Добавляем has_showroom
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='has_showroom') THEN
+            ALTER TABLE master_profiles ADD COLUMN has_showroom BOOLEAN DEFAULT false;
+        END IF;
+        
+        -- Добавляем showroom_address
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='showroom_address') THEN
+            ALTER TABLE master_profiles ADD COLUMN showroom_address TEXT;
+        END IF;
+        
+        -- Добавляем payment_methods
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='payment_methods') THEN
+            ALTER TABLE master_profiles ADD COLUMN payment_methods TEXT[];
+        END IF;
+        
+        -- Добавляем warranty_terms
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='warranty_terms') THEN
+            ALTER TABLE master_profiles ADD COLUMN warranty_terms TEXT;
+        END IF;
+        
+        -- Добавляем return_policy
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='return_policy') THEN
+            ALTER TABLE master_profiles ADD COLUMN return_policy TEXT;
+        END IF;
+        
+        -- Добавляем website
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='website') THEN
+            ALTER TABLE master_profiles ADD COLUMN website VARCHAR(255);
+        END IF;
+        
+        -- Добавляем instagram
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='instagram') THEN
+            ALTER TABLE master_profiles ADD COLUMN instagram VARCHAR(100);
+        END IF;
+        
+        -- Добавляем facebook
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='facebook') THEN
+            ALTER TABLE master_profiles ADD COLUMN facebook VARCHAR(100);
+        END IF;
+        
+        -- Добавляем telegram
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='telegram') THEN
+            ALTER TABLE master_profiles ADD COLUMN telegram VARCHAR(100);
+        END IF;
+        
+        -- Добавляем whatsapp
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='whatsapp') THEN
+            ALTER TABLE master_profiles ADD COLUMN whatsapp VARCHAR(50);
+        END IF;
+        
+        -- Добавляем languages
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='languages') THEN
+            ALTER TABLE master_profiles ADD COLUMN languages TEXT[];
+        END IF;
+        
+        -- Добавляем delivery_available
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='delivery_available') THEN
+            ALTER TABLE master_profiles ADD COLUMN delivery_available BOOLEAN DEFAULT true;
+        END IF;
+        
+        -- Добавляем assembly_available
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='assembly_available') THEN
+            ALTER TABLE master_profiles ADD COLUMN assembly_available BOOLEAN DEFAULT true;
+        END IF;
+        
+        -- Добавляем design_services
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='design_services') THEN
+            ALTER TABLE master_profiles ADD COLUMN design_services BOOLEAN DEFAULT false;
+        END IF;
+        
+        -- Добавляем consultation_free
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name='master_profiles' AND column_name='consultation_free') THEN
+            ALTER TABLE master_profiles ADD COLUMN consultation_free BOOLEAN DEFAULT true;
+        END IF;
+      END $$;
+    `;
+    await pool.query(addMasterProfileFields);
+    console.log('✓ Все поля добавлены/проверены в master_profiles');
 
     // Миграция: Добавляем поля для комиссионной системы
     const addCommissionFields = `
@@ -622,6 +1087,93 @@ export const initializeDatabase = async () => {
     await pool.query(createWalletIndexes);
     console.log('✓ Индексы для wallet_transactions созданы/проверены');
 
+    // Миграция: Проверяем и добавляем колонку order_id если её нет
+    const checkOrderIdColumn = `
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'wallet_transactions' 
+      AND column_name = 'order_id'
+    `;
+    const orderIdCheck = await pool.query(checkOrderIdColumn);
+    
+    if (orderIdCheck.rows.length === 0) {
+      console.log(' Колонка order_id отсутствует в wallet_transactions. Добавляю...');
+      await pool.query(`ALTER TABLE wallet_transactions ADD COLUMN order_id INTEGER`);
+      await pool.query(`CREATE INDEX IF NOT EXISTS idx_wallet_transactions_order_id ON wallet_transactions(order_id)`);
+      console.log('✓ Колонка order_id добавлена в wallet_transactions');
+    } else {
+      console.log('✓ Колонка order_id уже существует в wallet_transactions');
+    }
+
+    // Миграция: Проверяем и добавляем колонку payment_intent_id если её нет
+    const checkPaymentIntentColumn = `
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'wallet_transactions' 
+      AND column_name = 'payment_intent_id'
+    `;
+    const paymentIntentCheck = await pool.query(checkPaymentIntentColumn);
+    
+    if (paymentIntentCheck.rows.length === 0) {
+      console.log(' Колонка payment_intent_id отсутствует в wallet_transactions. Добавляю...');
+      await pool.query(`ALTER TABLE wallet_transactions ADD COLUMN payment_intent_id VARCHAR(255)`);
+      await pool.query(`CREATE INDEX IF NOT EXISTS idx_wallet_payment_intent ON wallet_transactions(payment_intent_id)`);
+      console.log('✓ Колонка payment_intent_id добавлена в wallet_transactions');
+    } else {
+      console.log('✓ Колонка payment_intent_id уже существует в wallet_transactions');
+    }
+
+    // Миграция: Проверяем и добавляем колонку description если её нет
+    const checkDescriptionColumn = `
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'wallet_transactions' 
+      AND column_name = 'description'
+    `;
+    const descriptionCheck = await pool.query(checkDescriptionColumn);
+    
+    if (descriptionCheck.rows.length === 0) {
+      console.log(' Колонка description отсутствует в wallet_transactions. Добавляю...');
+      await pool.query(`ALTER TABLE wallet_transactions ADD COLUMN description TEXT`);
+      console.log('✓ Колонка description добавлена в wallet_transactions');
+    } else {
+      console.log('✓ Колонка description уже существует в wallet_transactions');
+    }
+
+    // Миграция: Проверяем и добавляем колонку created_at если её нет
+    const checkCreatedAtColumn = `
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'wallet_transactions' 
+      AND column_name = 'created_at'
+    `;
+    const createdAtCheck = await pool.query(checkCreatedAtColumn);
+    
+    if (createdAtCheck.rows.length === 0) {
+      console.log(' Колонка created_at отсутствует в wallet_transactions. Добавляю...');
+      await pool.query(`ALTER TABLE wallet_transactions ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+      console.log('✓ Колонка created_at добавлена в wallet_transactions');
+    } else {
+      console.log('✓ Колонка created_at уже существует в wallet_transactions');
+    }
+
+    // Миграция: Проверяем и добавляем колонку updated_at если её нет
+    const checkUpdatedAtColumn = `
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'wallet_transactions' 
+      AND column_name = 'updated_at'
+    `;
+    const updatedAtCheck = await pool.query(checkUpdatedAtColumn);
+    
+    if (updatedAtCheck.rows.length === 0) {
+      console.log(' Колонка updated_at отсутствует в wallet_transactions. Добавляю...');
+      await pool.query(`ALTER TABLE wallet_transactions ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+      console.log('✓ Колонка updated_at добавлена в wallet_transactions');
+    } else {
+      console.log('✓ Колонка updated_at уже существует в wallet_transactions');
+    }
+
     // Создаем триггер для автоматического создания профиля мастера
     const createMasterProfileTrigger = `
       CREATE OR REPLACE FUNCTION create_master_profile()
@@ -713,6 +1265,142 @@ export const initializeDatabase = async () => {
     `;
     await pool.query(createMasterSettingsTable);
     console.log('✓ Таблица master_settings создана/проверена');
+
+    // Создаем таблицу favorites (избранное)
+    const createFavoritesTable = `
+      CREATE TABLE IF NOT EXISTS favorites (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, order_id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id);
+      CREATE INDEX IF NOT EXISTS idx_favorites_order_id ON favorites(order_id);
+      CREATE INDEX IF NOT EXISTS idx_favorites_created_at ON favorites(created_at DESC);
+    `;
+    await pool.query(createFavoritesTable);
+    console.log('✓ Таблица favorites создана/проверена');
+
+    // Создаем таблицу portfolio_favorites (избранные работы портфолио)
+    const createPortfolioFavoritesTable = `
+      CREATE TABLE IF NOT EXISTS portfolio_favorites (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        portfolio_id INTEGER NOT NULL REFERENCES portfolio(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, portfolio_id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_portfolio_favorites_user_id ON portfolio_favorites(user_id);
+      CREATE INDEX IF NOT EXISTS idx_portfolio_favorites_portfolio_id ON portfolio_favorites(portfolio_id);
+      CREATE INDEX IF NOT EXISTS idx_portfolio_favorites_created_at ON portfolio_favorites(created_at DESC);
+    `;
+    await pool.query(createPortfolioFavoritesTable);
+    console.log('✓ Таблица portfolio_favorites создана/проверена');
+
+    // Создаем таблицу furniture_3d_models (3D модели мебели)
+    const createFurniture3DModelsTable = `
+      CREATE TABLE IF NOT EXISTS furniture_3d_models (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        category VARCHAR(100) NOT NULL,
+        furniture_type VARCHAR(100),
+        base_price DECIMAL(10, 2) NOT NULL DEFAULT 0, -- базовая цена модели
+        obj_file_url TEXT NOT NULL,
+        mtl_file_url TEXT,
+        texture_files JSONB,
+        preview_image TEXT,
+        active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_3d_models_category ON furniture_3d_models(category);
+      CREATE INDEX IF NOT EXISTS idx_3d_models_active ON furniture_3d_models(active);
+      CREATE INDEX IF NOT EXISTS idx_3d_models_created_at ON furniture_3d_models(created_at DESC);
+    `;
+    await pool.query(createFurniture3DModelsTable);
+    console.log('✓ Таблица furniture_3d_models создана/проверена');
+
+    // Миграция: обновляем структуру таблицы furniture_3d_models если она уже существует
+    const migrateFurniture3DModels = `
+      DO $$ 
+      BEGIN
+        -- Добавляем base_price если не существует
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name = 'furniture_3d_models' AND column_name = 'base_price') THEN
+          ALTER TABLE furniture_3d_models ADD COLUMN base_price DECIMAL(10, 2) NOT NULL DEFAULT 0;
+        END IF;
+
+        -- Удаляем старые столбцы если существуют
+        IF EXISTS (SELECT 1 FROM information_schema.columns 
+                  WHERE table_name = 'furniture_3d_models' AND column_name = 'price') THEN
+          ALTER TABLE furniture_3d_models DROP COLUMN IF EXISTS price;
+        END IF;
+
+        IF EXISTS (SELECT 1 FROM information_schema.columns 
+                  WHERE table_name = 'furniture_3d_models' AND column_name = 'style') THEN
+          ALTER TABLE furniture_3d_models DROP COLUMN IF EXISTS style;
+        END IF;
+
+        IF EXISTS (SELECT 1 FROM information_schema.columns 
+                  WHERE table_name = 'furniture_3d_models' AND column_name = 'materials') THEN
+          ALTER TABLE furniture_3d_models DROP COLUMN IF EXISTS materials;
+        END IF;
+
+        IF EXISTS (SELECT 1 FROM information_schema.columns 
+                  WHERE table_name = 'furniture_3d_models' AND column_name = 'width') THEN
+          ALTER TABLE furniture_3d_models DROP COLUMN IF EXISTS width;
+        END IF;
+
+        IF EXISTS (SELECT 1 FROM information_schema.columns 
+                  WHERE table_name = 'furniture_3d_models' AND column_name = 'height') THEN
+          ALTER TABLE furniture_3d_models DROP COLUMN IF EXISTS height;
+        END IF;
+
+        IF EXISTS (SELECT 1 FROM information_schema.columns 
+                  WHERE table_name = 'furniture_3d_models' AND column_name = 'depth') THEN
+          ALTER TABLE furniture_3d_models DROP COLUMN IF EXISTS depth;
+        END IF;
+      END $$;
+    `;
+    await pool.query(migrateFurniture3DModels);
+    console.log('✓ Миграция furniture_3d_models выполнена');
+
+    // Миграция: добавляем поле view_settings для сохранения настроек камеры и объекта
+    const addViewSettings = `
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name = 'furniture_3d_models' AND column_name = 'view_settings') THEN
+          ALTER TABLE furniture_3d_models ADD COLUMN view_settings JSONB;
+        END IF;
+      END $$;
+    `;
+    await pool.query(addViewSettings);
+    console.log('✓ Поле view_settings добавлено/проверено');
+
+    // Создаем таблицу model_parameters (параметры для 3D моделей с ценами)
+    const createModelParametersTable = `
+      CREATE TABLE IF NOT EXISTS model_parameters (
+        id SERIAL PRIMARY KEY,
+        model_id INTEGER NOT NULL REFERENCES furniture_3d_models(id) ON DELETE CASCADE,
+        parameter_type VARCHAR(50) NOT NULL, -- material, size, style, color, finish
+        parameter_name VARCHAR(100) NOT NULL,
+        parameter_value VARCHAR(255) NOT NULL,
+        price_modifier DECIMAL(10, 2) DEFAULT 0, -- дополнительная цена для этого параметра
+        is_default BOOLEAN DEFAULT false,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_model_parameters_model_id ON model_parameters(model_id);
+      CREATE INDEX IF NOT EXISTS idx_model_parameters_type ON model_parameters(parameter_type);
+    `;
+    await pool.query(createModelParametersTable);
+    console.log('✓ Таблица model_parameters создана/проверена');
 
     console.log('✅ Инициализация базы данных завершена успешно!\n');
 

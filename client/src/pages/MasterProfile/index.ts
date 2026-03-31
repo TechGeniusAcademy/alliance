@@ -1,0 +1,1 @@
+export { MasterProfilePage } from './MasterProfile';

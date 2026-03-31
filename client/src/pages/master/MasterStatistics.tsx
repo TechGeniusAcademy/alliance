@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   MdAttachMoney,
   MdWork,
@@ -46,6 +47,7 @@ interface Statistics {
 }
 
 const MasterStatistics = () => {
+  const { t } = useTranslation();
   const [statistics, setStatistics] = useState<Statistics | null>(null);
   const [loading, setLoading] = useState(false);
   const [period, setPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
@@ -66,47 +68,47 @@ const MasterStatistics = () => {
       setStatistics(response.data);
     } catch (error) {
       console.error('Ошибка загрузки статистики:', error);
-      setToast({ message: 'Не удалось загрузить статистику', type: 'error' });
+      setToast({ message: t('masterStatistics.notifications.loadError'), type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
   if (loading || !statistics) {
-    return <div className={styles.loading}>Загрузка статистики...</div>;
+    return <div className={styles.loading}>{t('masterStatistics.loading')}</div>;
   }
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h1>Статистика</h1>
-          <p>Анализ вашей работы и производительности</p>
+          <h1>{t('masterStatistics.title')}</h1>
+          <p>{t('masterStatistics.subtitle')}</p>
         </div>
         <div className={styles.periodSelector}>
           <button
             className={period === 'week' ? styles.active : ''}
             onClick={() => setPeriod('week')}
           >
-            Неделя
+            {t('masterStatistics.periods.week')}
           </button>
           <button
             className={period === 'month' ? styles.active : ''}
             onClick={() => setPeriod('month')}
           >
-            Месяц
+            {t('masterStatistics.periods.month')}
           </button>
           <button
             className={period === 'quarter' ? styles.active : ''}
             onClick={() => setPeriod('quarter')}
           >
-            Квартал
+            {t('masterStatistics.periods.quarter')}
           </button>
           <button
             className={period === 'year' ? styles.active : ''}
             onClick={() => setPeriod('year')}
           >
-            Год
+            {t('masterStatistics.periods.year')}
           </button>
         </div>
       </div>
@@ -118,9 +120,9 @@ const MasterStatistics = () => {
             <MdWork size={28} />
           </div>
           <div className={styles.metricContent}>
-            <span className={styles.metricLabel}>Всего заказов</span>
+            <span className={styles.metricLabel}>{t('masterStatistics.metrics.totalOrders')}</span>
             <h2>{statistics.totalOrders}</h2>
-            <span className={styles.metricSub}>Завершено: {statistics.completedOrders}</span>
+            <span className={styles.metricSub}>{t('masterStatistics.metrics.completed')} {statistics.completedOrders}</span>
           </div>
         </div>
 
@@ -129,10 +131,10 @@ const MasterStatistics = () => {
             <MdAttachMoney size={28} />
           </div>
           <div className={styles.metricContent}>
-            <span className={styles.metricLabel}>Общий доход</span>
+            <span className={styles.metricLabel}>{t('masterStatistics.metrics.totalIncome')}</span>
             <h2>{statistics.totalIncome.toLocaleString('ru-RU')} ₸</h2>
             <span className={styles.metricSub}>
-              Средний чек: {statistics.performanceMetrics.averageOrderValue.toLocaleString('ru-RU')} ₸
+              {t('masterStatistics.metrics.averageCheck')} {statistics.performanceMetrics.averageOrderValue.toLocaleString('ru-RU')} ₸
             </span>
           </div>
         </div>
@@ -142,10 +144,10 @@ const MasterStatistics = () => {
             <MdStar size={28} />
           </div>
           <div className={styles.metricContent}>
-            <span className={styles.metricLabel}>Средний рейтинг</span>
+            <span className={styles.metricLabel}>{t('masterStatistics.metrics.averageRating')}</span>
             <h2>{statistics.averageRating.toFixed(1)}</h2>
             <span className={styles.metricSub}>
-              Удовлетворенность: {statistics.performanceMetrics.customerSatisfaction}%
+              {t('masterStatistics.metrics.satisfaction')} {statistics.performanceMetrics.customerSatisfaction}%
             </span>
           </div>
         </div>
@@ -155,10 +157,10 @@ const MasterStatistics = () => {
             <MdPeople size={28} />
           </div>
           <div className={styles.metricContent}>
-            <span className={styles.metricLabel}>Клиенты</span>
+            <span className={styles.metricLabel}>{t('masterStatistics.metrics.clients')}</span>
             <h2>{statistics.totalClients}</h2>
             <span className={styles.metricSub}>
-              Повторных: {statistics.performanceMetrics.repeatClients}%
+              {t('masterStatistics.metrics.repeat')} {statistics.performanceMetrics.repeatClients}%
             </span>
           </div>
         </div>
@@ -166,11 +168,11 @@ const MasterStatistics = () => {
 
       {/* Показатели эффективности */}
       <div className={styles.performanceSection}>
-        <h2>Показатели эффективности</h2>
+        <h2>{t('masterStatistics.performance.title')}</h2>
         <div className={styles.performanceGrid}>
           <div className={styles.performanceCard}>
             <div className={styles.performanceHeader}>
-              <span>Процент завершения</span>
+              <span>{t('masterStatistics.performance.completionRate')}</span>
               <strong>{statistics.completionRate}%</strong>
             </div>
             <div className={styles.progressBar}>
@@ -183,7 +185,7 @@ const MasterStatistics = () => {
 
           <div className={styles.performanceCard}>
             <div className={styles.performanceHeader}>
-              <span>Доставка в срок</span>
+              <span>{t('masterStatistics.performance.onTimeDelivery')}</span>
               <strong>{statistics.performanceMetrics.onTimeDelivery}%</strong>
             </div>
             <div className={styles.progressBar}>
@@ -196,7 +198,7 @@ const MasterStatistics = () => {
 
           <div className={styles.performanceCard}>
             <div className={styles.performanceHeader}>
-              <span>Удовлетворенность клиентов</span>
+              <span>{t('masterStatistics.performance.customerSatisfaction')}</span>
               <strong>{statistics.performanceMetrics.customerSatisfaction}%</strong>
             </div>
             <div className={styles.progressBar}>
@@ -209,7 +211,7 @@ const MasterStatistics = () => {
 
           <div className={styles.performanceCard}>
             <div className={styles.performanceHeader}>
-              <span>Повторные клиенты</span>
+              <span>{t('masterStatistics.performance.repeatClients')}</span>
               <strong>{statistics.performanceMetrics.repeatClients}%</strong>
             </div>
             <div className={styles.progressBar}>
@@ -226,7 +228,7 @@ const MasterStatistics = () => {
       <div className={styles.chartsSection}>
         <div className={styles.chartCard}>
           <div className={styles.chartHeader}>
-            <h3><MdShowChart size={24} /> Динамика заказов</h3>
+            <h3><MdShowChart size={24} /> {t('masterStatistics.charts.ordersDynamics')}</h3>
           </div>
           <div className={styles.chartContent}>
             {statistics.monthlyData.map((data, index) => (
@@ -250,7 +252,7 @@ const MasterStatistics = () => {
 
         <div className={styles.chartCard}>
           <div className={styles.chartHeader}>
-            <h3><MdTimeline size={24} /> Динамика дохода</h3>
+            <h3><MdTimeline size={24} /> {t('masterStatistics.charts.incomeDynamics')}</h3>
           </div>
           <div className={styles.chartContent}>
             {statistics.monthlyData.map((data, index) => (
@@ -275,13 +277,13 @@ const MasterStatistics = () => {
 
       {/* Популярные категории */}
       <div className={styles.categoriesSection}>
-        <h2>Популярные категории</h2>
+        <h2>{t('masterStatistics.categories.title')}</h2>
         <div className={styles.categoriesGrid}>
           {statistics.topCategories.map((category, index) => (
             <div key={index} className={styles.categoryCard}>
               <div className={styles.categoryHeader}>
                 <span className={styles.categoryName}>{category.category}</span>
-                <span className={styles.categoryCount}>{category.count} заказов</span>
+                <span className={styles.categoryCount}>{category.count} {t('masterStatistics.categories.orders')}</span>
               </div>
               <div className={styles.categoryBar}>
                 <div 
@@ -297,12 +299,12 @@ const MasterStatistics = () => {
 
       {/* Недавняя активность */}
       <div className={styles.activitySection}>
-        <h2><MdCalendarToday size={24} /> Недавняя активность</h2>
+        <h2><MdCalendarToday size={24} /> {t('masterStatistics.activity.title')}</h2>
         <div className={styles.activityTable}>
           <div className={styles.tableHeader}>
-            <div>Дата</div>
-            <div>Заказов завершено</div>
-            <div>Доход</div>
+            <div>{t('masterStatistics.activity.date')}</div>
+            <div>{t('masterStatistics.activity.ordersCompleted')}</div>
+            <div>{t('masterStatistics.activity.income')}</div>
           </div>
           {statistics.recentActivity.map((activity, index) => (
             <div key={index} className={styles.tableRow}>

@@ -181,3 +181,102 @@ export const getMasterStatistics = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 };
+
+// Получить недавнюю активность мастера
+export const getMasterActivity = async (req: AuthRequest, res: Response) => {
+  try {
+    const masterId = req.user?.id;
+    const { limit = 10 } = req.query;
+
+    // Получаем последние события
+    const activitiesResult = await pool.query(
+      `SELECT 
+        o.id,
+        o.status,
+        o.category,
+        o.title as order_name,
+        o.created_at,
+        o.updated_at,
+        u.name as customer_name,
+        CASE 
+          WHEN o.status = 'pending' THEN 'newOrder'
+          WHEN o.status = 'in_progress' THEN 'orderStarted'
+          WHEN o.status = 'completed' THEN 'orderCompleted'
+          WHEN o.status = 'accepted' THEN 'orderAccepted'
+          WHEN o.status = 'cancelled' THEN 'orderCancelled'
+          ELSE 'orderUpdated'
+        END as activity_type
+      FROM orders o
+      LEFT JOIN users u ON o.customer_id = u.id
+      WHERE o.assigned_master_id = $1
+      ORDER BY o.updated_at DESC
+      LIMIT $2`,
+      [masterId, limit]
+    );
+
+    // Получаем недавние отзывы
+    const reviewsResult = await pool.query(
+      `SELECT 
+        r.id,
+        r.rating,
+        r.comment,
+        r.created_at,
+        u.name as customer_name,
+        o.id as order_id
+      FROM reviews r
+      LEFT JOIN users u ON r.customer_id = u.id
+      LEFT JOIN orders o ON r.order_id = o.id
+      WHERE r.master_id = $1
+      ORDER BY r.created_at DESC
+      LIMIT 5`,
+      [masterId]
+    );
+
+    // Форматируем активности
+    const activities = activitiesResult.rows.map(row => ({
+      id: row.id,
+      type: row.activity_type,
+      title: getActivityTitle(row.activity_type),
+      description: `${row.order_name || 'Заказ'} #${row.id}`,
+      customerName: row.customer_name,
+      timestamp: row.updated_at,
+      status: row.status,
+      category: row.category
+    }));
+
+    // Добавляем отзывы в активности
+    const reviewActivities = reviewsResult.rows.map(row => ({
+      id: `review_${row.id}`,
+      type: 'newReview',
+      title: 'Новый отзыв',
+      description: `Отзыв ${row.rating}★ от ${row.customer_name}`,
+      comment: row.comment,
+      rating: row.rating,
+      customerName: row.customer_name,
+      orderId: row.order_id,
+      timestamp: row.created_at
+    }));
+
+    // Объединяем и сортируем по времени
+    const allActivities = [...activities, ...reviewActivities]
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, parseInt(limit as string));
+
+    res.json(allActivities);
+  } catch (error) {
+    console.error('Ошибка получения активности:', error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+};
+
+function getActivityTitle(activityType: string): string {
+  const titles: { [key: string]: string } = {
+    newOrder: 'Новый заказ',
+    orderStarted: 'Заказ начат',
+    orderCompleted: 'Заказ завершен',
+    orderAccepted: 'Заказ принят',
+    orderCancelled: 'Заказ отменен',
+    orderUpdated: 'Заказ обновлен'
+  };
+  return titles[activityType] || 'Обновление заказа';
+}

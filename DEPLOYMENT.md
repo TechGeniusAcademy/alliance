@@ -171,11 +171,11 @@ nano .env
 ### Содержимое .env:
 
 ```env
-VITE_API_URL=http://YOUR_SERVER_IP:5000
+VITE_API_URL=http://194.32.142.221:5000
 ```
 
 **⚠️ Замените YOUR_SERVER_IP на:**
-- IP адрес сервера: `VITE_API_URL=http://123.45.67.89:5000`
+- IP адрес сервера: `VITE_API_URL=http://194.32.142.221:5000`
 - Или домен: `VITE_API_URL=http://alliancemebel.kz:5000`
 
 **Сохранить:** `Ctrl+O`, `Enter`, `Ctrl+X`
@@ -308,8 +308,12 @@ sudo systemctl status nginx
 pm2 status
 pm2 logs alliance-server --lines 20
 
-# Проверка открытых портов
-sudo netstat -tulpn | grep -E ':(80|5000|5432)'
+# Проверка открытых портов (используйте ss - современная альтернатива netstat)
+sudo ss -tulpn | grep -E ':(80|5000|5432)'
+
+# Или установите net-tools, если предпочитаете netstat
+# sudo apt install -y net-tools
+# sudo netstat -tulpn | grep -E ':(80|5000|5432)'
 ```
 
 ### Ручное тестирование:

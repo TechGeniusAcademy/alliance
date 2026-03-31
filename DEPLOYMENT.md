@@ -554,6 +554,130 @@ sudo git clone https://github.com/TechGeniusAcademy/alliance.git
 
 **Примечание:** Клонирование с `--depth 1` создает "мелкую" копию без истории коммитов, что быстрее и надежнее для production деплоя.
 
+### Проблема: Сервер постоянно перезапускается (множество рестартов в PM2)
+```bash
+# Симптомы: pm2 status показывает сотни рестартов за несколько секунд
+
+# Проверьте логи PM2, чтобы увидеть причину падения
+pm2 logs alliance-server --lines 100
+
+# Распространенные причины:
+
+# 1. Отсутствуют переменные окружения (STRIPE_SECRET_KEY и др.)
+# Решение: Добавьте все обязательные переменные в .env
+nano /var/www/alliance/server/.env
+
+# Добавьте эти строки если их нет:
+# STRIPE_SECRET_KEY=
+# STRIPE_PUBLISHABLE_KEY=
+# WHATSAPP_PHONE_NUMBER=
+# NODE_ENV=production
+
+# 2. Порт 5000 уже занят
+# Проверьте:
+sudo ss -tulpn | grep :5000
+
+# Если порт занят, найдите процесс и остановите его:
+sudo lsof -i :5000
+sudo kill -9 <PID>
+
+# 3. Ошибка подключения к базе данных
+# Проверьте credentials в .env и что PostgreSQL работает
+sudo systemctl status postgresql
+
+# После исправления, перезапустите сервер:
+pm2 restart alliance-server
+```
+
+### Проблема: WhatsApp бот не запускается (libatk-1.0.so.0: cannot open shared library)
+```bash
+# Ошибка: Error: Failed to launch the browser process
+# error while loading shared libraries: libatk-1.0.so.0
+
+# Причина: Puppeteer (используется для WhatsApp бота) требует системные библиотеки Chrome
+
+# Решение: Установить все необходимые зависимости для Chrome/Puppeteer
+sudo apt install -y \
+  libnss3 \
+  libatk1.0-0 \
+  libatk-bridge2.0-0 \
+  libcups2 \
+  libdrm2 \
+  libxkbcommon0 \
+  libxcomposite1 \
+  libxdamage1 \
+  libxfixes3 \
+  libxrandr2 \
+  libgbm1 \
+  libasound2 \
+  libpango-1.0-0 \
+  libcairo2 \
+  libx11-xcb1 \
+  libxss1
+
+# После установки перезапустите сервер
+pm2 restart alliance-server
+
+# Проверьте логи
+pm2 logs alliance-server --lines 30
+
+# Если WhatsApp не нужен, можно оставить WHATSAPP_PHONE_NUMBER пустым в .env
+```
+
+### Проблема: Порт 5000 уже занят (EADDRINUSE)
+```bash
+# Ошибка: Error: listen EADDRINUSE: address already in use 0.0.0.0:5000
+
+# Причина 1: Вы запустили сервер напрямую через node, а PM2 уже его запустил
+# Решение: НЕ запускайте сервер через `node dist/index.js` напрямую
+# Всегда используйте PM2:
+pm2 restart alliance-server
+
+# Причина 2: Другой процесс занял порт 5000
+# Найдите процесс:
+sudo lsof -i :5000
+
+# Остановите процесс:
+sudo kill -9 <PID>
+
+# Или остановите все PM2 процессы и запустите заново:
+pm2 stop all
+pm2 delete all
+pm2 start dist/index.js --name alliance-server
+```
+
+### Проблема: База данных не создаётся автоматически
+```bash
+# Ошибка: Did not find any relations (таблицы не созданы)
+
+# Причина: Сервер не смог подключиться к БД при первом запуске
+
+# Решение:
+# 1. Убедитесь что PostgreSQL запущен
+sudo systemctl status postgresql
+
+# 2. Проверьте credentials в .env
+cat /var/www/alliance/server/.env
+
+# 3. Проверьте что пользователь и БД созданы
+sudo -u postgres psql -c "\du"  # Список пользователей
+sudo -u postgres psql -c "\l"   # Список баз данных
+
+# 4. Если нужно пересоздать БД:
+sudo -u postgres psql -c "DROP DATABASE IF EXISTS alliance_db;"
+sudo -u postgres psql -c "CREATE DATABASE alliance_db;"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE alliance_db TO alliance_user;"
+
+# 5. Перезапустите сервер - он создаст таблицы автоматически
+pm2 restart alliance-server
+
+# 6. Проверьте логи - должны быть строки о создании таблиц
+pm2 logs alliance-server --lines 100
+
+# 7. Проверьте что таблицы созданы
+sudo -u postgres psql -d alliance_db -c "\dt"
+```
+
 ---
 
 ## Информация о безопасности

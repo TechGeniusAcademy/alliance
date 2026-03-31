@@ -109,6 +109,16 @@ DB_NAME=alliance_db
 DB_PASSWORD=00000000
 DB_PORT=5432
 JWT_SECRET=f79a46e7f26b363c8b07b18111f44b285f930d51ce86a033640a0133f8d3d062
+
+# Stripe API Keys (опциональные - если не используете Stripe, оставьте пустыми)
+STRIPE_SECRET_KEY=
+STRIPE_PUBLISHABLE_KEY=
+
+# WhatsApp Bot (опциональные - если не используете WhatsApp интеграцию, оставьте пустыми)
+WHATSAPP_PHONE_NUMBER=
+
+# Другие опциональные настройки
+NODE_ENV=production
 ```
 
 **Для генерации JWT_SECRET можно использовать:**

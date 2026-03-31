@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MdAdd, MdDelete, MdEdit, MdClose, MdViewInAr } from 'react-icons/md';
 import * as THREE from 'three';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
-import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import styles from './Admin3DModels.module.css';
 
 export interface Model3D {
@@ -325,7 +325,7 @@ const Admin3DModels = ({ onShowToast }: Admin3DModelsProps) => {
       
       objLoader.load(
         objUrl,
-        (object) => {
+        (object: THREE.Group) => {
           console.log('OBJ loaded successfully');
           // Center and scale the object
           const box = new THREE.Box3().setFromObject(object);
@@ -359,10 +359,10 @@ const Admin3DModels = ({ onShowToast }: Admin3DModelsProps) => {
             camera.lookAt(0, 0, 0);
           }
         },
-        (progress) => {
+        (progress: ProgressEvent) => {
           console.log('Loading progress:', (progress.loaded / progress.total * 100).toFixed(2) + '%');
         },
-        (error) => {
+        (error: unknown) => {
           console.error('Error loading OBJ:', error);
           onShowToast('Ошибка загрузки модели', 'error');
         }
@@ -376,16 +376,16 @@ const Admin3DModels = ({ onShowToast }: Admin3DModelsProps) => {
       
       mtlLoader.load(
         mtlFileName || model.mtl_file_url,
-        (materials) => {
+        (materials: THREE.Material) => {
           console.log('MTL loaded successfully');
           materials.preload();
           objLoader.setMaterials(materials);
           loadObj();
         },
-        (progress) => {
+        (progress: ProgressEvent) => {
           console.log('MTL loading progress:', (progress.loaded / progress.total * 100).toFixed(2) + '%');
         },
-        (error) => {
+        (error: unknown) => {
           console.error('Error loading MTL:', error);
           console.log('Loading OBJ without materials');
           loadObj(); // Load without materials

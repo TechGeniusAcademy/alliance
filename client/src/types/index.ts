@@ -81,8 +81,8 @@ export interface BlogPost {
   readTime?: number;
 }
 
-// ---------- Review ----------
-export interface Review {
+// ---------- Review (Simple) ----------
+export interface SimpleReview {
   id: string;
   rating: number;
   comment: string;

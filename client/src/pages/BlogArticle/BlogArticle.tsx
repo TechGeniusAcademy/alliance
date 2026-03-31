@@ -11,7 +11,6 @@ import {
   FiHeart,
   FiBookmark,
   FiSend,
-  FiTag,
   FiList,
   FiFolder
 } from 'react-icons/fi';
@@ -156,7 +155,7 @@ const articleData = {
 };
 
 export const BlogArticlePage = () => {
-  const { slug } = useParams();
+  const { slug: _slug } = useParams();
   const [email, setEmail] = useState('');
   const [comment, setComment] = useState('');
 

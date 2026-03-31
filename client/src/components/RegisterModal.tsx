@@ -42,7 +42,6 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps)
     if (iin.length !== 12) return false;
 
     // Проверка даты рождения в ИИН
-    const year = parseInt(iin.substring(0, 2));
     const month = parseInt(iin.substring(2, 4));
     const day = parseInt(iin.substring(4, 6));
     

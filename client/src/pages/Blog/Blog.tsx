@@ -17,7 +17,6 @@ import { useLanguage } from '../../context/LanguageContext';
 import styles from './Blog.module.css';
 
 export const BlogPage = () => {
-  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
 

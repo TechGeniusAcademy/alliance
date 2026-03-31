@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, memo, useCallback, useMemo, useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { MdChat, MdSearch, MdSend, MdAttachFile, MdShoppingCart, MdCheckCircle } from 'react-icons/md';
+import { MdChat, MdSearch, MdSend, MdAttachFile, MdShoppingCart } from 'react-icons/md';
 import { io, Socket } from 'socket.io-client';
 import chatService, { type Chat, type Message } from '../../services/chatService';
 import Toast, { type ToastType } from '../../components/Toast';
@@ -539,6 +539,8 @@ const MasterChats = () => {
     try {
       setSubmitting(true);
       await chatService.submitForReview(orderId);
+      
+      if (!selectedChat) return;
       
       // Отправляем событие через WebSocket о смене статуса
       socketRef.current?.emit('orderStatusChanged', {

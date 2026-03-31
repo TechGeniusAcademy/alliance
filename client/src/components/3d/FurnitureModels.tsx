@@ -16,7 +16,7 @@ interface FurnitureProps {
 }
 
 // Базовый компонент - простой бокс
-const BaseFurniture = ({ config, scaleY = 1 }: FurnitureProps & { scaleY?: number }) => {
+const _BaseFurniture = ({ config, scaleY = 1 }: FurnitureProps & { scaleY?: number }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   
   return (

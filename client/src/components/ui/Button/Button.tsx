@@ -46,10 +46,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <Component
-        ref={ref}
+        ref={Component === 'button' ? ref : undefined}
         className={classNames}
         disabled={disabled || isLoading}
-        {...props}
+        {...props as any}
       >
         {isLoading && (
           <span className={styles.spinner}>

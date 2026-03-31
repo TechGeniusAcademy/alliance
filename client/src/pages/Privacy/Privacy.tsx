@@ -3,7 +3,6 @@ import {
   FiDatabase,
   FiLock,
   FiUserCheck,
-  FiCheck,
   FiEye,
   FiEdit,
   FiTrash2,

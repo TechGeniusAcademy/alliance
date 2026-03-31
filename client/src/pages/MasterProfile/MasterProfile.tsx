@@ -7,27 +7,20 @@ import {
   FiChevronRight,
   FiStar,
   FiCheckCircle,
-  FiMapPin,
   FiMessageSquare,
   FiHeart,
   FiShare2,
-  FiPhone,
-  FiMail,
-  FiClock,
   FiShield,
-  FiCheck,
   FiUser,
   FiImage,
   FiBriefcase,
   FiCalendar,
-  FiAward,
-  FiTool,
-  FiFolder
+  FiAward
 } from 'react-icons/fi';
 import styles from './MasterProfile.module.css';
 
 // Mock master data
-const masterData = {
+const _masterData = {
   id: 1,
   name: 'Алексей Петров',
   specialty: 'Мастер корпусной мебели',
@@ -137,7 +130,7 @@ const masterData = {
 
 export const MasterProfilePage = () => {
   const { id } = useParams();
-  const [reviewsFilter, setReviewsFilter] = useState('all');
+  const [_reviewsFilter, _setReviewsFilter] = useState('all');
   const [master, setMaster] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

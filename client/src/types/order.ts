@@ -3,7 +3,7 @@ export interface Order {
   title: string;
   furnitureType: string;
   description: string;
-  status: 'pending' | 'active' | 'auction' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'pending' | 'active' | 'auction' | 'in_progress' | 'completed' | 'cancelled' | 'review';
   price: {
     min: number;
     max: number;

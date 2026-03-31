@@ -99,7 +99,7 @@ export const Categories = () => {
 
         <div className={styles.grid}>
           {categories.map((category) => {
-            const Icon = category.icon;
+            const Icon = category.icon as React.ComponentType<{className?: string}>;
             return (
               <Link
                 key={category.id}

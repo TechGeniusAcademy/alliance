@@ -213,7 +213,7 @@ export const HowItWorksPage = () => {
         <div className={styles.stepsContainer}>
           <div className={styles.stepsList}>
             {steps.map((step, index) => {
-              const Icon = step.icon;
+              const _Icon = step.icon;
               return (
                 <div key={index} className={styles.step}>
                   <div className={styles.stepContent}>
@@ -360,6 +360,7 @@ export const HowItWorksPage = () => {
       <AuthModal 
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
+        onSwitchToRegister={() => {}}
       />
     </>
   );

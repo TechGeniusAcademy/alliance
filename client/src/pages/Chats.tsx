@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, memo, useMemo, useCallback, useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MdChat, MdSearch, MdSend, MdAttachFile, MdShoppingCart, MdCheckCircle, MdStar } from 'react-icons/md';
+import { MdChat, MdSearch, MdSend, MdAttachFile, MdShoppingCart, MdStar } from 'react-icons/md';
 import { io, Socket } from 'socket.io-client';
 import chatService, { type Chat, type Message } from '../services/chatService';
 import Toast, { type ToastType } from '../components/Toast';
@@ -106,6 +106,11 @@ const Chats = () => {
   const pendingUpdateRef = useRef(false);
   const socketRef = useRef<Socket | null>(null);
   const processedStateRef = useRef<any>(null); // Для отслеживания обработанного location.state
+
+  // Helper function to show toast notifications
+  const showToast = (message: string, type: ToastType) => {
+    setToast({ message, type });
+  };
 
   // Подключение WebSocket
   useEffect(() => {
@@ -281,7 +286,7 @@ const Chats = () => {
     }
   }, [location.state, chats]); // Убрали зависимость от chats - используем только location.state
 
-  const createChatWithMaster = async (masterId: number, masterName?: string) => {
+  const createChatWithMaster = async (masterId: number, _masterName?: string) => {
     try {
       // Создаем новый чат через API
       const newChat = await chatService.createOrGetChatWithMaster(masterId);

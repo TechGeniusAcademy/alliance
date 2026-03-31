@@ -430,7 +430,7 @@ export const PricingPage = () => {
       )}
 
       {/* Модальное окно авторизации */}
-      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} onSwitchToRegister={() => {}} />
     </div>
   );
 };

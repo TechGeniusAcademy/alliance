@@ -7,7 +7,6 @@ import {
   FiHome,
   FiChevronRight,
   FiUsers,
-  FiFileText,
   FiGrid,
   FiList,
   FiStar,
@@ -33,6 +32,7 @@ interface Master {
   completedOrders: number;
   verified: boolean;
   skills?: string[];
+  specializations?: string[];
 }
 
 interface Order {
@@ -47,7 +47,7 @@ interface Order {
   status: string;
 }
 
-interface Category {
+interface _Category {
   name: string;
   description: string;
   icon: string;

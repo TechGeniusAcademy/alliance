@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { FiArrowRight, FiUsers, FiTool, FiX, FiAlertCircle } from 'react-icons/fi';
 import { useLanguage } from '../../../context/LanguageContext';

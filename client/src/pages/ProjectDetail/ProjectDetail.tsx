@@ -19,7 +19,6 @@ import {
   FiDollarSign,
   FiUser,
   FiArrowRight,
-  FiImage,
   FiBox
 } from 'react-icons/fi';
 import styles from './ProjectDetail.module.css';
@@ -51,7 +50,7 @@ interface PortfolioProject {
 }
 
 // Mock project data
-const projectData = {
+const _projectData = {
   id: 1,
   title: 'Современная кухня в стиле минимализм',
   category: 'Кухни на заказ',

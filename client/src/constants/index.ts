@@ -13,6 +13,7 @@ export const ROUTES = {
   MASTER_PROFILE: '/masters/:id',
   PROJECTS: '/projects',
   PROJECT_DETAIL: '/projects/:id',
+  ORDERS: '/orders',
   PRICING: '/pricing',
   BLOG: '/blog',
   BLOG_ARTICLE: '/blog/:slug',

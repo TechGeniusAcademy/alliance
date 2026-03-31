@@ -8,8 +8,6 @@ import type {
   Notification,
   Review,
   SpecialOffer,
-} from '../types';
-import type {
   UserSettings,
   FAQItem,
   SupportTicket
@@ -761,8 +759,9 @@ class AppService {
       },
       body: JSON.stringify(settings)
     });
-    */
     return response.json();
+    */
+    return { ...await this.getSettings(), ...settings };
   }
 
   // FAQ

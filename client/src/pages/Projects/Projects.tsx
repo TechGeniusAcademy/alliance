@@ -355,6 +355,7 @@ export const ProjectsPage = () => {
       <RegisterModal 
         isOpen={registerModalOpen}
         onClose={() => setRegisterModalOpen(false)}
+        onSwitchToLogin={() => {}}
       />
     </div>
   );

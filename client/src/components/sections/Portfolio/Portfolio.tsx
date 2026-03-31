@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../../config/api';
-import { FiArrowRight, FiEye } from 'react-icons/fi';
+import { FiArrowRight } from 'react-icons/fi';
 import { useLanguage } from '../../../context/LanguageContext';
 import { ROUTES } from '../../../constants';
 import { Button } from '../../ui/Button';

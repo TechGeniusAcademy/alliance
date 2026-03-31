@@ -83,8 +83,8 @@ const Chats = () => {
   const [showChatWindow, setShowChatWindow] = useState(false); // Для мобильной версии
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [showSelectOrderModal, setShowSelectOrderModal] = useState(false);
-  const [activeOrders, setActiveOrders] = useState<any[]>([]);
-  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [activeOrders, _setActiveOrders] = useState<any[]>([]);
+  const [loadingOrders, _setLoadingOrders] = useState(false);
   const currentUserId = (() => {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -551,36 +551,36 @@ const Chats = () => {
     }
   }, [newMessage, selectedChat]);
 
-  const _handleAcceptWork = async () => {
-    if (!selectedChat) return;
+  // const _handleAcceptWork = async () => {
+  //   if (!selectedChat) return;
 
-    try {
-      // Определяем ID мастера
-      const masterId = selectedChat.customer_id === currentUserId 
-        ? selectedChat.master_id 
-        : selectedChat.customer_id;
+  //   try {
+  //     // Определяем ID мастера
+  //     const masterId = selectedChat.customer_id === currentUserId 
+  //       ? selectedChat.master_id 
+  //       : selectedChat.customer_id;
       
-      // Проверяем активные заказы с этим мастером
-      setLoadingOrders(true);
-      const orders = await chatService.getActiveOrdersWithUser(masterId, 'master');
-      setLoadingOrders(false);
+  //     // Проверяем активные заказы с этим мастером
+  //     setLoadingOrders(true);
+  //     const orders = await chatService.getActiveOrdersWithUser(masterId, 'master');
+  //     setLoadingOrders(false);
       
-      if (orders.length > 1) {
-        // Несколько заказов - показываем модальное окно
-        setActiveOrders(orders);
-        setShowSelectOrderModal(true);
-        return;
-      }
+  //     if (orders.length > 1) {
+  //       // Несколько заказов - показываем модальное окно
+  //       setActiveOrders(orders);
+  //       setShowSelectOrderModal(true);
+  //       return;
+  //     }
       
-      // Один заказ - показываем модальное окно принятия работы
-      setShowAcceptModal(true);
-    } catch (error) {
-      console.error('Failed to load active orders:', error);
-      setLoadingOrders(false);
-      // Если ошибка - показываем обычное модальное окно
-      setShowAcceptModal(true);
-    }
-  };
+  //     // Один заказ - показываем модальное окно принятия работы
+  //     setShowAcceptModal(true);
+  //   } catch (error) {
+  //     console.error('Failed to load active orders:', error);
+  //     setLoadingOrders(false);
+  //     // Если ошибка - показываем обычное модальное окно
+  //     setShowAcceptModal(true);
+  //   }
+  // };
 
   const handleSelectOrder = async (orderId: number) => {
     setShowSelectOrderModal(false);

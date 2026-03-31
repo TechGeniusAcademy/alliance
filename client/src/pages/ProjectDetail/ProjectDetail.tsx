@@ -18,8 +18,7 @@ import {
   FiLayers,
   FiDollarSign,
   FiUser,
-  FiArrowRight,
-  FiBox
+  FiArrowRight
 } from 'react-icons/fi';
 import styles from './ProjectDetail.module.css';
 

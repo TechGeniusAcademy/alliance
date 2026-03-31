@@ -80,8 +80,8 @@ const MasterChats = () => {
   const [showChatWindow, setShowChatWindow] = useState(false);
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [showSelectOrderModal, setShowSelectOrderModal] = useState(false);
-  const [activeOrders, setActiveOrders] = useState<any[]>([]);
-  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [activeOrders, _setActiveOrders] = useState<any[]>([]);
+  const [loadingOrders, _setLoadingOrders] = useState(false);
   const currentUserId = (() => {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -493,38 +493,38 @@ const MasterChats = () => {
     }
   }, [newMessage, selectedChat]);
 
-  const _handleSubmitForReview = async () => {
-    if (!selectedChat) return;
+  // const _handleSubmitForReview = async () => {
+  //   if (!selectedChat) return;
     
-    try {
-      // Определяем ID клиента
-      const customerId = selectedChat.customer_id === currentUserId 
-        ? selectedChat.master_id 
-        : selectedChat.customer_id;
+  //   try {
+  //     // Определяем ID клиента
+  //     const customerId = selectedChat.customer_id === currentUserId 
+  //       ? selectedChat.master_id 
+  //       : selectedChat.customer_id;
       
-      // Проверяем активные заказы с этим клиентом
-      setLoadingOrders(true);
-      const orders = await chatService.getActiveOrdersWithUser(customerId, 'customer');
-      setLoadingOrders(false);
+  //     // Проверяем активные заказы с этим клиентом
+  //     setLoadingOrders(true);
+  //     const orders = await chatService.getActiveOrdersWithUser(customerId, 'customer');
+  //     setLoadingOrders(false);
       
-      if (orders.length > 1) {
-        // Несколько заказов - показываем модальное окно
-        setActiveOrders(orders);
-        setShowSelectOrderModal(true);
-        return;
-      }
+  //     if (orders.length > 1) {
+  //       // Несколько заказов - показываем модальное окно
+  //       setActiveOrders(orders);
+  //       setShowSelectOrderModal(true);
+  //       return;
+  //     }
       
-      // Один заказ - продолжаем как обычно
-      await handleActualSubmitForReview(selectedChat.order_id);
-    } catch (error) {
-      console.error('Failed to load active orders:', error);
-      setLoadingOrders(false);
-      // Если ошибка - продолжаем с текущим заказом
-      if (selectedChat.order_id) {
-        await handleActualSubmitForReview(selectedChat.order_id);
-      }
-    }
-  };
+  //     // Один заказ - продолжаем как обычно
+  //     await handleActualSubmitForReview(selectedChat.order_id);
+  //   } catch (error) {
+  //     console.error('Failed to load active orders:', error);
+  //     setLoadingOrders(false);
+  //     // Если ошибка - продолжаем с текущим заказом
+  //     if (selectedChat.order_id) {
+  //       await handleActualSubmitForReview(selectedChat.order_id);
+  //     }
+  //   }
+  // };
 
   const handleSelectOrder = async (orderId: number) => {
     setShowSelectOrderModal(false);

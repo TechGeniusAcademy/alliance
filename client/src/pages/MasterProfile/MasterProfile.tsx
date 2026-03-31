@@ -10,12 +10,8 @@ import {
   FiMessageSquare,
   FiHeart,
   FiShare2,
-  FiShield,
   FiUser,
-  FiImage,
-  FiBriefcase,
-  FiCalendar,
-  FiAward
+  FiImage
 } from 'react-icons/fi';
 import styles from './MasterProfile.module.css';
 

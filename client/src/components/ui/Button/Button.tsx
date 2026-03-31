@@ -28,7 +28,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       rightIcon,
       className,
       disabled,
-      as: Component = 'button',
+      as,
+      href,
       ...props
     },
     ref
@@ -44,18 +45,72 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       .filter(Boolean)
       .join(' ');
 
-    const Component = href ? 'a' : 'button';
-    const commonProps = {
-      className: classNames,
-      ...(href && { href }),
-      ...(onClick && { onClick }),
-      ...props,
-    };
+    const Component = as || (href ? 'a' : 'button');
 
+    if (Component === 'button') {
+      return (
+        <button
+          ref={ref}
+          className={classNames}
+          disabled={disabled || isLoading}
+          {...props}
+        >
+          {isLoading && (
+            <span className={styles.spinner}>
+              <svg viewBox="0 0 24 24" className={styles.spinnerIcon}>
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  fill="none"
+                  strokeDasharray="30 60"
+                />
+              </svg>
+            </span>
+          )}
+          {!isLoading && leftIcon && <span className={styles.icon}>{leftIcon}</span>}
+          <span className={styles.text}>{children}</span>
+          {!isLoading && rightIcon && <span className={styles.icon}>{rightIcon}</span>}
+        </button>
+      );
+    }
+
+    if (href) {
+      return (
+        <a
+          className={classNames}
+          href={href}
+          {...(props as any)}
+        >
+          {isLoading && (
+            <span className={styles.spinner}>
+              <svg viewBox="0 0 24 24" className={styles.spinnerIcon}>
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  fill="none"
+                  strokeDasharray="30 60"
+                />
+              </svg>
+            </span>
+          )}
+          {!isLoading && leftIcon && <span className={styles.icon}>{leftIcon}</span>}
+          <span className={styles.text}>{children}</span>
+          {!isLoading && rightIcon && <span className={styles.icon}>{rightIcon}</span>}
+        </a>
+      );
+    }
+
+    const CustomComponent: any = as || 'button';
     return (
-      <Component
-        {...(Component === 'button' ? { ref, disabled: disabled || isLoading } : {})}
-        {...commonProps as any}
+      <CustomComponent
+        className={classNames}
+        {...props}
       >
         {isLoading && (
           <span className={styles.spinner}>
@@ -75,7 +130,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {!isLoading && leftIcon && <span className={styles.icon}>{leftIcon}</span>}
         <span className={styles.text}>{children}</span>
         {!isLoading && rightIcon && <span className={styles.icon}>{rightIcon}</span>}
-      </Component>
+      </CustomComponent>
     );
   }
 );

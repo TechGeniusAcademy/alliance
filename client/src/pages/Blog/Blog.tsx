@@ -13,7 +13,6 @@ import {
   FiStar,
   FiArrowRight
 } from 'react-icons/fi';
-import { useLanguage } from '../../context/LanguageContext';
 import styles from './Blog.module.css';
 
 export const BlogPage = () => {

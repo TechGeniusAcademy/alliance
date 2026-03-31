@@ -1,6 +1,4 @@
 // Простые 3D модели мебели для конфигуратора заказов
-import { useRef } from 'react';
-import * as THREE from 'three';
 
 interface FurnitureConfig {
   width: number;

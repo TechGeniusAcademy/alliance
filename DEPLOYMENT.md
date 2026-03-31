@@ -678,6 +678,47 @@ pm2 logs alliance-server --lines 100
 sudo -u postgres psql -d alliance_db -c "\dt"
 ```
 
+### Проблема: CORS блокирует запросы (Access-Control-Allow-Origin)
+```bash
+# Ошибка в браузере: Access to XMLHttpRequest at 'http://alliancemebel.kz/api/...' 
+# from origin 'http://194.32.142.221' has been blocked by CORS policy
+
+# Причина: Сервер не разрешает cross-origin запросы с вашего домена
+
+# Решение 1: Проверьте что сервер запущен и работает
+pm2 status
+curl http://localhost:5000/api/health
+
+# Если сервер не работает:
+pm2 restart alliance-server
+pm2 logs alliance-server
+
+# Решение 2: Убедитесь что используете последнюю версию кода (CORS уже настроен)
+cd /var/www/alliance
+git pull origin main
+cd server
+npm run build
+pm2 restart alliance-server
+
+# Решение 3: Проверьте что Nginx правильно проксирует запросы
+sudo nginx -t
+sudo systemctl restart nginx
+
+# Решение 4: Проверьте логи Nginx - возможно ошибка 403 из-за прав доступа
+sudo tail -f /var/log/nginx/error.log
+
+# Если видите "403 Forbidden", проверьте права на файлы:
+sudo chown -R www-data:www-data /var/www/alliance/client/dist
+sudo chmod -R 755 /var/www/alliance/client/dist
+
+# Решение 5: Убедитесь что домен alliancemebel.kz указывает на ваш сервер
+# Проверьте DNS записи:
+nslookup alliancemebel.kz
+
+# Временное решение для тестирования:
+# Откройте сайт через IP напрямую, чтобы убрать CORS (origin будет совпадать)
+```
+
 ---
 
 ## Информация о безопасности
